@@ -1,2 +1,2 @@
 # ClassificationForRegression
-Combinaison de méthodes ensemblistes pour la régression
+Combinaison of ensemblist methods for regression
