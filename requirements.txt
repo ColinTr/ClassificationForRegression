@@ -1,1 +1,11 @@
-
+numpy
+pandas
+tqdm
+matplotlib
+virtualenv
+notebook
+ipython
+jupyter
+jupyter-client
+jupyter-console
+jupyter-core
