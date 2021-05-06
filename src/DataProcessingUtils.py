@@ -13,22 +13,13 @@ def one_hot_encode():
     return None
 
 
-def apply_box_cox():
-    # TODO
-    return None
-
-
-def standardize():
-    # TODO
-    return None
-
-
 def equal_width_split(Y, n_bins):
     """
-    TODO
-    :param Y:
-    :param n_bins:
-    :return:
+    Create thresholds to split the goal variable into n_bins equally wide bins,
+    distributed between the min and the max of the goal variable.
+    :param Y: np.array or list : The goal variable
+    :param n_bins: int : The number of bins to create
+    :return: list[int] : The (n_bins - 1) thresholds
     """
     Y_min = np.min(Y)
     Y_max = np.max(Y)
@@ -41,10 +32,10 @@ def equal_width_split(Y, n_bins):
 
 def equal_freq_split(Y, n_bins):
     """
-    TODO
-    :param Y:
-    :param n_bins:
-    :return:
+    Create thresholds to split the goal variable into n_bins containing the same number of goal variables.
+    :param Y: np.array or list : The goal variable
+    :param n_bins: int : The number of bins to create
+    :return: list[int] : The (n_bins - 1) thresholds
     """
     thresholds_list = []
 
@@ -61,10 +52,13 @@ def equal_freq_split(Y, n_bins):
 
 def below_threshold_class_gen(Y, thresholds_list):
     """
-    TODO
-    :param Y: numpy array
-    :param thresholds_list:
-    :return:
+    Associate a class to the values of Y based on the threshold_list.
+    (number_of_thresholds - 1) classes will be created.
+    Each class is associated to a threshold and for each value of Y, if it is below the threshold of a class,
+    1 will be put, 0 otherwise.
+    :param Y: np.array or list : The goal variable
+    :param thresholds_list: list[int] : The thresholds
+    :return: list[list[int]] : The classes
     """
     classes = np.zeros((len(Y), len(thresholds_list)), dtype=int)
     for threshold_index, threshold in zip(range(len(thresholds_list)), thresholds_list):
@@ -77,10 +71,13 @@ def below_threshold_class_gen(Y, thresholds_list):
 
 def inside_bin_class_gen(Y, thresholds_list):
     """
-    TODO
-    :param Y:
-    :param thresholds_list:
-    :return:
+    Associate a class to the values of Y based on the threshold_list.
+    For each value of Y, the position inside the pairs of thresholds will be defined as the class number.
+    Note that the min and max value of Y consist the first element of the pair
+    and the last element of the last pair respectively
+    :param Y: np.array or list : The goal variable
+    :param thresholds_list: list[int] : The thresholds
+    :return: list[int] : The classes
     """
 
     thresholds_pairs = [[np.min(Y), thresholds_list[0]]]
@@ -104,6 +101,13 @@ def inside_bin_class_gen(Y, thresholds_list):
 
 
 def kfold_train_test_split(n_indexes, k_folds, seed=None):
+    """
+    Generate indexes and randomly puts them in k_folds lists.
+    :param n_indexes: int : The number of indexes to use
+    :param k_folds: int : The number of lists to use
+    :param seed: int : The seed for the random shuffling
+    :return: list[list[int]] : The shuffled indexes inside their k_folds lists
+    """
     random.seed(seed)
 
     indexes_list = list(range(0, n_indexes))

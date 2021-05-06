@@ -116,6 +116,8 @@ if __name__ == "__main__":
     goal_var_index = args.goal_var_index
     n_bins = args.n_bins
     k_folds = args.k_folds
+
+    # Setup the logging level
     if args.log_lvl == 'debug':
         logging.getLogger().setLevel(logging.DEBUG)
     elif args.log_lvl == 'info':
@@ -145,18 +147,18 @@ if __name__ == "__main__":
 
     k_fold_indexes = kfold_train_test_split(len(Y), k_folds)
 
+    # We iterate for k_folds folds to create the datasets
     for k_fold_index in range(0, k_folds):
         logging.debug("========== FOLD N°" + str(k_fold_index) + " ==========")
 
+        # Get the training and testing indexes based on the k_fold_indexes and the k_fold_index
         train_indexes = []
         test_indexes = []
-
         for group in range(k_folds):
             if group == k_fold_index:
                 test_indexes.append(k_fold_indexes[group])
             else:
                 train_indexes.append(k_fold_indexes[group])
-
         train_indexes = np.concatenate(train_indexes).ravel()  # Ravel the list of lists of indexes
         test_indexes = np.concatenate(test_indexes).ravel()
 
@@ -210,16 +212,22 @@ if __name__ == "__main__":
             test_discretized_classes = below_threshold_class_gen(Y_test, thresholds_list)
         elif output_classes == "inside_bin":
             train_discretized_classes = inside_bin_class_gen(Y_train, thresholds_list)
-            test_discretized_classes = below_threshold_class_gen(Y_test, thresholds_list)
+            test_discretized_classes = inside_bin_class_gen(Y_test, thresholds_list)
         else:
             raise ValueError('Unknown parameter for output_classes.')
         logging.debug("\nGenerated classes (for train dataset) :\n" + str(pd.DataFrame(train_discretized_classes).head(5)))
         # ======================================================
 
         # We then add the generated classes to the dataframe
-        for class_index in range(len(train_discretized_classes[1])):
-            X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]
-            X_test['class_' + str(class_index)] = test_discretized_classes[:, class_index]
+        # If there is only one column of class add it directly
+        if type(train_discretized_classes[0]) == int:
+            X_train['class'] = train_discretized_classes
+            X_test['class'] = test_discretized_classes
+        # But if there are multiple class columns, add each of them to the dataframe
+        else:
+            for class_index in range(len(train_discretized_classes[1])):
+                X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]
+                X_test['class_' + str(class_index)] = test_discretized_classes[:, class_index]
 
         logging.debug("\nFinal dataframe (train) :\n" + str(X_train.head(3)))
 
@@ -227,9 +235,9 @@ if __name__ == "__main__":
         # We generate the filename while making sure that we don't add too many '/'
         file_prefix = output_path + ('/' if output_path[-1] == '' else '/') + 'fold_' + str(k_fold_index)
         train_output_name = file_prefix + '_TRAIN_' + ntpath.basename(dataset_path)
-        X_train.to_csv(path_or_buf=train_output_name)
+        X_train.to_csv(path_or_buf=train_output_name, index=False)
 
         test_output_name = file_prefix + '_TEST_' + ntpath.basename(dataset_path)
-        X_test.to_csv(path_or_buf=test_output_name)
+        X_test.to_csv(path_or_buf=test_output_name, index=False)
 
         logging.info("Split " + str(k_fold_index) + " datasets saved in files")
