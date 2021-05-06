@@ -4,8 +4,11 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+from sklearn.preprocessing import PowerTransformer
+from sklearn import preprocessing
 from DataProcessingUtils import *
-from scipy.stats import boxcox
+import seaborn as sns
+import matplotlib.pyplot as plt
 import pandas as pd
 import argparse
 import logging
@@ -138,7 +141,7 @@ if __name__ == "__main__":
     logging.debug("\nY :")
     logging.debug(Y.head(3))
 
-    # TODO : Categorical data encoding => Maybe do that in another script (or even a notebook)
+    # TODO : Categorical data encoding => Maybe do that in another script (or even in a notebook)
 
     k_fold_indexes = kfold_train_test_split(len(Y), k_folds)
 
@@ -161,13 +164,29 @@ if __name__ == "__main__":
         X_test, Y_test = X.iloc[test_indexes].copy(), np.array(Y.iloc[test_indexes])
 
         # ======================= BoxCox =======================
-        # TODO : Fit BoxCox on the training dataset
-        # TODO : Apply BoxCox on the training AND testing datasets
+        # Fit BoxCox on the training dataset
+        box_cox = PowerTransformer(method='box-cox')  # Only works with strictly positive values !
+        box_cox.fit(Y_train.reshape(-1, 1))
+
+        # Apply BoxCox on the training AND testing datasets
+        # sns.displot(Y)
+        # plt.savefig("mygraph1.png")
+        Y_train = box_cox.transform(Y_train.reshape(-1, 1))
+        Y_train = np.concatenate(Y_train).ravel()
+        Y_test = box_cox.transform(Y_test.reshape(-1, 1))
+        Y_test = np.concatenate(Y_test).ravel()
+        # sns.displot(Y_train)
+        # plt.savefig("mygraph2.png")
         # ======================================================
 
         # =================== Normalization ====================
-        # TODO : Fit normalization on the training dataset
-        # TODO : Apply normalization on the training AND testing datasets
+        # Fit normalization on the training dataset
+        scaler = preprocessing.StandardScaler()
+        scaler.fit(X_train)
+
+        # Apply normalization on the training AND testing datasets
+        X_train = pd.DataFrame(scaler.transform(X_train))
+        X_test = pd.DataFrame(scaler.transform(X_test))
         # ======================================================
 
         # =================== discretization ===================
@@ -204,8 +223,7 @@ if __name__ == "__main__":
 
         logging.debug("\nFinal dataframe (train) :\n" + str(X_train.head(3)))
 
-        # TODO : Save the result in a CSV file
-        final_dataframe = pd.DataFrame([])
+        # Save the result in a CSV file
         # We generate the filename while making sure that we don't add too many '/'
         file_prefix = output_path + ('/' if output_path[-1] == '' else '/') + 'fold_' + str(k_fold_index)
         train_output_name = file_prefix + '_TRAIN_' + ntpath.basename(dataset_path)
