@@ -12,6 +12,11 @@ import logging
 import ntpath
 import time
 
+from class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
+from class_generation.InsideBinClassGenerator import InsideBinClassGenerator
+from steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
+from steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
+
 
 def argument_parser():
     """
@@ -124,6 +129,27 @@ if __name__ == "__main__":
     else:
         raise ValueError('Unknown parameter for log_lvl.')
 
+    # Declare the thresholds generator
+    thresholds_generator = None
+    if split_method == "equal_width":
+        thresholds_generator = EqualWidthStepsEncoder()
+    elif split_method == "equal_freq":
+        thresholds_generator = EqualFreqStepsEncoder()
+    elif split_method == "kmeans":
+        # (optional) TODO
+        raise ValueError('This split method has not been implemented yet.')
+    else:
+        raise ValueError('Unknown parameter for split_method.')
+
+    # Declare the class generator
+    class_generator = None
+    if output_classes == "below_threshold":
+        class_generator = BelowThresholdClassGenerator()
+    elif output_classes == "inside_bin":
+        class_generator = InsideBinClassGenerator()
+    else:
+        raise ValueError('Unknown parameter for output_classes.')
+
     logging.info("Reading the dataset's file...")
     reading_start_time = time.time()
     imported_dataset = pd.read_csv(dataset_path, delimiter=delimiter, header=header, decimal=decimal,
@@ -168,33 +194,15 @@ if __name__ == "__main__":
         # Fits the normalization on Y_train and applies it on Y_train AND Y_test
         X_train, X_test = DataProcessingUtils.normalize(X_train, X_test)
 
-        # =================== discretization ===================
-        # Thresholds definition (= Fit on the training data)
-        thresholds_list = None
-        if split_method == "equal_width":
-            thresholds_list = DataProcessingUtils.equal_width_split(Y_train, n_bins)
-        elif split_method == "equal_freq":
-            thresholds_list = DataProcessingUtils.equal_freq_split(Y_train, n_bins)
-        elif split_method == "kmeans":
-            # (optional) TODO
-            raise ValueError('This split method has not been implemented yet.')
-        else:
-            raise ValueError('Unknown parameter for split_method.')
+        # Thresholds definition
+        thresholds_list = thresholds_generator.generate_steps(Y_train, n_bins)
         logging.debug("Thresholds :" + str(thresholds_list))
 
         # Discretization
-        train_discretized_classes, test_discretized_classes = None, None
-        if output_classes == "below_threshold":
-            train_discretized_classes = DataProcessingUtils.below_threshold_class_gen(Y_train, thresholds_list)
-            test_discretized_classes = DataProcessingUtils.below_threshold_class_gen(Y_test, thresholds_list)
-        elif output_classes == "inside_bin":
-            train_discretized_classes = DataProcessingUtils.inside_bin_class_gen(Y_train, thresholds_list)
-            test_discretized_classes = DataProcessingUtils.inside_bin_class_gen(Y_test, thresholds_list)
-        else:
-            raise ValueError('Unknown parameter for output_classes.')
+        class_generator.fit(thresholds_list)
+        train_discretized_classes, test_discretized_classes = class_generator.transform(Y_train, Y_test)
         logging.debug("Generated classes (for train dataset) :\n"
                       + str(pd.DataFrame(train_discretized_classes).head(5)))
-        # ======================================================
 
         # We then add the generated classes to the dataframe
         # If there is only one column of class add it directly
