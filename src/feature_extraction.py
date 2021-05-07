@@ -3,17 +3,16 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
-import os
-import sys
 
+from utils.logging_util import setup_logging_level
 from models.RandomForestC import RandomForestC
 from os.path import isfile, join
 from os import listdir
 import pandas as pd
-import numpy as np
 import argparse
 import logging
 import time
+import os
 
 
 def argument_parser():
@@ -84,12 +83,12 @@ def create_new_classifier_model(classifier_name):
 
 
 def detect_class_columns(header):
-    index = 0
+    col_index = 0
     class_cols_indexes = []
     for column_name in header:
-        if column_name.split('_')[0]=='class':
-            class_cols_indexes.append(index)
-        index = index + 1
+        if column_name.split('_')[0] == 'class':
+            class_cols_indexes.append(col_index)
+        col_index = col_index + 1
     return class_cols_indexes
 
 
@@ -100,14 +99,7 @@ if __name__ == "__main__":
     output_path = args.output_path
 
     # Setup the logging level
-    if args.log_lvl == 'debug':
-        logging.getLogger().setLevel(logging.DEBUG)
-    elif args.log_lvl == 'info':
-        logging.getLogger().setLevel(logging.INFO)
-    elif args.log_lvl == 'warning':
-        logging.getLogger().setLevel(logging.WARNING)
-    else:
-        raise ValueError('Unknown parameter for log_lvl.')
+    setup_logging_level(args.log_lvl)
 
     directory_files = [f for f in listdir(dataset_folder) if isfile(join(dataset_folder, f))]
 
@@ -131,23 +123,28 @@ if __name__ == "__main__":
     # print("train_files_dict :\n", train_files_dict)
     # print("test_files_dict :\n", test_files_dict)
 
-    for train_key, test_key, fold_index in zip(train_files_dict.keys(), test_files_dict.keys(), range(0, len(test_files_dict.keys()))):
+    for train_key, test_key, fold_index in zip(train_files_dict.keys(), test_files_dict.keys(),
+                                               range(0, len(test_files_dict.keys()))):
+        logging.info('========== Fold ' + str(fold_index) + ' ==========')
         train_dataset_path = train_files_dict[train_key]
         test_dataset_path = test_files_dict[test_key]
 
         logging.info("Reading the dataset's train and test file...")
         reading_start_time = time.time()
-        imported_train_dataset = pd.read_csv(os.path.join(dataset_folder, train_dataset_path), delimiter=',')
-        imported_test_dataset = pd.read_csv(os.path.join(dataset_folder, test_dataset_path), delimiter=',')
+        imported_train_dataset = pd.read_csv(os.path.join(dataset_folder, train_dataset_path))
+        imported_test_dataset = pd.read_csv(os.path.join(dataset_folder, test_dataset_path))
         logging.info("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
         # We keep all the columns except the goal variable ones
         class_columns_indexes = detect_class_columns(list(imported_train_dataset.columns.values))
 
+        # We will gradually add the extracted features to these dataframes
+        train_extended_dataset = imported_train_dataset.copy()
+        test_extended_dataset = imported_test_dataset.copy()
+
         X_train = imported_train_dataset.drop(imported_train_dataset.columns[class_columns_indexes], axis=1)
         Y_train = imported_train_dataset[imported_train_dataset.columns[class_columns_indexes]]
         X_test = imported_test_dataset.drop(imported_test_dataset.columns[class_columns_indexes], axis=1)
-        extended_X_test = X_test.copy()  # We will gradually add the extracted features to this dataframe
         Y_test = imported_test_dataset[imported_test_dataset.columns[class_columns_indexes]]
 
         logging.debug("Dataset's first 3 rows :")
@@ -159,24 +156,35 @@ if __name__ == "__main__":
         # For each class column, train a classifier and extract its features
         for train_column, test_column, index in zip(Y_train, Y_test, range(0, len(Y_train))):
             classifier_model = create_new_classifier_model(args.classifier)
+
+            # We fit the classifier on the TRAIN data
             classifier_model.fit(X_train, Y_train[train_column])
-            extracted_features, model_score = classifier_model.extract_features(X_test, Y_test[test_column])
-            logging.info('Fold ' + str(fold_index) + ', model ' + str(index) + ' accuracy : ' + str(model_score))
+
+            # We the extract features with this classifier on the train AND test data
+            train_extracted_features, train_score = classifier_model.extract_features(X_train, Y_train[test_column])
+            logging.info('model ' + str(index) + ' train accuracy : ' + str(train_score))
+            test_extracted_features, test_score = classifier_model.extract_features(X_test, Y_test[test_column])
+            logging.info('model ' + str(index) + ' test accuracy : ' + str(test_score))
             # np.set_printoptions(threshold=sys.maxsize)
-            # print(np.array(extracted_features))
+            # print(np.array(test_extracted_features))
 
-            # We can now add the extracted features to the dataframe :
-            for key in extracted_features.keys():
-                extended_X_test['class_' + str(index) + '_' + str(key)] = extracted_features[key]
+            # We can now add the extracted features to the dataframes :
+            for train_key, test_key in zip(train_extracted_features.keys(), test_extracted_features.keys()):
+                train_extended_dataset['threshold_' + str(index) + '_' + str(train_key)] = train_extracted_features[train_key]
+                test_extended_dataset['threshold_' + str(index) + '_' + str(test_key)] = test_extracted_features[test_key]
 
-        logging.debug("Extended dataset's first 3 rows :")
-        logging.debug('\n' + str(extended_X_test.head(3)))
+        logging.debug("Train extended dataset's first 3 rows :")
+        logging.debug('\n' + str(train_extended_dataset.head(3)))
 
-        # Save the extended dataset in a CSV file
-        # We generate the filename while making sure that we don't add too many '/'
+        logging.debug("Test extended dataset's first 3 rows :")
+        logging.debug('\n' + str(train_extended_dataset.head(3)))
+
+        # Save the extended datasets in a CSV file
         if not os.path.exists(output_path):
             os.mkdir(output_path)
-        train_output_name = os.path.join(output_path, 'Extended_' + test_dataset_path)
-        extended_X_test.to_csv(path_or_buf=train_output_name, index=False)
+        train_output_name = os.path.join(output_path, 'Extended_' + train_dataset_path)
+        train_extended_dataset.to_csv(path_or_buf=train_output_name, index=False)
+        test_output_name = os.path.join(output_path, 'Extended_' + test_dataset_path)
+        test_extended_dataset.to_csv(path_or_buf=test_output_name, index=False)
 
         logging.info("Split " + str(fold_index) + " extended dataset saved.")

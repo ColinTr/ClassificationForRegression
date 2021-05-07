@@ -3,20 +3,20 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
-import os
 
-import DataProcessingUtils
+from class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
+from class_generation.InsideBinClassGenerator import InsideBinClassGenerator
+from steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
+from steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
+from utils.logging_util import setup_logging_level
+from utils.DataProcessingUtils import *
 import pandas as pd
 import numpy as np
 import argparse
 import logging
 import ntpath
 import time
-
-from class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
-from class_generation.InsideBinClassGenerator import InsideBinClassGenerator
-from steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
-from steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
+import os
 
 
 def argument_parser():
@@ -121,14 +121,7 @@ if __name__ == "__main__":
     k_folds = args.k_folds
 
     # Setup the logging level
-    if args.log_lvl == 'debug':
-        logging.getLogger().setLevel(logging.DEBUG)
-    elif args.log_lvl == 'info':
-        logging.getLogger().setLevel(logging.INFO)
-    elif args.log_lvl == 'warning':
-        logging.getLogger().setLevel(logging.WARNING)
-    else:
-        raise ValueError('Unknown parameter for log_lvl.')
+    setup_logging_level(args.log_lvl)
 
     # Declare the thresholds generator
     thresholds_generator = None
@@ -167,7 +160,7 @@ if __name__ == "__main__":
 
     # TODO : Categorical data encoding => Maybe do that in another script (or even in a notebook)
 
-    k_fold_indexes = DataProcessingUtils.kfold_train_test_split(len(Y), k_folds)
+    k_fold_indexes = kfold_train_test_split(len(Y), k_folds)
 
     # We iterate for k_folds folds to create the datasets
     for k_fold_index in range(0, k_folds):
@@ -188,10 +181,10 @@ if __name__ == "__main__":
         X_test, Y_test = X.iloc[test_indexes].copy(), np.array(Y.iloc[test_indexes])
 
         # Fits the box-cox on Y_train and applies it on Y_train AND Y_test
-        Y_train, Y_test = DataProcessingUtils.box_cox(Y_train, Y_test)
+        Y_train, Y_test = box_cox(Y_train, Y_test)
 
         # Fits the normalization on Y_train and applies it on Y_train AND Y_test
-        X_train, X_test = DataProcessingUtils.normalize(X_train, X_test)
+        X_train, X_test = normalize(X_train, X_test)
 
         # Thresholds definition
         thresholds_list = thresholds_generator.generate_steps(Y_train, n_bins)
