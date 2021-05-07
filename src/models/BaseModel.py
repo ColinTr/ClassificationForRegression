@@ -7,20 +7,20 @@ contact : colin.troisemaine@gmail.com
 from abc import ABC, abstractmethod
 
 
-class CustomClassGenerator(ABC):
+class BaseModel(ABC):
     """
     TODO
     """
 
     @abstractmethod
-    def fit(self, thresholds_list):
+    def fit(self, X_train, Y_train):
         """
         TODO
         """
         pass
 
     @abstractmethod
-    def transform(self, Y_train, Y_test):
+    def extract_features(self, X_test, Y_test):
         """
         TODO
         """

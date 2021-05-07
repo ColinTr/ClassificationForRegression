@@ -9,6 +9,10 @@ import numpy as np
 
 
 class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
+    """
+    TODO
+    """
+
     def __init__(self):
         super(EqualFreqStepsEncoder, self).__init__()
         self.thresholds_list = None

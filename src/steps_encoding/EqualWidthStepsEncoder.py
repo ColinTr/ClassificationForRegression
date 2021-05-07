@@ -9,6 +9,10 @@ import numpy as np
 
 
 class EqualWidthStepsEncoder(StepsEncoder.StepsEncoder):
+    """
+    TODO
+    """
+
     def __init__(self):
         super(EqualWidthStepsEncoder, self).__init__()
         self.thresholds_list = None
