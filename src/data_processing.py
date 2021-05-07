@@ -4,12 +4,9 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-from sklearn.preprocessing import PowerTransformer
-from sklearn import preprocessing
-from DataProcessingUtils import *
-import seaborn as sns
-import matplotlib.pyplot as plt
+import DataProcessingUtils
 import pandas as pd
+import numpy as np
 import argparse
 import logging
 import ntpath
@@ -137,15 +134,15 @@ if __name__ == "__main__":
     X = imported_dataset.drop(imported_dataset.columns[goal_var_index], axis=1)
     Y = imported_dataset[imported_dataset.columns[goal_var_index]]
 
-    logging.debug("\nDataset's first 3 rows :")
+    logging.debug("Dataset's first 3 rows :")
     logging.debug("X :")
     logging.debug(X.head(3))
-    logging.debug("\nY :")
+    logging.debug("Y :")
     logging.debug(Y.head(3))
 
     # TODO : Categorical data encoding => Maybe do that in another script (or even in a notebook)
 
-    k_fold_indexes = kfold_train_test_split(len(Y), k_folds)
+    k_fold_indexes = DataProcessingUtils.kfold_train_test_split(len(Y), k_folds)
 
     # We iterate for k_folds folds to create the datasets
     for k_fold_index in range(0, k_folds):
@@ -165,57 +162,38 @@ if __name__ == "__main__":
         X_train, Y_train = X.iloc[train_indexes].copy(), np.array(Y.iloc[train_indexes])
         X_test, Y_test = X.iloc[test_indexes].copy(), np.array(Y.iloc[test_indexes])
 
-        # ======================= BoxCox =======================
-        # Fit BoxCox on the training dataset
-        box_cox = PowerTransformer(method='box-cox')  # Only works with strictly positive values !
-        box_cox.fit(Y_train.reshape(-1, 1))
+        # Fits the box-cox on Y_train and applies it on Y_train AND Y_test
+        Y_train, Y_test = DataProcessingUtils.box_cox(Y_train, Y_test)
 
-        # Apply BoxCox on the training AND testing datasets
-        # sns.displot(Y)
-        # plt.savefig("mygraph1.png")
-        Y_train = box_cox.transform(Y_train.reshape(-1, 1))
-        Y_train = np.concatenate(Y_train).ravel()
-        Y_test = box_cox.transform(Y_test.reshape(-1, 1))
-        Y_test = np.concatenate(Y_test).ravel()
-        # sns.displot(Y_train)
-        # plt.savefig("mygraph2.png")
-        # ======================================================
-
-        # =================== Normalization ====================
-        # Fit normalization on the training dataset
-        scaler = preprocessing.StandardScaler()
-        scaler.fit(X_train)
-
-        # Apply normalization on the training AND testing datasets
-        X_train = pd.DataFrame(scaler.transform(X_train))
-        X_test = pd.DataFrame(scaler.transform(X_test))
-        # ======================================================
+        # Fits the normalization on Y_train and applies it on Y_train AND Y_test
+        X_train, X_test = DataProcessingUtils.normalize(X_train, X_test)
 
         # =================== discretization ===================
         # Thresholds definition (= Fit on the training data)
         thresholds_list = None
         if split_method == "equal_width":
-            thresholds_list = equal_width_split(Y_train, n_bins)
+            thresholds_list = DataProcessingUtils.equal_width_split(Y_train, n_bins)
         elif split_method == "equal_freq":
-            thresholds_list = equal_freq_split(Y_train, n_bins)
+            thresholds_list = DataProcessingUtils.equal_freq_split(Y_train, n_bins)
         elif split_method == "kmeans":
             # (optional) TODO
             raise ValueError('This split method has not been implemented yet.')
         else:
             raise ValueError('Unknown parameter for split_method.')
-        logging.debug("\nThresholds :" + str(thresholds_list))
+        logging.debug("Thresholds :" + str(thresholds_list))
 
         # Discretization
         train_discretized_classes, test_discretized_classes = None, None
         if output_classes == "below_threshold":
-            train_discretized_classes = below_threshold_class_gen(Y_train, thresholds_list)
-            test_discretized_classes = below_threshold_class_gen(Y_test, thresholds_list)
+            train_discretized_classes = DataProcessingUtils.below_threshold_class_gen(Y_train, thresholds_list)
+            test_discretized_classes = DataProcessingUtils.below_threshold_class_gen(Y_test, thresholds_list)
         elif output_classes == "inside_bin":
-            train_discretized_classes = inside_bin_class_gen(Y_train, thresholds_list)
-            test_discretized_classes = inside_bin_class_gen(Y_test, thresholds_list)
+            train_discretized_classes = DataProcessingUtils.inside_bin_class_gen(Y_train, thresholds_list)
+            test_discretized_classes = DataProcessingUtils.inside_bin_class_gen(Y_test, thresholds_list)
         else:
             raise ValueError('Unknown parameter for output_classes.')
-        logging.debug("\nGenerated classes (for train dataset) :\n" + str(pd.DataFrame(train_discretized_classes).head(5)))
+        logging.debug("Generated classes (for train dataset) :\n"
+                      + str(pd.DataFrame(train_discretized_classes).head(5)))
         # ======================================================
 
         # We then add the generated classes to the dataframe
@@ -229,7 +207,7 @@ if __name__ == "__main__":
                 X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]
                 X_test['class_' + str(class_index)] = test_discretized_classes[:, class_index]
 
-        logging.debug("\nFinal dataframe (train) :\n" + str(X_train.head(3)))
+        logging.debug("Final dataframe (train) :\n" + str(X_train.head(3)))
 
         # Save the result in a CSV file
         # We generate the filename while making sure that we don't add too many '/'
