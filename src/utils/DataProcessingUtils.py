@@ -31,13 +31,13 @@ def box_cox(Y_train, Y_test):
 
     # Apply BoxCox on the training AND testing datasets
     # sns.displot(Y)
-    # plt.savefig("mygraph1.png")
+    # plt.savefig("Y_orignal.png")
     Y_train = transform.transform(Y_train.reshape(-1, 1))
     Y_train = np.concatenate(Y_train).ravel()
     Y_test = transform.transform(Y_test.reshape(-1, 1))
     Y_test = np.concatenate(Y_test).ravel()
     # sns.displot(Y_train)
-    # plt.savefig("mygraph2.png")
+    # plt.savefig("Y_box-cox_transformed.png")
     return Y_train, Y_test
 
 
