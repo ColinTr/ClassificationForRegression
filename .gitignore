@@ -108,5 +108,9 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+data/logs/*
+!data/logs/.gitkeep
+data/extracted_features/*
+!data/extracted_features/.gitkeep
 
 .idea

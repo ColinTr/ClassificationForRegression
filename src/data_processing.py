@@ -3,6 +3,7 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
+import os
 
 import DataProcessingUtils
 import pandas as pd
@@ -38,7 +39,7 @@ def argument_parser():
 
     parser.add_argument('--output_path',
                         type=str,
-                        help='The folder where the result will be written',
+                        help='The folder where the results will be saved',
                         required=True)
 
     parser.add_argument('--split_method',
@@ -161,10 +162,8 @@ if __name__ == "__main__":
     Y = imported_dataset[imported_dataset.columns[goal_var_index]]
 
     logging.debug("Dataset's first 3 rows :")
-    logging.debug("X :")
-    logging.debug(X.head(3))
-    logging.debug("Y :")
-    logging.debug(Y.head(3))
+    logging.debug('X :\n' + str(X.head(3)))
+    logging.debug('Y :\n' + str(Y.head(3)))
 
     # TODO : Categorical data encoding => Maybe do that in another script (or even in a notebook)
 
@@ -218,12 +217,14 @@ if __name__ == "__main__":
         logging.debug("Final dataframe (train) :\n" + str(X_train.head(3)))
 
         # Save the result in a CSV file
-        # We generate the filename while making sure that we don't add too many '/'
-        file_prefix = output_path + ('/' if output_path[-1] == '' else '/') + 'fold_' + str(k_fold_index)
-        train_output_name = file_prefix + '_TRAIN_' + ntpath.basename(dataset_path)
+        if not os.path.exists(output_path):
+            os.mkdir(output_path)
+        train_output_name = os.path.join(output_path,
+                                         'fold_' + str(k_fold_index) + '_TRAIN_' + ntpath.basename(dataset_path))
         X_train.to_csv(path_or_buf=train_output_name, index=False)
 
-        test_output_name = file_prefix + '_TEST_' + ntpath.basename(dataset_path)
+        test_output_name = os.path.join(output_path,
+                                        'fold_' + str(k_fold_index) + '_TEST_' + ntpath.basename(dataset_path))
         X_test.to_csv(path_or_buf=test_output_name, index=False)
 
         logging.info("Split " + str(k_fold_index) + " datasets saved in files")

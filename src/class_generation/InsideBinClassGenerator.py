@@ -9,6 +9,10 @@ import numpy as np
 
 
 class InsideBinClassGenerator(CustomClassGenerator.CustomClassGenerator):
+    """
+    TODO
+    """
+
     def __init__(self):
         super(InsideBinClassGenerator, self).__init__()
         self.thresholds_list = None

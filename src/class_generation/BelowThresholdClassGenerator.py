@@ -9,6 +9,10 @@ import numpy as np
 
 
 class BelowThresholdClassGenerator(CustomClassGenerator.CustomClassGenerator):
+    """
+    TODO
+    """
+
     def __init__(self):
         super(BelowThresholdClassGenerator, self).__init__()
         self.thresholds_list = None
