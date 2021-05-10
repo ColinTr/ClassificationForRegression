@@ -4,10 +4,11 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+import os
 import sys
-sys.path.insert(0, '..')
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.logging_util import setup_logging_level
+from src.utils.logging_util import setup_logging_level
 from sklearn.ensemble import RandomForestRegressor
 from os.path import isfile, join
 from os import listdir
@@ -24,14 +25,14 @@ def argument_parser():
     TODO
     """
 
-    parser = argparse.ArgumentParser(usage='\n python3 compute_test_metrics.py [dataset_folder] |regressor] [log_lvl]'
+    parser = argparse.ArgumentParser(usage='\n python compute_test_metrics.py [dataset_folder] [regressor] [log_lvl]'
                                            '\n Example : python scripts/compute_test_metrics.py TODO...',
                                      description="This program allows to compute the mean metrics of a regressor"
                                                  "across all datasets named with TEST inside a folder.")
 
     parser.add_argument('--dataset_folder',
                         type=str,
-                        help='The folder where the TEST k-fold datasets are stored',
+                        help='The folder where the test and train k-fold datasets are stored',
                         required=True)
 
     parser.add_argument('--regressor',
@@ -42,7 +43,7 @@ def argument_parser():
 
     parser.add_argument('--log_lvl',
                         type=str,
-                        default='warning',
+                        default='info',
                         choices=["debug", "info", "warning"],
                         help='Change the log display level')
 

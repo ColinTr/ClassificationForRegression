@@ -4,15 +4,16 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+import os
 import sys
-sys.path.insert(0, '..')
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
-from class_generation.InsideBinClassGenerator import InsideBinClassGenerator
-from steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
-from steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
-from utils.logging_util import setup_logging_level
-from utils.DataProcessingUtils import *
+from src.class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
+from src.class_generation.InsideBinClassGenerator import InsideBinClassGenerator
+from src.steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
+from src.steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
+from src.utils.logging_util import setup_logging_level
+from src.utils.DataProcessingUtils import *
 import pandas as pd
 import numpy as np
 import argparse
@@ -27,7 +28,7 @@ def argument_parser():
     A parser to allow user to easily process any dataset using the split method and class generation he desires.
     """
 
-    parser = argparse.ArgumentParser(usage='\n python3 data_processing.py [dataset_path] [output_path] [split_method] '
+    parser = argparse.ArgumentParser(usage='\n python data_processing.py [dataset_path] [output_path] [split_method] '
                                            '[output_classes] [delimiter] [header] [decimal] [na_values] [usecols] '
                                            '[goal_var_index] [n_bins] [k_folds] [log_lvl]'
                                            '\n Example : python scripts/data_processing.py '
@@ -66,7 +67,7 @@ def argument_parser():
                         type=str,
                         default="infer",
                         choices=["infer", "None"],
-                        help='Infer the column names or use None if the first line isn\' a csv header line')
+                        help='Infer the column names or use None if the first line isn\'t a csv header line')
 
     parser.add_argument('--decimal',
                         type=str,
@@ -99,7 +100,7 @@ def argument_parser():
 
     parser.add_argument('--log_lvl',
                         type=str,
-                        default='warning',
+                        default='info',
                         choices=["debug", "info", "warning"],
                         help='Change the log display level')
 

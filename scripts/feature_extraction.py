@@ -4,11 +4,12 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+import os
 import sys
-sys.path.insert(0, '..')
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.logging_util import setup_logging_level
-from models.RandomForestC import RandomForestC
+from src.utils.logging_util import setup_logging_level
+from src.models.RandomForestC import RandomForestC
 from os.path import isfile, join
 from os import listdir
 import pandas as pd
@@ -23,7 +24,7 @@ def argument_parser():
     TODO
     """
 
-    parser = argparse.ArgumentParser(usage='\n python3 feature_extraction.py [dataset_folder] [output_path]'
+    parser = argparse.ArgumentParser(usage='\n python feature_extraction.py [dataset_folder] [output_path]'
                                            '|classifier] [class_cols] [log_lvl]'
                                            '\n Example : python scripts/feature_extraction.py TODO...',
                                      description="This program allows to extract features from a dataset.")
@@ -44,15 +45,9 @@ def argument_parser():
                         choices=["RandomForests", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
                         required=True)
 
-    parser.add_argument('--class_cols',
-                        type=int,
-                        nargs='+',  # 1 or more values expected,
-                        help='The indexes of the classes columns',
-                        required=True)
-
     parser.add_argument('--log_lvl',
                         type=str,
-                        default='warning',
+                        default='info',
                         choices=["debug", "info", "warning"],
                         help='Change the log display level')
 
