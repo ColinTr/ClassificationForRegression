@@ -4,6 +4,9 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+import sys
+sys.path.insert(0, '..')
+
 from utils.logging_util import setup_logging_level
 from sklearn.ensemble import RandomForestRegressor
 from os.path import isfile, join

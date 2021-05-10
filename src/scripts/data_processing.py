@@ -4,6 +4,9 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+import sys
+sys.path.insert(0, '..')
+
 from class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
 from class_generation.InsideBinClassGenerator import InsideBinClassGenerator
 from steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
@@ -56,7 +59,7 @@ def argument_parser():
 
     parser.add_argument('--delimiter',
                         type=str,
-                        default=",",
+                        default=',',
                         help='Delimiter to use when reading the dataset')
 
     parser.add_argument('--header',
@@ -67,7 +70,7 @@ def argument_parser():
 
     parser.add_argument('--decimal',
                         type=str,
-                        default=",",
+                        default='.',
                         help='Character to recognize as decimal point')
 
     parser.add_argument('--na_values',

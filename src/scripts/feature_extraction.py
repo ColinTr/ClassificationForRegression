@@ -4,12 +4,14 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+import sys
+sys.path.insert(0, '..')
+
 from utils.logging_util import setup_logging_level
 from models.RandomForestC import RandomForestC
 from os.path import isfile, join
 from os import listdir
 import pandas as pd
-import numpy as np
 import argparse
 import logging
 import time
@@ -176,9 +178,9 @@ if __name__ == "__main__":
             # print(np.array(test_extracted_features))
 
             # We can now add the extracted features to the dataframes :
-            for train_key, test_key in zip(train_extracted_features.keys(), test_extracted_features.keys()):
-                train_extended_dataset['threshold_' + str(index) + '_' + str(train_key)] = train_extracted_features[train_key]
-                test_extended_dataset['threshold_' + str(index) + '_' + str(test_key)] = test_extracted_features[test_key]
+            for ef_train_key, ef_test_key in zip(train_extracted_features.keys(), test_extracted_features.keys()):
+                train_extended_dataset['threshold_' + str(index) + '_' + str(ef_train_key)] = train_extracted_features[ef_train_key]
+                test_extended_dataset['threshold_' + str(index) + '_' + str(ef_test_key)] = test_extracted_features[ef_test_key]
 
         # And finally add the (box-cox transformed) goal variable to be used by the upcoming regression
         train_extended_dataset['reg_goal_var'] = imported_train_dataset[imported_train_dataset.columns[reg_goal_var_index]]

@@ -106,10 +106,15 @@ venv.bak/
 # Ignore the datasets
 data/raw/*
 !data/raw/.gitkeep
+!data/raw/Combined_Cycle_Power_Plant_Dataset/Folds5x2_pp.csv
+!data/raw/Combined_Cycle_Power_Plant_Dataset/Readme.txt
+
 data/processed/*
 !data/processed/.gitkeep
+
 data/logs/*
 !data/logs/.gitkeep
+
 data/extracted_features/*
 !data/extracted_features/.gitkeep
 
