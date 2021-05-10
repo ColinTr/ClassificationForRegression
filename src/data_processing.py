@@ -207,6 +207,10 @@ if __name__ == "__main__":
                 X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]
                 X_test['class_' + str(class_index)] = test_discretized_classes[:, class_index]
 
+        # And finally add the (box-cox transformed) goal variable to be used by the upcoming regression
+        X_train['reg_goal_var'] = Y_train
+        X_test['reg_goal_var'] = Y_test
+
         logging.debug("Final dataframe (train) :\n" + str(X_train.head(3)))
 
         # Save the result in a CSV file

@@ -9,6 +9,7 @@ from models.RandomForestC import RandomForestC
 from os.path import isfile, join
 from os import listdir
 import pandas as pd
+import numpy as np
 import argparse
 import logging
 import time
@@ -84,12 +85,15 @@ def create_new_classifier_model(classifier_name):
 
 def detect_class_columns(header):
     col_index = 0
+    regression_goal_var_index = -1
     class_cols_indexes = []
     for column_name in header:
         if column_name.split('_')[0] == 'class':
             class_cols_indexes.append(col_index)
+        elif column_name == 'reg_goal_var':
+            regression_goal_var_index = col_index
         col_index = col_index + 1
-    return class_cols_indexes
+    return class_cols_indexes, regression_goal_var_index
 
 
 if __name__ == "__main__":
@@ -135,17 +139,21 @@ if __name__ == "__main__":
         imported_test_dataset = pd.read_csv(os.path.join(dataset_folder, test_dataset_path))
         logging.info("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
-        # We keep all the columns except the goal variable ones
-        class_columns_indexes = detect_class_columns(list(imported_train_dataset.columns.values))
+        # We keep all the columns except the goal variable ones and the one for regression
+        class_columns_indexes, reg_goal_var_index = detect_class_columns(list(imported_train_dataset.columns.values))
+        X_cols_to_drop = class_columns_indexes.copy()
+        X_cols_to_drop.append(reg_goal_var_index)
 
         # We will gradually add the extracted features to these dataframes
         train_extended_dataset = imported_train_dataset.copy()
         test_extended_dataset = imported_test_dataset.copy()
 
-        X_train = imported_train_dataset.drop(imported_train_dataset.columns[class_columns_indexes], axis=1)
+        X_train = imported_train_dataset.drop(imported_train_dataset.columns[X_cols_to_drop], axis=1)
         Y_train = imported_train_dataset[imported_train_dataset.columns[class_columns_indexes]]
-        X_test = imported_test_dataset.drop(imported_test_dataset.columns[class_columns_indexes], axis=1)
+        Y_train_reg_goal_var = imported_train_dataset[imported_train_dataset.columns[reg_goal_var_index]]
+        X_test = imported_test_dataset.drop(imported_test_dataset.columns[X_cols_to_drop], axis=1)
         Y_test = imported_test_dataset[imported_test_dataset.columns[class_columns_indexes]]
+        Y_test_reg_goal_var = imported_test_dataset[imported_test_dataset.columns[reg_goal_var_index]]
 
         logging.debug("Dataset's first 3 rows :")
         logging.debug('X_train :\n' + str(X_train.head(3)))
@@ -162,9 +170,8 @@ if __name__ == "__main__":
 
             # We the extract features with this classifier on the train AND test data
             train_extracted_features, train_score = classifier_model.extract_features(X_train, Y_train[test_column])
-            logging.info('model ' + str(index) + ' train accuracy : ' + str(train_score))
             test_extracted_features, test_score = classifier_model.extract_features(X_test, Y_test[test_column])
-            logging.info('model ' + str(index) + ' test accuracy : ' + str(test_score))
+            logging.info('model ' + str(index) + ' accuracy : train = {0:.2f}'.format(train_score) + ' & test = {0:.2f}'.format(test_score))
             # np.set_printoptions(threshold=sys.maxsize)
             # print(np.array(test_extracted_features))
 
@@ -172,6 +179,10 @@ if __name__ == "__main__":
             for train_key, test_key in zip(train_extracted_features.keys(), test_extracted_features.keys()):
                 train_extended_dataset['threshold_' + str(index) + '_' + str(train_key)] = train_extracted_features[train_key]
                 test_extended_dataset['threshold_' + str(index) + '_' + str(test_key)] = test_extracted_features[test_key]
+
+        # And finally add the (box-cox transformed) goal variable to be used by the upcoming regression
+        train_extended_dataset['reg_goal_var'] = imported_train_dataset[imported_train_dataset.columns[reg_goal_var_index]]
+        test_extended_dataset['reg_goal_var'] = imported_test_dataset[imported_test_dataset.columns[reg_goal_var_index]]
 
         logging.debug("Train extended dataset's first 3 rows :")
         logging.debug('\n' + str(train_extended_dataset.head(3)))

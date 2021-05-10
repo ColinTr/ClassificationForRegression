@@ -48,12 +48,15 @@ def argument_parser():
 
 def detect_class_columns(header):
     col_index = 0
+    regression_goal_var_index = -1
     class_cols_indexes = []
     for column_name in header:
         if column_name.split('_')[0] == 'class':
             class_cols_indexes.append(col_index)
+        elif column_name == 'reg_goal_var':
+            regression_goal_var_index = col_index
         col_index = col_index + 1
-    return class_cols_indexes
+    return class_cols_indexes, regression_goal_var_index
 
 
 if __name__ == "__main__":
@@ -77,10 +80,12 @@ if __name__ == "__main__":
         logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
         # We keep all the columns except the goal variable ones
-        class_columns_indexes = detect_class_columns(list(train_dataframe.columns.values))
+        class_columns_indexes, reg_goal_var_index = detect_class_columns(list(train_dataframe.columns.values))
+        X_cols_to_drop = class_columns_indexes.copy()
+        X_cols_to_drop.append(reg_goal_var_index)
 
-        X = train_dataframe.drop(train_dataframe.columns[class_columns_indexes], axis=1)
-        Y = train_dataframe[train_dataframe.columns[class_columns_indexes]]
+        X = train_dataframe.drop(train_dataframe.columns[X_cols_to_drop], axis=1)
+        Y = train_dataframe[train_dataframe.columns[reg_goal_var_index]]  # This time, Y is the regression goal variable
 
         logging.debug("Dataset's first 3 rows :")
         logging.debug('X :\n' + str(X.head(3)))
@@ -106,7 +111,8 @@ if __name__ == "__main__":
     if len(X_train_datasets.keys()) != len(X_test_datasets.keys()):
         raise ValueError('Train and test number of files don\t match')
 
-    accuracies = []
+    test_accuracies = []
+    train_accuracies = []
     for X_train_key, Y_train_key, X_test_key, Y_test_key in zip(sorted(X_train_datasets.keys()),
                                                                 sorted(Y_train_datasets.keys()),
                                                                 sorted(X_test_datasets.keys()),
@@ -131,10 +137,12 @@ if __name__ == "__main__":
             # Fit the model on the TRAINING data
             model.fit(X_train, Y_train)
 
-            # Compute the metrics on the TESTING data
-            accuracy = model.score(X_test, Y_test)
-            accuracies.append(accuracy)
-            logging.info('Test accuracy for split ' + X_train_key + ' : ' + str(accuracy))
+            # Compute the metrics
+            test_accuracy = model.score(X_test, Y_test)
+            train_accuracy = model.score(X_train, Y_train)
+            test_accuracies.append(test_accuracy)
+            train_accuracies.append(train_accuracy)
+            logging.info('Split ' + X_train_key + ' accuracy : train = {0:.2f}'.format(train_accuracy) + ' & test = {0:.2f}'.format(test_accuracy))
         elif args.regressor == "LogisticRegression":
             # TODO
             pass
@@ -148,4 +156,4 @@ if __name__ == "__main__":
             # TODO
             pass
 
-    logging.info('Mean accuracy : ' + str(np.mean(accuracies)))
+    logging.info('Mean accuracy : train =  {0:.4f}'.format(np.mean(train_accuracies)) + ' & test =  {0:.4f}'.format(np.mean(test_accuracies)))
