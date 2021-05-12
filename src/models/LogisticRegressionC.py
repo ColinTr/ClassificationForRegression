@@ -4,15 +4,15 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from . import BaseModel
 import pandas as pd
 
 
-class RandomForestC(BaseModel.BaseModel):
+class LogisticRegressionC(BaseModel.BaseModel):
     def __init__(self):
-        super(RandomForestC, self).__init__()
-        self.model = RandomForestClassifier()
+        super(LogisticRegressionC, self).__init__()
+        self.model = LogisticRegression()
 
     def fit(self, X_train, Y_train):
         self.model.fit(X_train, Y_train)

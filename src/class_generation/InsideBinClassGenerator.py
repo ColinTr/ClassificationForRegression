@@ -10,7 +10,7 @@ import numpy as np
 
 class InsideBinClassGenerator(CustomClassGenerator.CustomClassGenerator):
     """
-    TODO
+    Associates a class to the values of a goal variable based on a threshold_list.
     """
 
     def __init__(self):

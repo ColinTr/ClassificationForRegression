@@ -4,7 +4,7 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-from sklearn.preprocessing import PowerTransformer
+from sklearn.preprocessing import PowerTransformer, MinMaxScaler
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -14,7 +14,7 @@ import random
 
 
 def one_hot_encode():
-    # TODO
+    # (optional) TODO
     return None
 
 
@@ -25,17 +25,24 @@ def box_cox(Y_train, Y_test):
     :param Y_test: list or np.array :  The testing goal values to transform
     :return: Y_train, Y_test : The transformed Y_train and Y_test
     """
+    Y_train = Y_train.reshape(-1, 1)
+    Y_test = Y_test.reshape(-1, 1)
+
+    # Since BoxCox can only be applied to positive data, we first scale the data to [1, 2]
+    scaler = MinMaxScaler(feature_range=(1, 2))
+    scaler.fit(Y_train)
+    Y_train = scaler.transform(Y_train)
+    Y_test = scaler.transform(Y_test)  # Risk of still having negative data in the test goal variable...
+
     # Fit BoxCox on the training dataset
     transform = PowerTransformer(method='box-cox')  # Only works with strictly positive values !
-    transform.fit(Y_train.reshape(-1, 1))
+    transform.fit(Y_train)
 
     # Apply BoxCox on the training AND testing datasets
     # sns.displot(Y)
     # plt.savefig("Y_orignal.png")
-    Y_train = transform.transform(Y_train.reshape(-1, 1))
-    Y_train = np.concatenate(Y_train).ravel()
-    Y_test = transform.transform(Y_test.reshape(-1, 1))
-    Y_test = np.concatenate(Y_test).ravel()
+    Y_train = transform.transform(Y_train)
+    Y_test = transform.transform(Y_test)
     # sns.displot(Y_train)
     # plt.savefig("Y_box-cox_transformed.png")
     return Y_train, Y_test
@@ -73,3 +80,21 @@ def kfold_train_test_split(n_indexes, k_folds, seed=None):
     random.shuffle(indexes_list)
 
     return np.array_split(indexes_list, k_folds)
+
+
+def detect_class_columns(header):
+    """
+    Detect from a header which columns have a string "class"
+    :param header: The header
+    :return: A List of the indexes of the columns with the string "class" inside
+    """
+    col_index = 0
+    regression_goal_var_index = -1
+    class_cols_indexes = []
+    for column_name in header:
+        if column_name.split('_')[0] == 'class':
+            class_cols_indexes.append(col_index)
+        elif column_name == 'reg_goal_var':
+            regression_goal_var_index = col_index
+        col_index = col_index + 1
+    return class_cols_indexes, regression_goal_var_index

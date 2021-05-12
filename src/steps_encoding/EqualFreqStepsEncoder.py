@@ -10,7 +10,7 @@ import numpy as np
 
 class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
     """
-    TODO
+    Generates thresholds to split the goal variable into n_bins containing the same number of goal variables.
     """
 
     def __init__(self):

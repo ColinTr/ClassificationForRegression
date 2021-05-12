@@ -4,15 +4,15 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.naive_bayes import GaussianNB
 from . import BaseModel
 import pandas as pd
 
 
-class RandomForestC(BaseModel.BaseModel):
+class GaussianNBC(BaseModel.BaseModel):
     def __init__(self):
-        super(RandomForestC, self).__init__()
-        self.model = RandomForestClassifier()
+        super(GaussianNBC, self).__init__()
+        self.model = GaussianNB()
 
     def fit(self, X_train, Y_train):
         self.model.fit(X_train, Y_train)

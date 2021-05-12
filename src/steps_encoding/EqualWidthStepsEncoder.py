@@ -10,7 +10,8 @@ import numpy as np
 
 class EqualWidthStepsEncoder(StepsEncoder.StepsEncoder):
     """
-    TODO
+    Generates thresholds to split the goal variable into n_bins equally wide bins,
+    distributed between the min and the max of the goal variable.
     """
 
     def __init__(self):

@@ -8,9 +8,12 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from src.utils.DataProcessingUtils import detect_class_columns
 from src.utils.logging_util import setup_logging_level
 from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
 from os.path import isfile, join
+from src.utils.Metrics import *
 from os import listdir
 import pandas as pd
 import numpy as np
@@ -22,11 +25,10 @@ import os
 
 def argument_parser():
     """
-    TODO
+    A parser to allow user to easily compute many metrics on the datasets of the given folder.
     """
 
-    parser = argparse.ArgumentParser(usage='\n python compute_test_metrics.py [dataset_folder] [regressor] [log_lvl]'
-                                           '\n Example : python scripts/compute_test_metrics.py TODO...',
+    parser = argparse.ArgumentParser(usage='\n python compute_test_metrics.py [dataset_folder] [regressor] [log_lvl]',
                                      description="This program allows to compute the mean metrics of a regressor"
                                                  "across all datasets named with TEST inside a folder.")
 
@@ -38,7 +40,7 @@ def argument_parser():
     parser.add_argument('--regressor',
                         type=str,
                         help='The regression model to use',
-                        choices=["RandomForests", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
+                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
                         required=True)
 
     parser.add_argument('--log_lvl',
@@ -48,19 +50,6 @@ def argument_parser():
                         help='Change the log display level')
 
     return parser.parse_args()
-
-
-def detect_class_columns(header):
-    col_index = 0
-    regression_goal_var_index = -1
-    class_cols_indexes = []
-    for column_name in header:
-        if column_name.split('_')[0] == 'class':
-            class_cols_indexes.append(col_index)
-        elif column_name == 'reg_goal_var':
-            regression_goal_var_index = col_index
-        col_index = col_index + 1
-    return class_cols_indexes, regression_goal_var_index
 
 
 if __name__ == "__main__":
@@ -83,8 +72,10 @@ if __name__ == "__main__":
         train_dataframe = pd.read_csv(os.path.join(dataset_folder, filename))
         logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
-        # We keep all the columns except the goal variable ones
+        # We keep all the columns except the goal variable ones and the class ones
         class_columns_indexes, reg_goal_var_index = detect_class_columns(list(train_dataframe.columns.values))
+
+        # It would be cheating to use the class_X columns since they are the goal variable encoded
         X_cols_to_drop = class_columns_indexes.copy()
         X_cols_to_drop.append(reg_goal_var_index)
 
@@ -115,8 +106,8 @@ if __name__ == "__main__":
     if len(X_train_datasets.keys()) != len(X_test_datasets.keys()):
         raise ValueError('Train and test number of files don\t match')
 
-    test_accuracies = []
-    train_accuracies = []
+    train_metrics_list = []
+    test_metrics_list = []
     for X_train_key, Y_train_key, X_test_key, Y_test_key in zip(sorted(X_train_datasets.keys()),
                                                                 sorted(Y_train_datasets.keys()),
                                                                 sorted(X_test_datasets.keys()),
@@ -135,23 +126,24 @@ if __name__ == "__main__":
         logging.debug("Y_test :")
         logging.debug('\n' + str(Y_test.head(3)))
 
-        if args.regressor == "RandomForests":
+        # We fit the model on the TRAINING data
+        # Before predicting on both training and testing data to compute the metrics
+        model = None
+        if args.regressor == "RandomForest":
             model = RandomForestRegressor()
-
-            # Fit the model on the TRAINING data
             model.fit(X_train, Y_train)
 
-            # Compute the metrics
-            test_accuracy = model.score(X_test, Y_test)
-            train_accuracy = model.score(X_train, Y_train)
-            test_accuracies.append(test_accuracy)
-            train_accuracies.append(train_accuracy)
-            logging.info('Split ' + X_train_key + ' accuracy : train = {0:.2f}'.format(train_accuracy) + ' & test = {0:.2f}'.format(test_accuracy))
+            y_train_pred = model.predict(X_train)
+            y_test_pred = model.predict(X_test)
         elif args.regressor == "LogisticRegression":
             # TODO
             pass
         elif args.regressor == "XGBoost":
-            # TODO
+            model = XGBRegressor(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
+            model.fit(X_train, Y_train)
+
+            y_train_pred = model.predict(np.ascontiguousarray(X_train))
+            y_test_pred = model.predict(np.ascontiguousarray(X_test))
             pass
         elif args.regressor == "GaussianNB":
             # TODO
@@ -159,5 +151,19 @@ if __name__ == "__main__":
         elif args.regressor == "Khiops":
             # TODO
             pass
+        else:
+            raise ValueError('Unknown parameter for regressor')
 
-    logging.info('Mean accuracy : train =  {0:.4f}'.format(np.mean(train_accuracies)) + ' & test =  {0:.4f}'.format(np.mean(test_accuracies)))
+        # Compute the metrics
+        train_metrics = compute_all_metrics(y_train_pred, Y_train, n=len(Y_train), p=X_train.shape[1])
+        test_metrics = compute_all_metrics(y_test_pred, Y_test, n=len(Y_test), p=X_test.shape[1])
+
+        train_metrics_list.append(train_metrics)
+        test_metrics_list.append(test_metrics)
+        logging.info('Split ' + X_train_key + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
+                     ' & test = {0:.2f}'.format(test_metrics["r_squared"]))
+
+    logging.info('Mean R² score : train =  {0:.4f}'.format(
+        np.mean([metrics_dict['r_squared'] for metrics_dict in train_metrics_list]))
+                 + ' & test =  {0:.4f}'.format(
+        np.mean([metrics_dict['r_squared'] for metrics_dict in test_metrics_list])))

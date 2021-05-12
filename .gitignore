@@ -117,4 +117,7 @@ data/logs/*
 data/extracted_features/*
 !data/extracted_features/.gitkeep
 
+data/results/*
+!data/results/.gitkeep
+
 .idea

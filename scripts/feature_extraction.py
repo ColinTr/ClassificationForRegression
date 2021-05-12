@@ -8,8 +8,13 @@ import os
 import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from src.utils.DataProcessingUtils import detect_class_columns
+from src.models.LogisticRegressionC import LogisticRegressionC
 from src.utils.logging_util import setup_logging_level
 from src.models.RandomForestC import RandomForestC
+from src.models.GaussianNBC import GaussianNBC
+from src.models.PyKhiopsC import PyKhiopsC
+from src.models.XGBoostC import XGBoostC
 from os.path import isfile, join
 from os import listdir
 import pandas as pd
@@ -21,12 +26,10 @@ import os
 
 def argument_parser():
     """
-    TODO
+    A parser to allow user to easily extract features of any folder of datasets with the classifier of his choice.
     """
-
     parser = argparse.ArgumentParser(usage='\n python feature_extraction.py [dataset_folder] [output_path]'
-                                           '|classifier] [class_cols] [log_lvl]'
-                                           '\n Example : python scripts/feature_extraction.py TODO...',
+                                           '|classifier] [class_cols] [log_lvl]',
                                      description="This program allows to extract features from a dataset.")
 
     parser.add_argument('--dataset_folder',
@@ -42,7 +45,7 @@ def argument_parser():
     parser.add_argument('--classifier',
                         type=str,
                         help='The classifier model to use',
-                        choices=["RandomForests", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
+                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
                         required=True)
 
     parser.add_argument('--log_lvl',
@@ -62,35 +65,18 @@ def sort_dict(dictionary):
 
 
 def create_new_classifier_model(classifier_name):
-    if classifier_name == 'RandomForests':
+    if classifier_name == 'RandomForest':
         return RandomForestC()
     elif classifier_name == 'LogisticRegression':
-        # TODO
-        return None
+        return LogisticRegressionC()
     elif classifier_name == 'XGBoost':
-        # TODO
-        return None
+        return XGBoostC()
     elif classifier_name == 'GaussianNB':
-        # TODO
-        return None
+        return GaussianNBC()
     elif classifier_name == 'Khiops':
-        # TODO
-        return None
+        return PyKhiopsC()
     else:
         raise ValueError('Unknown parameter for classifier.')
-
-
-def detect_class_columns(header):
-    col_index = 0
-    regression_goal_var_index = -1
-    class_cols_indexes = []
-    for column_name in header:
-        if column_name.split('_')[0] == 'class':
-            class_cols_indexes.append(col_index)
-        elif column_name == 'reg_goal_var':
-            regression_goal_var_index = col_index
-        col_index = col_index + 1
-    return class_cols_indexes, regression_goal_var_index
 
 
 if __name__ == "__main__":

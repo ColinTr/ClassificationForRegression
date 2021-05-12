@@ -9,19 +9,21 @@ from abc import ABC, abstractmethod
 
 class CustomClassGenerator(ABC):
     """
-    TODO
+    Abstract class.
+    Process of discretization.
+    Using a list of thresholds, the user will be able to define classes for a goal variable.
     """
 
     @abstractmethod
     def fit(self, thresholds_list):
         """
-        TODO
+        Fit the CustomClassGenerator the thresholds list.
         """
         pass
 
     @abstractmethod
     def transform(self, Y_train, Y_test):
         """
-        TODO
+        Discretize the given goal variable (train and test) using the fitted thresholds list.
         """
         pass

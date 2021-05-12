@@ -30,10 +30,7 @@ def argument_parser():
 
     parser = argparse.ArgumentParser(usage='\n python data_processing.py [dataset_path] [output_path] [split_method] '
                                            '[output_classes] [delimiter] [header] [decimal] [na_values] [usecols] '
-                                           '[goal_var_index] [n_bins] [k_folds] [log_lvl]'
-                                           '\n Example : python scripts/data_processing.py '
-                                           '--dataset_path=\"../data/raw/3D_Road_Network_Dataset/3D_spatial_network'
-                                           '.csv\"',
+                                           '[goal_var_index] [n_bins] [k_folds] [log_lvl]',
                                      description="This program allows to process datasets to be used later.")
 
     parser.add_argument('--dataset_path',

@@ -12,3 +12,4 @@ jupyter-core==4.7.1
 scipy==1.6.3
 sklearn==0.0
 seaborn==0.11.1
+xgboost==1.4.1

@@ -4,21 +4,22 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
 from . import BaseModel
 import pandas as pd
+import numpy as np
 
 
-class RandomForestC(BaseModel.BaseModel):
+class XGBoostC(BaseModel.BaseModel):
     def __init__(self):
-        super(RandomForestC, self).__init__()
-        self.model = RandomForestClassifier()
+        super(XGBoostC, self).__init__()
+        self.model = XGBClassifier(n_estimators=100, use_label_encoder=False, objective='binary:logistic', eval_metric='logloss')
 
     def fit(self, X_train, Y_train):
-        self.model.fit(X_train, Y_train)
+        self.model.fit(np.ascontiguousarray(X_train), Y_train)
 
     def extract_features(self, X, Y):
-        model_score = self.model.score(X, Y)
+        model_score = self.model.score(np.ascontiguousarray(X), Y)
         extracted_features = pd.DataFrame([])
 
         # Extract the conditional probabilities of each class
