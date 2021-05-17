@@ -112,6 +112,9 @@ if __name__ == "__main__":
 
     for train_key, test_key, fold_index in zip(train_files_dict.keys(), test_files_dict.keys(),
                                                range(0, len(test_files_dict.keys()))):
+        if train_key != test_key:
+            raise ValueError('Train and test files number don\'t match')
+
         logging.info('========== Fold ' + str(fold_index) + ' ==========')
         train_dataset_path = train_files_dict[train_key]
         test_dataset_path = test_files_dict[test_key]
