@@ -21,7 +21,7 @@ import pandas as pd
 import argparse
 import logging
 import time
-import os
+import gc
 
 
 def argument_parser():
@@ -182,3 +182,11 @@ if __name__ == "__main__":
         test_extended_dataset.to_csv(path_or_buf=test_output_name, index=False)
 
         logging.info("Split " + str(fold_index) + " extended dataset saved.")
+
+        # Expressly free the data from the memory
+        del train_extended_dataset, test_extended_dataset, train_extracted_features, test_extracted_features,\
+            X_train, X_test, Y_test, Y_train, Y_test_reg_goal_var, Y_train_reg_goal_var,\
+            imported_train_dataset, imported_test_dataset
+
+        # Call python's garbage collector
+        gc.collect()

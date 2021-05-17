@@ -21,6 +21,7 @@ import logging
 import ntpath
 import time
 import os
+import gc
 
 
 def argument_parser():
@@ -226,3 +227,9 @@ if __name__ == "__main__":
         X_test.to_csv(path_or_buf=test_output_name, index=False)
 
         logging.info("Split " + str(k_fold_index) + " datasets saved in files")
+
+        # Expressly free the data from the memory
+        del X_test, X_train, Y_test, Y_train
+
+        # Call python's garbage collector
+        gc.collect()

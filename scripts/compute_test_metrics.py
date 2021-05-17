@@ -21,6 +21,7 @@ import argparse
 import logging
 import time
 import os
+import gc
 
 
 def argument_parser():
@@ -62,14 +63,23 @@ if __name__ == "__main__":
 
     directory_files = [f for f in listdir(dataset_folder) if isfile(join(dataset_folder, f))]
 
-    X_train_datasets = {}
-    Y_train_datasets = {}
-    X_test_datasets = {}
-    Y_test_datasets = {}
-    for filename in directory_files:
-        logging.debug('Reading file : ' + os.path.join(dataset_folder, filename) + '...')
+    train_filename_list = [e for e in directory_files if 'TRAIN' in e.split('_')]
+    test_filename_list = [e for e in directory_files if 'TEST' in e.split('_')]
+
+    # Safety checks
+    if len(train_filename_list) == 0:
+        raise ValueError('No TRAIN dataset found in train_folder')
+    if len(train_filename_list) != len(test_filename_list):
+        raise ValueError('Train and test number of files don\t match')
+
+    train_metrics_list = []
+    test_metrics_list = []
+
+    for train_filename, test_filename in zip(train_filename_list, test_filename_list):
+
+        logging.debug('Reading training file : ' + os.path.join(dataset_folder, train_filename) + '...')
         reading_start_time = time.time()
-        train_dataframe = pd.read_csv(os.path.join(dataset_folder, filename))
+        train_dataframe = pd.read_csv(os.path.join(dataset_folder, train_filename))
         logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
         # We keep all the columns except the goal variable ones and the class ones
@@ -79,58 +89,38 @@ if __name__ == "__main__":
         X_cols_to_drop = class_columns_indexes.copy()
         X_cols_to_drop.append(reg_goal_var_index)
 
-        X = train_dataframe.drop(train_dataframe.columns[X_cols_to_drop], axis=1)
-        Y = train_dataframe[train_dataframe.columns[reg_goal_var_index]]  # This time, Y is the regression goal variable
+        X_train = train_dataframe.drop(train_dataframe.columns[X_cols_to_drop], axis=1)
+        # This time, Y is the regression goal variable
+        Y_train = train_dataframe[train_dataframe.columns[reg_goal_var_index]]
 
-        logging.debug("Dataset's first 3 rows :")
-        logging.debug('X :\n' + str(X.head(3)))
-        logging.debug('Y :\n' + str(Y.head(3)))
+        logging.debug("Train dataset's first 3 rows :")
+        logging.debug('X :\n' + str(X_train.head(3)))
+        logging.debug('Y :\n' + str(Y_train.head(3)))
 
-        if 'Extended' in filename.split('_'):
-            fold_num = filename.split('_')[2]
+        logging.debug('Reading testing file : ' + os.path.join(dataset_folder, test_filename) + '...')
+        reading_start_time = time.time()
+        test_dataframe = pd.read_csv(os.path.join(dataset_folder, test_filename))
+        logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
+
+        X_test = test_dataframe.drop(test_dataframe.columns[X_cols_to_drop], axis=1)
+        # This time, Y is the regression goal variable
+        Y_test = test_dataframe[test_dataframe.columns[reg_goal_var_index]]
+
+        logging.debug("Test dataset's first 3 rows :")
+        logging.debug('X :\n' + str(X_test.head(3)))
+        logging.debug('Y :\n' + str(Y_test.head(3)))
+
+        # Get the fold_num for pretty logging
+        if 'Extended' in train_filename.split('_'):
+            fold_num = train_filename.split('_')[2]
         else:
-            fold_num = filename.split('_')[1]
-
-        if 'TRAIN' in filename.split('_'):
-            X_train_datasets[fold_num] = X
-            Y_train_datasets[fold_num] = Y
-        elif 'TEST' in filename.split('_'):
-            X_test_datasets[fold_num] = X
-            Y_test_datasets[fold_num] = Y
-        else:
-            raise ValueError('Unsupported file found : ' + filename)
-
-    # Safety checks
-    if len(X_train_datasets.keys()) == 0:
-        raise ValueError('No TRAIN dataset found in train_folder')
-    if len(X_train_datasets.keys()) != len(X_test_datasets.keys()):
-        raise ValueError('Train and test number of files don\t match')
-
-    train_metrics_list = []
-    test_metrics_list = []
-    for X_train_key, Y_train_key, X_test_key, Y_test_key in zip(sorted(X_train_datasets.keys()),
-                                                                sorted(Y_train_datasets.keys()),
-                                                                sorted(X_test_datasets.keys()),
-                                                                sorted(Y_test_datasets.keys())):
-        X_train = X_train_datasets[X_train_key]
-        Y_train = Y_train_datasets[Y_train_key]
-        X_test = X_test_datasets[X_test_key]
-        Y_test = Y_test_datasets[Y_test_key]
-
-        logging.debug("X_train :")
-        logging.debug('\n' + str(X_train.head(3)))
-        logging.debug("Y_train :")
-        logging.debug('\n' + str(Y_train.head(3)))
-        logging.debug("X_test:")
-        logging.debug('\n' + str(X_test.head(3)))
-        logging.debug("Y_test :")
-        logging.debug('\n' + str(Y_test.head(3)))
+            fold_num = train_filename.split('_')[1]
 
         # We fit the model on the TRAINING data
         # Before predicting on both training and testing data to compute the metrics
         model = None
         if args.regressor == "RandomForest":
-            model = RandomForestRegressor()
+            model = RandomForestRegressor(n_jobs=-1)
             model.fit(X_train, Y_train)
 
             y_train_pred = model.predict(X_train)
@@ -139,7 +129,7 @@ if __name__ == "__main__":
             # TODO
             pass
         elif args.regressor == "XGBoost":
-            model = XGBRegressor(n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
+            model = XGBRegressor(n_jobs=-1, n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
             model.fit(X_train, Y_train)
 
             y_train_pred = model.predict(np.ascontiguousarray(X_train))
@@ -160,8 +150,14 @@ if __name__ == "__main__":
 
         train_metrics_list.append(train_metrics)
         test_metrics_list.append(test_metrics)
-        logging.info('Split ' + X_train_key + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
+        logging.info('Split ' + fold_num + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
                      ' & test = {0:.2f}'.format(test_metrics["r_squared"]))
+
+        # Expressly free the variables from the memory
+        del train_dataframe, test_dataframe, X_train, X_test, Y_train, Y_test, y_train_pred, y_test_pred
+
+        # Call python's garbage collector
+        gc.collect()
 
     logging.info('Mean R² score : train =  {0:.4f}'.format(
         np.mean([metrics_dict['r_squared'] for metrics_dict in train_metrics_list]))
