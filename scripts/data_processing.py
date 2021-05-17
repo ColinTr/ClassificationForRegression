@@ -218,18 +218,16 @@ if __name__ == "__main__":
         # Save the result in a CSV file
         if not os.path.exists(output_path):
             os.mkdir(output_path)
-        train_output_name = os.path.join(output_path,
-                                         'fold_' + str(k_fold_index) + '_TRAIN_' + ntpath.basename(dataset_path))
-        X_train.to_csv(path_or_buf=train_output_name, index=False)
+        train_path = os.path.join(output_path, 'fold_' + str(k_fold_index) + '_TRAIN_' + ntpath.basename(dataset_path))
+        X_train.to_csv(path_or_buf=train_path, index=False)
 
-        test_output_name = os.path.join(output_path,
-                                        'fold_' + str(k_fold_index) + '_TEST_' + ntpath.basename(dataset_path))
-        X_test.to_csv(path_or_buf=test_output_name, index=False)
+        test_path = os.path.join(output_path, 'fold_' + str(k_fold_index) + '_TEST_' + ntpath.basename(dataset_path))
+        X_test.to_csv(path_or_buf=test_path, index=False)
 
         logging.info("Split " + str(k_fold_index) + " datasets saved in files")
 
         # Expressly free the data from the memory
-        del X_test, X_train, Y_test, Y_train
+        del X_test, X_train, Y_test, Y_train, train_discretized_classes, test_discretized_classes
 
         # Call python's garbage collector
         gc.collect()

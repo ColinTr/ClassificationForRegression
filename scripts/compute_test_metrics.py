@@ -64,18 +64,30 @@ if __name__ == "__main__":
     directory_files = [f for f in listdir(dataset_folder) if isfile(join(dataset_folder, f))]
 
     train_filename_list = [e for e in directory_files if 'TRAIN' in e.split('_')]
+    train_filename_list.sort()
     test_filename_list = [e for e in directory_files if 'TEST' in e.split('_')]
+    test_filename_list.sort()
 
     # Safety checks
     if len(train_filename_list) == 0:
         raise ValueError('No TRAIN dataset found in train_folder')
     if len(train_filename_list) != len(test_filename_list):
-        raise ValueError('Train and test number of files don\t match')
+        raise ValueError('Train and test number of files don\'t match')
 
     train_metrics_list = []
     test_metrics_list = []
 
     for train_filename, test_filename in zip(train_filename_list, test_filename_list):
+        # Get the fold_num for pretty logging
+        if 'Extended' in train_filename.split('_'):
+            fold_num = train_filename.split('_')[2]
+            test_fold_num = test_filename.split('_')[2]
+        else:
+            fold_num = train_filename.split('_')[1]
+            test_fold_num = test_filename.split('_')[1]
+
+        if fold_num != test_fold_num:
+            raise ValueError('Train and test files number don\'t match')
 
         logging.debug('Reading training file : ' + os.path.join(dataset_folder, train_filename) + '...')
         reading_start_time = time.time()
@@ -109,12 +121,6 @@ if __name__ == "__main__":
         logging.debug("Test dataset's first 3 rows :")
         logging.debug('X :\n' + str(X_test.head(3)))
         logging.debug('Y :\n' + str(Y_test.head(3)))
-
-        # Get the fold_num for pretty logging
-        if 'Extended' in train_filename.split('_'):
-            fold_num = train_filename.split('_')[2]
-        else:
-            fold_num = train_filename.split('_')[1]
 
         # We fit the model on the TRAINING data
         # Before predicting on both training and testing data to compute the metrics
