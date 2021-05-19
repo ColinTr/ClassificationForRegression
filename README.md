@@ -58,6 +58,8 @@ You can now install the required libraries inside your virtual environment with 
 ## Run
 Here is a list of examples of usages of the scripts :
 
+**Note :** The following examples are meant to be used from inside the 'scripts' directory.
+
 Pre-processing of a dataset :
 > python data_processing.py --dataset_path="../data/raw/Combined_Cycle_Power_Plant_Dataset/Folds5x2_pp.csv" --goal_var_index=4
 
