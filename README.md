@@ -74,6 +74,9 @@ Here is a list of examples of usages of the scripts :
 4) Finally, we compute the metrics on the predictions:
 > python compute_metrics.py --predictions_folder="../data/predictions/Combined_Cycle_Power_Plant_Dataset/RandomForest_classifier/RandomForest_regressor/"
 
+For easier understanding of the flow of the dataset through the scripts, refer to the following diagram :
+
+<img src="./scripts_diagram.jpg" alt="scripts_diagram" width="70%"/>
 
 ## Usage
 Here are the scripts and the details about every usable parameter :
