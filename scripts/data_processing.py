@@ -13,6 +13,8 @@ from src.class_generation.InsideBinClassGenerator import InsideBinClassGenerator
 from src.steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
 from src.steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
 from src.utils.logging_util import setup_logging_level
+from src.utils.logging_util import find_index_in_list
+from src.utils.logging_util import split_path
 from src.utils.DataProcessingUtils import *
 import pandas as pd
 import numpy as np
@@ -41,8 +43,7 @@ def argument_parser():
 
     parser.add_argument('--output_path',
                         type=str,
-                        help='The folder where the results will be saved',
-                        required=True)
+                        help='The folder where the results will be saved')
 
     parser.add_argument('--split_method',
                         type=str,
@@ -124,6 +125,19 @@ if __name__ == "__main__":
 
     # Setup the logging level
     setup_logging_level(args.log_lvl)
+
+    # If no value was given for the 'output_path', we will generate it automatically
+    if output_path is None:
+        split_path = split_path(dataset_path)
+        index_to_replace = find_index_in_list(split_path, ['raw', 'cleaned'])
+        if index_to_replace is None:
+            raise ValueError('Unable to generate an output path, please define explicitly the parameter --output_path')
+
+        split_path[index_to_replace] = 'processed'
+
+        output_path = os.path.join(*split_path)
+
+        logging.info('Generated output path : ' + output_path)
 
     # Declare the thresholds generator
     thresholds_generator = None

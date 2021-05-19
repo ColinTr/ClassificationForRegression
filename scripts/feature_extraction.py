@@ -11,8 +11,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from src.utils.DataProcessingUtils import detect_class_columns
 from src.models.LogisticRegressionC import LogisticRegressionC
 from src.utils.logging_util import setup_logging_level
+from src.utils.logging_util import find_index_in_list
 from src.models.RandomForestC import RandomForestC
 from src.models.GaussianNBC import GaussianNBC
+from src.utils.logging_util import split_path
 from src.models.PyKhiopsC import PyKhiopsC
 from src.models.XGBoostC import XGBoostC
 from os.path import isfile, join
@@ -39,8 +41,7 @@ def argument_parser():
 
     parser.add_argument('--output_path',
                         type=str,
-                        help='The folder where the results will be saved',
-                        required=True)
+                        help='The folder where the results will be saved')
 
     parser.add_argument('--classifier',
                         type=str,
@@ -82,11 +83,27 @@ def create_new_classifier_model(classifier_name):
 if __name__ == "__main__":
     args = argument_parser()
 
+    # Setup the logging level
+    setup_logging_level(args.log_lvl)
+
     dataset_folder = args.dataset_folder
     output_path = args.output_path
 
-    # Setup the logging level
-    setup_logging_level(args.log_lvl)
+    # If no value was given for the 'output_path', we will generate it automatically
+    if output_path is None:
+        split_path = split_path(dataset_folder)
+        index_to_replace = find_index_in_list(split_path, ['processed'])
+        if index_to_replace is None:
+            raise ValueError('Unable to generate an output path, please define explicitly the parameter --output_path')
+
+        split_path[index_to_replace] = 'extracted_features'
+
+        output_path = os.path.join(*split_path)
+
+        # Add the classifier name to the path so we can distinguish different feature extractions
+        output_path = os.path.join(output_path, args.classifier)
+
+        logging.info('Generated output path : ' + output_path)
 
     directory_files = [f for f in listdir(dataset_folder) if isfile(join(dataset_folder, f))]
 
@@ -178,7 +195,7 @@ if __name__ == "__main__":
 
         # Save the extended datasets in a CSV file
         if not os.path.exists(output_path):
-            os.mkdir(output_path)
+            os.makedirs(output_path)
         train_output_name = os.path.join(output_path, 'Extended_' + train_dataset_path)
         train_extended_dataset.to_csv(path_or_buf=train_output_name, index=False)
         test_output_name = os.path.join(output_path, 'Extended_' + test_dataset_path)
