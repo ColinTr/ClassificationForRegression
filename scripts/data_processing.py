@@ -4,26 +4,22 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
-from src.class_generation.InsideBinClassGenerator import InsideBinClassGenerator
-from src.steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
-from src.steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
-from src.utils.logging_util import setup_logging_level
-from src.utils.logging_util import find_index_in_list
-from src.utils.logging_util import split_path
-from src.utils.DataProcessingUtils import *
-import pandas as pd
-import numpy as np
 import argparse
 import logging
 import ntpath
 import time
-import os
+import sys
 import gc
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.class_generation.BelowThresholdClassGenerator import BelowThresholdClassGenerator
+from src.class_generation.InsideBinClassGenerator import InsideBinClassGenerator
+from src.steps_encoding.EqualWidthStepsEncoder import EqualWidthStepsEncoder
+from src.steps_encoding.EqualFreqStepsEncoder import EqualFreqStepsEncoder
+from src.utils.logging_util import generate_output_path
+from src.utils.logging_util import setup_logging_level
+from src.utils.DataProcessingUtils import *
 
 
 def argument_parser():
@@ -128,15 +124,7 @@ if __name__ == "__main__":
 
     # If no value was given for the 'output_path', we will generate it automatically
     if output_path is None:
-        split_path = split_path(dataset_path)
-        index_to_replace = find_index_in_list(split_path, ['raw', 'cleaned'])
-        if index_to_replace is None:
-            raise ValueError('Unable to generate an output path, please define explicitly the parameter --output_path')
-
-        split_path[index_to_replace] = 'processed'
-
-        output_path = os.path.join(*split_path)
-
+        output_path = generate_output_path(dataset_path, ['raw', 'cleaned'], 'processed')
         logging.info('Generated output path : ' + output_path)
 
     # Declare the thresholds generator
@@ -231,7 +219,7 @@ if __name__ == "__main__":
 
         # Save the result in a CSV file
         if not os.path.exists(output_path):
-            os.mkdir(output_path)
+            os.makedirs(output_path)
         train_path = os.path.join(output_path, 'fold_' + str(k_fold_index) + '_TRAIN_' + ntpath.basename(dataset_path))
         X_train.to_csv(path_or_buf=train_path, index=False)
 

@@ -4,25 +4,23 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.utils.DataProcessingUtils import detect_class_columns
-from src.utils.logging_util import setup_logging_level
-from src.utils.logging_util import find_index_in_list
-from src.utils.logging_util import split_path
-from sklearn.ensemble import RandomForestRegressor
-from xgboost import XGBRegressor
-from os.path import isfile, join
-from os import listdir
 import pandas as pd
 import numpy as np
 import argparse
 import logging
 import time
+import sys
 import os
 import gc
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.utils.DataProcessingUtils import detect_class_columns
+from src.utils.logging_util import generate_output_path
+from src.utils.logging_util import setup_logging_level
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+from os.path import isfile, join
+from os import listdir
 
 
 def argument_parser():
@@ -68,19 +66,6 @@ if __name__ == "__main__":
     dataset_folder = args.dataset_folder
     output_path = args.output_path
 
-    # If no value was given for the 'output_path', we will generate it automatically
-    if output_path is None:
-        split_path = split_path(dataset_folder)
-        index_to_replace = find_index_in_list(split_path, ['processed', 'extracted_features'])
-        if index_to_replace is None:
-            raise ValueError('Unable to generate an output path, please define explicitly the parameter --output_path')
-
-        split_path[index_to_replace] = 'results'
-
-        output_path = os.path.join(*split_path)
-
-        logging.info('Generated output path : ' + output_path)
-
     directory_files = [f for f in listdir(dataset_folder) if isfile(join(dataset_folder, f))]
 
     train_filename_list = [e for e in directory_files if 'TRAIN' in e.split('_')]
@@ -94,12 +79,28 @@ if __name__ == "__main__":
     if len(train_filename_list) != len(test_filename_list):
         raise ValueError('Train and test number of files don\'t match')
 
-    train_predictions_list = []
-    test_predictions_list = []
+    if 'Extended' in train_filename_list[0].split('_'):
+        extended = True
+    else:
+        extended = False
+
+    # If no value was given for the 'output_path', we will generate it automatically
+    if output_path is None:
+        output_path = generate_output_path(dataset_folder, ['processed', 'extracted_features'], 'predictions')
+
+        if not extended:
+            output_path = os.path.join(output_path, 'Standard')
+
+        # Add the regressor name to the path so we can distinguish different predictions
+        output_path = os.path.join(output_path, args.regressor + '_regressor')
+
+        logging.info('Generated output path : ' + output_path)
+
+    train_predictions_list, test_predictions_list = [],  []
 
     for train_filename, test_filename in zip(train_filename_list, test_filename_list):
         # Get the fold_num for pretty logging
-        if 'Extended' in train_filename.split('_'):
+        if extended:
             fold_num = train_filename.split('_')[2]
             test_fold_num = test_filename.split('_')[2]
         else:
@@ -144,13 +145,13 @@ if __name__ == "__main__":
 
         # We fit the model on the TRAINING data
         # Before predicting on both training and testing data to compute the metrics
-        model = None
+        model, Y_train_pred, Y_test_pred = None, None, None
         if args.regressor == "RandomForest":
             model = RandomForestRegressor(n_jobs=-1)
             model.fit(X_train, Y_train)
 
-            y_train_pred = model.predict(X_train)
-            y_test_pred = model.predict(X_test)
+            Y_train_pred = model.predict(X_train)
+            Y_test_pred = model.predict(X_test)
         elif args.regressor == "LogisticRegression":
             # TODO
             pass
@@ -158,8 +159,8 @@ if __name__ == "__main__":
             model = XGBRegressor(n_jobs=-1, n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
             model.fit(X_train, Y_train)
 
-            y_train_pred = model.predict(np.ascontiguousarray(X_train))
-            y_test_pred = model.predict(np.ascontiguousarray(X_test))
+            Y_train_pred = model.predict(np.ascontiguousarray(X_train))
+            Y_test_pred = model.predict(np.ascontiguousarray(X_test))
             pass
         elif args.regressor == "GaussianNB":
             # TODO
@@ -170,19 +171,27 @@ if __name__ == "__main__":
         else:
             raise ValueError('Unknown parameter for regressor')
 
-        """
-        # Compute the metrics
-        train_metrics = compute_all_metrics(y_train_pred, Y_train, n=len(Y_train), p=X_train.shape[1])
-        test_metrics = compute_all_metrics(y_test_pred, Y_test, n=len(Y_test), p=X_test.shape[1])
+        # We need to save the number of attributes of X for future metrics computation
+        tmp_array = np.zeros(len(Y_train))
+        tmp_array[:] = X_train.shape[1]
 
-        train_metrics_list.append(train_metrics)
-        test_metrics_list.append(test_metrics)
-        logging.info('Split ' + fold_num + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
-                     ' & test = {0:.2f}'.format(test_metrics["r_squared"]))
-        """
+        train_prediction_dataset = pd.DataFrame({'Y_train_pred': Y_train_pred,
+                                                 'Y_train': Y_train,
+                                                 'X_nb_attributes': tmp_array})
+        test_prediction_dataset = pd.DataFrame({'Y_test_pred': Y_test_pred,
+                                                'Y_test': Y_test})
+
+        # Save the extended datasets in a CSV file
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+
+        train_prediction_dataset.to_csv(path_or_buf=os.path.join(output_path, train_filename), index=False)
+        test_prediction_dataset.to_csv(path_or_buf=os.path.join(output_path, test_filename), index=False)
+
+        logging.info("Split " + str(fold_num) + " predictions predictions saved.")
 
         # Expressly free the variables from the memory
-        del train_dataframe, test_dataframe, X_train, X_test, Y_train, Y_test, y_train_pred, y_test_pred
+        del train_dataframe, test_dataframe, X_train, X_test, Y_train, Y_test, Y_train_pred, Y_test_pred
 
         # Call python's garbage collector
         gc.collect()

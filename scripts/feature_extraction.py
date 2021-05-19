@@ -4,26 +4,25 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
-import os
-import sys
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.utils.DataProcessingUtils import detect_class_columns
-from src.models.LogisticRegressionC import LogisticRegressionC
-from src.utils.logging_util import setup_logging_level
-from src.utils.logging_util import find_index_in_list
-from src.models.RandomForestC import RandomForestC
-from src.models.GaussianNBC import GaussianNBC
-from src.utils.logging_util import split_path
-from src.models.PyKhiopsC import PyKhiopsC
-from src.models.XGBoostC import XGBoostC
-from os.path import isfile, join
-from os import listdir
 import pandas as pd
 import argparse
 import logging
 import time
+import sys
 import gc
+import os
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.utils.DataProcessingUtils import detect_class_columns
+from src.models.LogisticRegressionC import LogisticRegressionC
+from src.utils.logging_util import generate_output_path
+from src.utils.logging_util import setup_logging_level
+from src.models.RandomForestC import RandomForestC
+from src.models.GaussianNBC import GaussianNBC
+from src.models.PyKhiopsC import PyKhiopsC
+from src.models.XGBoostC import XGBoostC
+from os.path import isfile, join
+from os import listdir
 
 
 def argument_parser():
@@ -91,17 +90,10 @@ if __name__ == "__main__":
 
     # If no value was given for the 'output_path', we will generate it automatically
     if output_path is None:
-        split_path = split_path(dataset_folder)
-        index_to_replace = find_index_in_list(split_path, ['processed'])
-        if index_to_replace is None:
-            raise ValueError('Unable to generate an output path, please define explicitly the parameter --output_path')
-
-        split_path[index_to_replace] = 'extracted_features'
-
-        output_path = os.path.join(*split_path)
+        output_path = generate_output_path(dataset_folder, ['processed'], 'extracted_features')
 
         # Add the classifier name to the path so we can distinguish different feature extractions
-        output_path = os.path.join(output_path, args.classifier)
+        output_path = os.path.join(output_path, args.classifier + '_classifier')
 
         logging.info('Generated output path : ' + output_path)
 
