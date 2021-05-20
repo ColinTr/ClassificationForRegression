@@ -66,17 +66,19 @@ Here is a list of examples of usages of the scripts :
 > python data_processing.py --dataset_path="../data/raw/Combined_Cycle_Power_Plant_Dataset/Folds5x2_pp.csv" --goal_var_index=4
 
 2) We then extract the features of a pre-processed dataset using a classification algorithm :
-> python feature_extraction.py --dataset_folder="../data/processed/Combined_Cycle_Power_Plant_Dataset/" --classifier="RandomForest"
+> python feature_extraction.py --dataset_folder="../data/processed/Combined_Cycle_Power_Plant_Dataset/10_bins_equal_freq_below_threshold/" --classifier="RandomForest"
 
 3) We can now generate the predictions using a regression model :
-> python generate_predictions.py --dataset_folder="../data/extracted_features/Combined_Cycle_Power_Plant_Dataset/RandomForest_classifier/" --regressor="RandomForest"
+> python generate_predictions.py --dataset_folder="../data/extracted_features/Combined_Cycle_Power_Plant_Dataset/10_bins_equal_freq_below_threshold/RandomForest_classifier/" --regressor="RandomForest"
 
 4) Finally, we compute the metrics on the predictions:
-> python compute_metrics.py --predictions_folder="../data/predictions/Combined_Cycle_Power_Plant_Dataset/RandomForest_classifier/RandomForest_regressor/"
+> python compute_metrics.py --predictions_folder="../data/predictions/Combined_Cycle_Power_Plant_Dataset/10_bins_equal_freq_below_threshold/RandomForest_classifier/RandomForest_regressor/"
 
 For easier understanding of the flow of the dataset through the scripts, refer to the following diagram :
 
-<img src="./scripts_diagram.jpg" alt="scripts_diagram" width="70%"/>
+<div style="text-align:center">
+   <img src="./scripts_diagram.png" alt="scripts_diagram" width="60%"/>
+</div>
 
 ## Usage
 Here are the scripts and the details about every usable parameter :
