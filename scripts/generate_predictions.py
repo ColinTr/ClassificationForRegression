@@ -154,7 +154,7 @@ if __name__ == "__main__":
             Y_test_pred = model.predict(X_test)
         elif args.regressor == "LogisticRegression":
             # TODO
-            pass
+            raise ValueError('This regressor hasn\'t been implemented yet')
         elif args.regressor == "XGBoost":
             model = XGBRegressor(n_jobs=-1, n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
             model.fit(X_train, Y_train)
@@ -164,10 +164,10 @@ if __name__ == "__main__":
             pass
         elif args.regressor == "GaussianNB":
             # TODO
-            pass
+            raise ValueError('This regressor hasn\'t been implemented yet')
         elif args.regressor == "Khiops":
             # TODO
-            pass
+            raise ValueError('This regressor hasn\'t been implemented yet')
         else:
             raise ValueError('Unknown parameter for regressor')
 

@@ -12,6 +12,7 @@ import argparse
 import logging
 import sys
 import os
+import gc
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.utils.logging_util import generate_output_path
@@ -131,6 +132,12 @@ if __name__ == "__main__":
         test_metrics_list.append(test_metrics)
         logging.info('Split ' + train_fold_num + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
                      ' & test = {0:.2f}'.format(test_metrics["r_squared"]))
+
+        # Expressly free the variables from the memory
+        del Y_train_pred, Y_train, Y_test_pred, Y_test, train_predictions_dataframe, test_predictions_dataframe
+
+        # Call python's garbage collector
+        gc.collect()
 
     metrics_dataframe = pd.concat(metrics_dataframe_list, ignore_index=True, axis=0)
 

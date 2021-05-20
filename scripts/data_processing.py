@@ -125,6 +125,10 @@ if __name__ == "__main__":
     # If no value was given for the 'output_path', we will generate it automatically
     if output_path is None:
         output_path = generate_output_path(dataset_path, ['raw', 'cleaned'], 'processed')
+
+        # Add the parameters the path so we can distinguish different pre-processing methods
+        output_path = os.path.join(output_path, str(n_bins) + '_bins_' + split_method + '_' + output_classes)
+
         logging.info('Generated output path : ' + output_path)
 
     # Declare the thresholds generator
