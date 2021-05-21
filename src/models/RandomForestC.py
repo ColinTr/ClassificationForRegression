@@ -12,7 +12,7 @@ import pandas as pd
 class RandomForestC(BaseModel.BaseModel):
     def __init__(self):
         super(RandomForestC, self).__init__()
-        self.model = RandomForestClassifier()
+        self.model = RandomForestClassifier(n_jobs=-1)
 
     def fit(self, X_train, Y_train):
         self.model.fit(X_train, Y_train)

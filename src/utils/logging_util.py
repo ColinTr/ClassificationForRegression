@@ -30,8 +30,9 @@ def find_index_in_list(split_path_list, element_list):
 
 
 def generate_output_path(input_path, elements_to_replace, new_element):
-    path = os.path.dirname(input_path)  # Remove the file name from the path
-    path = os.path.normpath(path)  # Clean the path if needed
+    if os.path.isfile(input_path):
+        input_path = os.path.dirname(input_path)  # Remove the file name from the path
+    path = os.path.normpath(input_path)  # Clean the path if needed
     split_path = path.split(os.sep)  # Split the path with the system separator ('/' or '\')
 
     index_to_replace = find_index_in_list(split_path, elements_to_replace)

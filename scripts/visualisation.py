@@ -9,17 +9,15 @@ from os.path import isfile, join
 import matplotlib.pyplot as plt
 from textwrap import wrap
 from os import listdir
-import seaborn as sns
 import pandas as pd
 import numpy as np
-import collections
 import argparse
 import logging
 import sys
-import gc
 import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 
 
@@ -68,6 +66,16 @@ if __name__ == "__main__":
 
     # Setup the logging level
     setup_logging_level(args.log_lvl)
+
+    output_path = args.output_path
+
+    # If no value was given for the 'output_path', we will generate it automatically
+    if output_path is None:
+        output_path = generate_output_path(args.parent_folder, ['metrics'], 'figures')
+        logging.info('Generated output path : ' + output_path)
+
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
 
     sub_directories_dict = {'equal_freq': {
         'inside_bin': {},
@@ -188,7 +196,7 @@ if __name__ == "__main__":
                     dataset_name = os.path.basename(os.path.normpath(args.parent_folder))
                     plt.suptitle(dataset_name + ' (test)')
                     fig.subplots_adjust(top=0.88)
-                    plt.savefig('Test_' + dataset_name + '_&_' + steps_encoding_method + '_&_' + class_generation_method + '_&_' + regressor_name + '.png')
+                    plt.savefig(os.path.join(output_path, 'Test_' + dataset_name + '_&_' + steps_encoding_method + '_&_' + class_generation_method + '_&_' + regressor_name + '.png'))
                     # ==========================
 
                     # ========== Train ==========
@@ -213,6 +221,5 @@ if __name__ == "__main__":
                     dataset_name = os.path.basename(os.path.normpath(args.parent_folder))
                     plt.suptitle(dataset_name + ' (train)')
                     fig.subplots_adjust(top=0.88)
-                    plt.savefig('Train_' + dataset_name + '_&_' + steps_encoding_method + '_&_' + class_generation_method + '_&_' + regressor_name + '.png')
+                    plt.savefig(os.path.join(output_path, 'Train_' + dataset_name + '_&_' + steps_encoding_method + '_&_' + class_generation_method + '_&_' + regressor_name + '.png'))
                     # ===========================
-

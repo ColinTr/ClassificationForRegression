@@ -12,7 +12,7 @@ import pandas as pd
 class LogisticRegressionC(BaseModel.BaseModel):
     def __init__(self):
         super(LogisticRegressionC, self).__init__()
-        self.model = LogisticRegression()
+        self.model = LogisticRegression(n_jobs=-1)
 
     def fit(self, X_train, Y_train):
         self.model.fit(X_train, Y_train)
