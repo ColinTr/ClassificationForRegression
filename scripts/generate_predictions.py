@@ -14,6 +14,7 @@ import os
 import gc
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.utils.DataProcessingUtils import get_real_class_predicted_probas
 from src.utils.DataProcessingUtils import detect_class_columns
 from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
@@ -127,8 +128,8 @@ if __name__ == "__main__":
         Y_train = train_dataframe[train_dataframe.columns[reg_goal_var_index]]
 
         logging.debug("Train dataset's first 3 rows :")
-        logging.debug('X :\n' + str(X_train.head(3)))
-        logging.debug('Y :\n' + str(Y_train.head(3)))
+        logging.debug('X_train :\n' + str(X_train.head(3)))
+        logging.debug('Y_train :\n' + str(Y_train.head(3)))
 
         logging.debug('Reading testing file : ' + os.path.join(dataset_folder, test_filename) + '...')
         reading_start_time = time.time()
@@ -140,8 +141,15 @@ if __name__ == "__main__":
         Y_test = test_dataframe[test_dataframe.columns[reg_goal_var_index]]
 
         logging.debug("Test dataset's first 3 rows :")
-        logging.debug('X :\n' + str(X_test.head(3)))
-        logging.debug('Y :\n' + str(Y_test.head(3)))
+        logging.debug('X_test :\n' + str(X_test.head(3)))
+        logging.debug('Y_test :\n' + str(Y_test.head(3)))
+
+        # We also extract the predicted probability of the real class of every classifier
+        #     so we can compute the accuracy of the classifiers later
+        train_df_predicted_probas, test_df_predicted_probas = None, None
+        if extended:
+            train_df_predicted_probas = get_real_class_predicted_probas(train_dataframe)
+            test_df_predicted_probas = get_real_class_predicted_probas(test_dataframe)
 
         # We fit the model on the TRAINING data
         # Before predicting on both training and testing data to compute the metrics
@@ -180,6 +188,10 @@ if __name__ == "__main__":
                                                  'X_nb_attributes': tmp_array})
         test_prediction_dataset = pd.DataFrame({'Y_test_pred': Y_test_pred,
                                                 'Y_test': Y_test})
+
+        if extended:
+            train_prediction_dataset = pd.concat([train_prediction_dataset, train_df_predicted_probas], axis=1)
+            test_prediction_dataset = pd.concat([test_prediction_dataset, test_df_predicted_probas], axis=1)
 
         # Save the extended datasets in a CSV file
         if not os.path.exists(output_path):

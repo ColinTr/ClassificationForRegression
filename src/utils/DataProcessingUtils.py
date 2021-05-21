@@ -13,11 +13,6 @@ import numpy as np
 import random
 
 
-def one_hot_encode():
-    # (optional) TODO
-    return None
-
-
 def box_cox(Y_train, Y_test):
     """
     Fits a box-cox transformation on the training goal values and applies it on the training and testing goal values.
@@ -98,3 +93,64 @@ def detect_class_columns(header):
             regression_goal_var_index = col_index
         col_index = col_index + 1
     return class_cols_indexes, regression_goal_var_index
+
+
+def get_real_class_predicted_probas(df):
+    """
+    TODO
+    :param df:
+    :return:
+    """
+    # We start by extracting only the threshold columns
+    threshold_cols_indexes, class_cols_indexes = [], []
+    for column_name, index in zip(list(df.columns.values), range(0, len(list(df.columns.values)))):
+        if 'threshold' in column_name.split('_'):
+            threshold_cols_indexes.append(index)
+        elif 'class' in column_name.split('_'):
+            class_cols_indexes.append(index)
+    thresholds_df = df[df.columns[threshold_cols_indexes]]
+    classes_df = df[df.columns[class_cols_indexes]]
+
+    class_columns_names = list(classes_df.columns.values)
+
+    if len(class_columns_names) is 1:
+        class_columns_names[0] = 'class_0'
+
+    class_columns_names = [class_column_name.split('_')[1] for class_column_name in class_columns_names]
+
+    predicted_probas_dict = {}
+    for class_column_name in class_columns_names:
+        predicted_probas_dict['class_' + class_column_name + '_predicted_proba'] = []
+
+    for index, row in df.iterrows():
+        for class_column_name in class_columns_names:
+            real_class_value = classes_df.loc[
+                index, 'class_' + str(class_column_name) if len(class_columns_names) > 1 else 'class']
+            predicted_probas_dict['class_' + class_column_name + '_predicted_proba'].append(
+                df.loc[index, 'threshold_' + str(class_column_name) + '_P(C_' + str(real_class_value) + '|X)'])
+
+    return pd.DataFrame(predicted_probas_dict)
+
+
+def compute_log_losses(df):
+    """
+    TODO
+    :param df:
+    :return:
+    """
+    classes_mean_log_loss_dict = {}
+
+    classes_names = []
+    for column_name in list(df.columns.values):
+        if 'class' in column_name.split('_'):
+            classes_names.append(column_name)
+
+    for class_name in classes_names:
+        log_loss = (-1/len(df[class_name])) * np.sum([np.log(predicted_proba) for predicted_proba in df[class_name]])
+        classes_mean_log_loss_dict['class_' + class_name.split('_')[1] + '_mean_log_loss'] = [log_loss]
+
+    # Either return individual losses with
+    # return pd.DataFrame(classes_mean_log_loss_dict)
+
+    # Or return the mean log loss of all the classifiers with
+    return np.mean([values[0] for values in classes_mean_log_loss_dict.values()])

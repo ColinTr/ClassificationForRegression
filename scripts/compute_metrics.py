@@ -15,10 +15,10 @@ import os
 import gc
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.utils.DataProcessingUtils import compute_log_losses
 from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 from src.utils.Metrics import compute_all_metrics
-
 
 def argument_parser():
     """
@@ -111,22 +111,26 @@ if __name__ == "__main__":
         train_metrics = compute_all_metrics(Y_train_pred, Y_train, n=len(Y_train), p=X_nb_attributes)
         test_metrics = compute_all_metrics(Y_test_pred, Y_test, n=len(Y_test), p=X_nb_attributes)
 
-        split_metrics_dataframe = pd.DataFrame({'train_mean_absolute_error': [train_metrics["mean_absolute_error"]],
-                                                'test_mean_absolute_error': [test_metrics["mean_absolute_error"]],
-                                                'train_mean_squared_error': [train_metrics["mean_squared_error"]],
-                                                'test_mean_squared_error': [test_metrics["mean_squared_error"]],
-                                                'train_root_mean_squared_error': [
-                                                    train_metrics["root_mean_squared_error"]],
-                                                'test_root_mean_squared_error': [
-                                                    test_metrics["root_mean_squared_error"]],
-                                                'train_r_squared': [train_metrics["r_squared"]],
-                                                'test_r_squared': [test_metrics["r_squared"]],
-                                                'train_adjusted_r_squared': [train_metrics["adjusted_r_squared"]],
-                                                'test_adjusted_r_squared': [test_metrics["adjusted_r_squared"]]})
+        split_metrics_df = pd.DataFrame({'train_mean_absolute_error': [train_metrics["mean_absolute_error"]],
+                                         'test_mean_absolute_error': [test_metrics["mean_absolute_error"]],
+                                         'train_mean_squared_error': [train_metrics["mean_squared_error"]],
+                                         'test_mean_squared_error': [test_metrics["mean_squared_error"]],
+                                         'train_root_mean_squared_error': [train_metrics["root_mean_squared_error"]],
+                                         'test_root_mean_squared_error': [test_metrics["root_mean_squared_error"]],
+                                         'train_r_squared': [train_metrics["r_squared"]],
+                                         'test_r_squared': [test_metrics["r_squared"]],
+                                         'train_adjusted_r_squared': [train_metrics["adjusted_r_squared"]],
+                                         'test_adjusted_r_squared': [test_metrics["adjusted_r_squared"]]})
 
-        metrics_dataframe_list.append(split_metrics_dataframe)
+        # Add the mean log losses of the classifiers to the metrics dataframe
+        train_log_loss = compute_log_losses(train_predictions_dataframe)
+        test_log_loss = compute_log_losses(test_predictions_dataframe)
+        split_metrics_df = pd.concat([split_metrics_df, pd.DataFrame({'train_mean_log_loss': [train_log_loss],
+                                                                      'test_mean_log_loss': [test_log_loss]})], axis=1)
 
-        logging.debug('Computed metrics : \n' + str(split_metrics_dataframe))
+        metrics_dataframe_list.append(split_metrics_df)
+
+        logging.debug('Computed metrics : \n' + str(split_metrics_df))
 
         train_metrics_list.append(train_metrics)
         test_metrics_list.append(test_metrics)

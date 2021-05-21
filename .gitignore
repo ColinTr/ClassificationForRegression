@@ -126,4 +126,7 @@ data/predictions/*
 data/metrics/*
 !data/metrics/.gitkeep
 
+data/figures/*
+!data/figures/.gitkeep
+
 .idea

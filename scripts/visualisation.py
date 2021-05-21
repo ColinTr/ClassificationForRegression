@@ -163,12 +163,15 @@ if __name__ == "__main__":
                                                                         'mean_of_train_r_squared': [],
                                                                         'var_of_train_r_squared': [],
                                                                         'mean_of_test_r_squared': [],
-                                                                        'var_of_test_r_squared': []}
+                                                                        'var_of_test_r_squared': [],
+                                                                        'mean_train_log_loss': [],
+                                                                        'mean_test_log_loss': []}
                             # Cast keys into ints so we can easily sort them
                             tmp_dict = {}
                             for key, value in sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name][classifier_name].items():
                                 tmp_dict[int(key)] = value
                             files_in_classifier_folder = OrderedDict(sorted(tmp_dict.items(), key=lambda t: t[0]))
+                            tmp_index = 0
                             for key, value in files_in_classifier_folder.items():
                                 classifier_metrics_dict[classifier_name]['abscissa'].append(key)
                                 tmp_df = pd.read_csv(value)
@@ -176,6 +179,10 @@ if __name__ == "__main__":
                                 classifier_metrics_dict[classifier_name]['var_of_train_r_squared'].append(np.var(tmp_df['train_r_squared']))
                                 classifier_metrics_dict[classifier_name]['mean_of_test_r_squared'].append(np.mean(tmp_df['test_r_squared']))
                                 classifier_metrics_dict[classifier_name]['var_of_test_r_squared'].append(np.var(tmp_df['test_r_squared']))
+                                if 'train_mean_log_loss' in list(tmp_df.columns.values):
+                                    classifier_metrics_dict[classifier_name]['mean_train_log_loss'].append((tmp_index, np.mean(tmp_df['train_mean_log_loss'])))
+                                    classifier_metrics_dict[classifier_name]['mean_test_log_loss'].append((tmp_index, np.mean(tmp_df['test_mean_log_loss'])))
+                                tmp_index = tmp_index + 1
 
                     # We can now generate a figure with a line for each classifier
                     # ========== Test ==========
@@ -185,9 +192,14 @@ if __name__ == "__main__":
                         plt.axhline(y=baseline_mean_test_r_squared, color='r', linestyle='--', label='baseline')
                     for key, value in classifier_metrics_dict.items():
                         mean_test_r_squared_df = pd.DataFrame({'x': value['abscissa'],
-                                                          'y': value['mean_of_test_r_squared'],
-                                                          'var': value['var_of_test_r_squared']})
+                                                               'y': value['mean_of_test_r_squared'],
+                                                               'var': value['var_of_test_r_squared']})
+
                         plt.plot(mean_test_r_squared_df["x"], mean_test_r_squared_df["y"], label=key, marker='o')
+
+                        for tmp_tuple in classifier_metrics_dict[key]['mean_test_log_loss']:
+                            ax.annotate('{0:.2f}'.format(tmp_tuple[1]), (mean_test_r_squared_df["x"][tmp_tuple[0]], mean_test_r_squared_df["y"][tmp_tuple[0]]))
+
                         if args.show_variance == 'true':
                             plt.fill_between(mean_test_r_squared_df["x"], mean_test_r_squared_df["y"] - mean_test_r_squared_df["var"], mean_test_r_squared_df["y"] + mean_test_r_squared_df["var"], alpha=0.2)
                     plt.legend()
@@ -208,7 +220,12 @@ if __name__ == "__main__":
                         mean_train_r_squared_df = pd.DataFrame({'x': value['abscissa'],
                                                                'y': value['mean_of_train_r_squared'],
                                                                'var': value['var_of_train_r_squared']})
+
                         plt.plot(mean_train_r_squared_df["x"], mean_train_r_squared_df["y"], label=key, marker='o')
+
+                        for tmp_tuple in classifier_metrics_dict[key]['mean_train_log_loss']:
+                            ax.annotate('{0:.2f}'.format(tmp_tuple[1]), (mean_train_r_squared_df["x"][tmp_tuple[0]], mean_train_r_squared_df["y"][tmp_tuple[0]]))
+
                         if args.show_variance == 'true':
                             plt.fill_between(mean_train_r_squared_df["x"],
                                              mean_train_r_squared_df["y"] - mean_train_r_squared_df["var"],
