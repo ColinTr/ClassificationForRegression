@@ -61,6 +61,12 @@ def argument_parser():
 
 
 def add_or_create_in_dict(dictionary, key, value):
+    """
+    Simple function to add a key to a dictionnary and create it if it doesn't exists.
+    :param dictionary: The dictionnary in which we will add the value and create the key if needed.
+    :param key: The key where the value will be added.
+    :param value: The value to add.
+    """
     if key not in dictionary.keys():
         dictionary[key] = value
     else:
@@ -98,6 +104,7 @@ if __name__ == "__main__":
     if not os.path.exists(output_path):
         os.makedirs(output_path)
 
+    # The files pathes will be arranged and sorted inside this dict
     sub_directories_dict = {'equal_freq': {
         'inside_bin': {},
         'below_threshold': {}
@@ -108,7 +115,8 @@ if __name__ == "__main__":
         }
     }
 
-    # We start by sorting the different files found
+    # We start by sorting the different files found...
+    # We start by exploring the content of the parent folder
     for directory in [f.path for f in os.scandir(args.parent_folder) if f.is_dir()]:
         split_path = directory.split(os.sep)  # Split the path with the system separator ('/' or '\')
         folder_path = split_path[-1].split('_')  # example : 10_bins_equal_freq_below_threshold
@@ -189,7 +197,8 @@ if __name__ == "__main__":
                                     'baseline mean_train_metric : {0:.4f}'.format(baseline_mean_train_metric))
                                 logging.debug(
                                     'baseline mean_test_metric : {0:.4f}'.format(baseline_mean_test_metric))
-                        # If it is not named 'Standard', it means that it contains metrics for a dataset with extracted features from a classifier
+                        # If it is not named 'Standard', it means that it contains metrics
+                        #     for a dataset with extracted features from a classifier
                         else:
                             classifier_metrics_dict[classifier_name] = {'abscissa': [],
                                                                         'mean_of_train_' + metric: [],
@@ -232,14 +241,14 @@ if __name__ == "__main__":
                         plt.axhline(y=baseline_mean_test_metric, color='r', linestyle='--', label='baseline')
                     for key, value in classifier_metrics_dict.items():
                         mean_test_metric_df = pd.DataFrame({'x': value['abscissa'],
-                                                               'y': value['mean_of_test_' + metric],
-                                                               'var': value['var_of_test_' + metric]})
+                                                            'y': value['mean_of_test_' + metric],
+                                                            'var': value['var_of_test_' + metric]})
 
                         plt.plot(mean_test_metric_df["x"], mean_test_metric_df["y"], label=key, marker='o')
 
                         for tmp_tuple in classifier_metrics_dict[key]['mean_test_log_loss']:
                             ax.annotate('{0:.2f}'.format(tmp_tuple[1]), (
-                            mean_test_metric_df["x"][tmp_tuple[0]], mean_test_metric_df["y"][tmp_tuple[0]]))
+                                mean_test_metric_df["x"][tmp_tuple[0]], mean_test_metric_df["y"][tmp_tuple[0]]))
 
                         if args.show_variance == 'true':
                             plt.fill_between(mean_test_metric_df["x"],
@@ -264,14 +273,14 @@ if __name__ == "__main__":
                         plt.axhline(y=baseline_mean_train_metric, color='r', linestyle='--', label='baseline')
                     for key, value in classifier_metrics_dict.items():
                         mean_train_metric_df = pd.DataFrame({'x': value['abscissa'],
-                                                                'y': value['mean_of_train_' + metric],
-                                                                'var': value['var_of_train_' + metric]})
+                                                             'y': value['mean_of_train_' + metric],
+                                                             'var': value['var_of_train_' + metric]})
 
                         plt.plot(mean_train_metric_df["x"], mean_train_metric_df["y"], label=key, marker='o')
 
                         for tmp_tuple in classifier_metrics_dict[key]['mean_train_log_loss']:
                             ax.annotate('{0:.2f}'.format(tmp_tuple[1]), (
-                            mean_train_metric_df["x"][tmp_tuple[0]], mean_train_metric_df["y"][tmp_tuple[0]]))
+                                mean_train_metric_df["x"][tmp_tuple[0]], mean_train_metric_df["y"][tmp_tuple[0]]))
 
                         if args.show_variance == 'true':
                             plt.fill_between(mean_train_metric_df["x"],

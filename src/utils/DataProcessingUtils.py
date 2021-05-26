@@ -97,31 +97,33 @@ def detect_class_columns(header):
 
 def get_real_class_predicted_probas(df):
     """
-    TODO
-    :param df:
-    :return:
+    From a dataframe, get the predicted probabilities of the real classes using the following elements :
+    For each class_X header, get the value which should be the value Y of the real class.
+    Find the predicted probability of the real class which should be in the column : threshold_X_P(C_Y|X).
+    :param df: The dataframe containing the predicted probabilities.
+    :return: The predicted probabilities of the real classes.
     """
-    # We start by extracting only the threshold columns
-    threshold_cols_indexes, class_cols_indexes = [], []
-    for column_name, index in zip(list(df.columns.values), range(0, len(list(df.columns.values)))):
-        if 'threshold' in column_name.split('_'):
-            threshold_cols_indexes.append(index)
-        elif 'class' in column_name.split('_'):
-            class_cols_indexes.append(index)
-    thresholds_df = df[df.columns[threshold_cols_indexes]]
+    # We start by extracting the class columns into a new dataframe
+    class_cols_indexes = []
+    for column_name, column_index in zip(list(df.columns.values), range(0, len(list(df.columns.values)))):
+        if 'class' in column_name.split('_'):
+            class_cols_indexes.append(column_index)
     classes_df = df[df.columns[class_cols_indexes]]
 
     class_columns_names = list(classes_df.columns.values)
 
+    # If there is only one class (case of the 'inside bin' class generation method), change the name to :
     if len(class_columns_names) is 1:
         class_columns_names[0] = 'class_0'
 
     class_columns_names = [class_column_name.split('_')[1] for class_column_name in class_columns_names]
 
+    # Initialize the predicted probabilities dict for every class
     predicted_probas_dict = {}
     for class_column_name in class_columns_names:
         predicted_probas_dict['class_' + class_column_name + '_predicted_proba'] = []
 
+    # For each row in the df, get for each class the predicted probability of the real class
     for index, row in df.iterrows():
         for class_column_name in class_columns_names:
             real_class_value = classes_df.loc[
@@ -134,9 +136,9 @@ def get_real_class_predicted_probas(df):
 
 def compute_log_losses(df):
     """
-    TODO
-    :param df:
-    :return:
+    For each class_X column inside the given dataframe of predictions, compute the mean log loss.
+    :param df: The dataframe of predictions. Header must be a list of : class_ + 'class_number'
+    :return: The mean log loss of every class.
     """
     classes_mean_log_loss_dict = {}
 

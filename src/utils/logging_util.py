@@ -9,6 +9,10 @@ import os
 
 
 def setup_logging_level(level):
+    """
+    Sets up the logging level.
+    :param level: String, the logging level.
+    """
     if level == 'debug':
         logging.getLogger().setLevel(logging.DEBUG)
     elif level == 'info':
@@ -20,6 +24,12 @@ def setup_logging_level(level):
 
 
 def find_index_in_list(split_path_list, element_list):
+    """
+    Returns the index of any element of a list inside another list.
+    :param split_path_list: The list where we want to find an item.
+    :param element_list: The list of items to test.
+    :return: Index of the element or None if not found.
+    """
     index = None
     for element in element_list:
         try:
@@ -30,6 +40,13 @@ def find_index_in_list(split_path_list, element_list):
 
 
 def generate_output_path(input_path, elements_to_replace, new_element):
+    """
+    Inside a String path, replace one of the given possible elements by the new element.
+    :param input_path: String, the input path to modify.
+    :param elements_to_replace: A list of elements that can be replaced.
+    :param new_element: The new element to use.
+    :return: The modified path.
+    """
     if os.path.isfile(input_path):
         input_path = os.path.dirname(input_path)  # Remove the file name from the path
     path = os.path.normpath(input_path)  # Clean the path if needed
