@@ -91,17 +91,17 @@ Here are the scripts and the details about every usable parameter :
    
     The optional parameters are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
-    * split_method : The splitting method to use
-    * output_classes : The method of class generation
+    * split_method : The splitting method to use (Choices : equal_width, equal_freq, kmeans)
+    * output_classes : The method of class generation (Choices : below_threshold, inside_bin)
     * delimiter : Delimiter to use when reading the dataset
-    * header : Infer the column names or use None if the first line isn't a csv header line
+    * header : Infer the column names or use None if the first line isn't a csv header line (Choices : infer, None)
     * decimal : Character to recognize as decimal point
     * na_values : Additional string to recognize as NA/NaN
     * usecols : The indexes of the columns to keep
     * goal_var_index : The index of the column to use as the goal variable
     * n_bins : The number of bins to create
     * k_folds : The number of folds in the k-folds
-    * log_lvl : Change the log display level
+    * log_lvl : Change the log display level (Choices : debug, info, warning)
 
 
 2) **feature_extraction.py :**
@@ -112,9 +112,9 @@ Here are the scripts and the details about every usable parameter :
 
     The optional parameters are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
-    * classifier : The classifier model to use
+    * classifier : The classifier model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
     * class_cols : The indexes of the classes columns
-    * log_lvl : Change the log display level
+    * log_lvl : Change the log display level (Choices : debug, info, warning)
    
 
 3) **generate_predictions.py :**
@@ -122,14 +122,14 @@ Here are the scripts and the details about every usable parameter :
 
     The mandatory parameters are :
     * dataset_folder : The folder where the test and train k-fold datasets are stored
-    * regressor : The regression model to use
+    * regressor : The regression model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
 
     The options are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
-    * log_lvl : Change the log display level
+    * log_lvl : Change the log display level (Choices : debug, info, warning)
    
 
-4) **compute_metrics :**
+4) **compute_metrics.py :**
    > python compute_metrics.py [results_folder] [options]
 
     The mandatory parameters are :
@@ -137,4 +137,17 @@ Here are the scripts and the details about every usable parameter :
 
     The options are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
-    * log_lvl : Change the log display level
+    * log_lvl : Change the log display level (Choices : debug, info, warning)
+   
+
+5) **visualisation.py :**
+   > python visualisation.py [parent_folder] [options]
+
+    The mandatory parameters are :
+    * results_folder : The folder where the results of the script *generate_predictions.py* are stored
+
+    The options are :
+    * output_path : The folder where the results will be saved (will be generated if not defined)
+    * show_variance : Whether the variance should be shown on the graph or not (Choices : true, false)
+    * metric : The metric to display (Choices : r_squarred, adjusted_r_squared, MSE, RMSE, MAE)
+    * log_lvl : Change the log display level (Choices : debug, info, warning)
