@@ -47,8 +47,8 @@ def argument_parser():
 
     parser.add_argument('--metric',
                         type=str,
-                        default='r_squarred',
-                        choices=['r_squarred', 'adjusted_r_squared', 'MSE', 'RMSE', 'MAE'],
+                        default='r_squared',
+                        choices=['r_squared', 'adjusted_r_squared', 'MSE', 'RMSE', 'MAE'],
                         help='The metric to display')
 
     parser.add_argument('--log_lvl',
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     metric = args.metric
 
     # Format the name so we can use it to get the metrics inside the files
-    if metric == 'r_squarred':
+    if metric == 'r_squared':
         pass
     elif metric == 'adjusted_r_squared':
         pass

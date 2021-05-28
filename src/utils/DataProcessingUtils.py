@@ -155,4 +155,7 @@ def compute_log_losses(df):
     # return pd.DataFrame(classes_mean_log_loss_dict)
 
     # Or return the mean log loss of all the classifiers with
-    return np.mean([values[0] for values in classes_mean_log_loss_dict.values()])
+    if len(classes_mean_log_loss_dict.values()) > 0:
+        return np.mean([values[0] for values in classes_mean_log_loss_dict.values()])
+    else:
+        return None

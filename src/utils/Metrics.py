@@ -13,6 +13,7 @@ import pandas as pd
 def compute_all_metrics(y_true, y_pred, n, p):
     """
     Computes the following metrics : MAE, MSE, RMSE, R² and Adjusted R².
+    NOTE : The order of y_true and y_pred is important, do not exchange.
     :param y_true: Ground truth (correct) target values.
     :param y_pred: Estimated target values.
     :param n: Number of instances.

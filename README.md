@@ -124,7 +124,7 @@ Here are the scripts and the details about every usable parameter :
 
     The mandatory parameters are :
     * dataset_folder : The folder where the test and train k-fold datasets are stored
-    * regressor : The regression model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
+    * regressor : The regression model to use (Choices : RandomForest, LinearRegression, XGBoost, GaussianNB, Khiops)
 
     The options are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
@@ -151,7 +151,7 @@ Here are the scripts and the details about every usable parameter :
     The options are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
     * show_variance : Whether the variance should be shown on the graph or not (Choices : true, false)
-    * metric : The metric to display (Choices : r_squarred, adjusted_r_squared, MSE, RMSE, MAE)
+    * metric : The metric to display (Choices : r_squared, adjusted_r_squared, MSE, RMSE, MAE)
     * log_lvl : Change the log display level (Choices : debug, info, warning)
    
 

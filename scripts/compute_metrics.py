@@ -19,6 +19,7 @@ from src.utils.DataProcessingUtils import compute_log_losses
 from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 from src.utils.Metrics import compute_all_metrics
+from sklearn.metrics import r2_score
 
 def argument_parser():
     """
@@ -108,8 +109,8 @@ if __name__ == "__main__":
         X_nb_attributes = train_predictions_dataframe['X_nb_attributes'][0]
 
         # Compute the metrics
-        train_metrics = compute_all_metrics(Y_train_pred, Y_train, n=len(Y_train), p=X_nb_attributes)
-        test_metrics = compute_all_metrics(Y_test_pred, Y_test, n=len(Y_test), p=X_nb_attributes)
+        train_metrics = compute_all_metrics(Y_train, Y_train_pred, n=len(Y_train), p=X_nb_attributes)
+        test_metrics = compute_all_metrics(Y_test, Y_test_pred, n=len(Y_test), p=X_nb_attributes)
 
         split_metrics_df = pd.DataFrame({'train_mean_absolute_error': [train_metrics["mean_absolute_error"]],
                                          'test_mean_absolute_error': [test_metrics["mean_absolute_error"]],

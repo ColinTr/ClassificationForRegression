@@ -19,8 +19,10 @@ from src.utils.DataProcessingUtils import detect_class_columns
 from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 from sklearn.ensemble import RandomForestRegressor
-from xgboost import XGBRegressor
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 from os.path import isfile, join
+from xgboost import XGBRegressor
 from os import listdir
 
 
@@ -46,7 +48,7 @@ def argument_parser():
     parser.add_argument('--regressor',
                         type=str,
                         help='The regression model to use',
-                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
+                        choices=["RandomForest", "LinearRegression", "XGBoost", "GaussianNB", "Khiops"],
                         required=True)
 
     parser.add_argument('--log_lvl',
@@ -160,9 +162,14 @@ if __name__ == "__main__":
 
             Y_train_pred = model.predict(X_train)
             Y_test_pred = model.predict(X_test)
-        elif args.regressor == "LogisticRegression":
-            # TODO
-            raise ValueError('This regressor hasn\'t been implemented yet')
+        elif args.regressor == "LinearRegression":
+            model = LinearRegression(n_jobs=-1)
+            model.fit(X_train, Y_train)
+
+            Y_train_pred = model.predict(X_train)
+            Y_test_pred = model.predict(X_test)
+
+            # print('Test R² : ' + str(r2_score(Y_train, Y_train_pred)))
         elif args.regressor == "XGBoost":
             model = XGBRegressor(n_jobs=-1, n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
             model.fit(X_train, Y_train)
