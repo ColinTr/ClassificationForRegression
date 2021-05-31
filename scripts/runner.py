@@ -32,7 +32,7 @@ def argument_parser():
                         nargs='+',  # 1 or more values expected
                         help='The classifiers to compare',
                         required=True,
-                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"])
+                        choices=["RandomForest", "LogisticRegression", "LinearRegression", "XGBoost", "GaussianNB", "Khiops"])
 
     return parser.parse_args()
 
@@ -75,7 +75,8 @@ if __name__ == "__main__":
         cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/5_bins_equal_freq_below_threshold/Standard/{}\" --log_lvl=warning".format(args.dataset_name, classifier + '_regressor'))
 
     # Create the graphs
-    cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\"".format(args.dataset_name))
+    cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"r_squared\"".format(args.dataset_name))
+    cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"RMSE\"".format(args.dataset_name))
 
     for c in cmd_list:
         print("Launching :\n" + str(c))

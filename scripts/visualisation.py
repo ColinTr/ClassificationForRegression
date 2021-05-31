@@ -237,6 +237,7 @@ if __name__ == "__main__":
                     # ========== Test ==========
                     fig = plt.figure()
                     ax = fig.add_subplot(111)
+                    ax.get_yaxis().get_major_formatter().set_useOffset(False)
                     if baseline_mean_test_metric is not None:
                         plt.axhline(y=baseline_mean_test_metric, color='r', linestyle='--', label='baseline')
                     for key, value in classifier_metrics_dict.items():
@@ -269,6 +270,7 @@ if __name__ == "__main__":
                     # ========== Train ==========
                     fig = plt.figure()
                     ax = fig.add_subplot(111)
+                    ax.get_yaxis().get_major_formatter().set_useOffset(False)
                     if baseline_mean_train_metric is not None:
                         plt.axhline(y=baseline_mean_train_metric, color='r', linestyle='--', label='baseline')
                     for key, value in classifier_metrics_dict.items():

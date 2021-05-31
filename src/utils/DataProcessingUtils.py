@@ -148,7 +148,9 @@ def compute_log_losses(df):
             classes_names.append(column_name)
 
     for class_name in classes_names:
-        log_loss = (-1/len(df[class_name])) * np.sum([np.log(predicted_proba) for predicted_proba in df[class_name]])
+        # We add 1e-15 to the predicted probability so we don't get errors on log(0), it shouldn't change the result
+        log_loss = (-1 / len(df[class_name])) * np.sum([np.log(predicted_proba + 1e-15)
+                                                        for predicted_proba in df[class_name]])
         classes_mean_log_loss_dict['class_' + class_name.split('_')[1] + '_mean_log_loss'] = [log_loss]
 
     # Either return individual losses with

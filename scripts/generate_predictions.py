@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
             # print('Test R² : ' + str(r2_score(Y_train, Y_train_pred)))
         elif args.regressor == "XGBoost":
-            model = XGBRegressor(n_jobs=-1, n_estimators=1000, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
+            model = XGBRegressor(n_jobs=-1, n_estimators=100, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
             model.fit(X_train, Y_train)
 
             Y_train_pred = model.predict(np.ascontiguousarray(X_train))
