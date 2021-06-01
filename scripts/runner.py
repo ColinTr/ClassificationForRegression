@@ -30,9 +30,16 @@ def argument_parser():
     parser.add_argument('--classifiers',
                         type=str,
                         nargs='+',  # 1 or more values expected
-                        help='The classifiers to compare',
-                        required=True,
-                        choices=["RandomForest", "LogisticRegression", "LinearRegression", "XGBoost", "GaussianNB", "Khiops"])
+                        help='The classifier models to use',
+                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
+                        required=True)
+
+    parser.add_argument('--regressors',
+                        type=str,
+                        nargs='+',  # 1 or more values expected
+                        help='The regressor models to use',
+                        choices=["RandomForest", "LinearRegression", "XGBoost", "GaussianNB", "Khiops"],
+                        required=True)
 
     return parser.parse_args()
 
@@ -58,21 +65,21 @@ if __name__ == "__main__":
             cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_equal_freq_below_threshold/\" --classifier=\"{}\" --log_lvl=warning".format(args.dataset_name, bins, classifier))
 
     # Generate the predictions
-    for classifier_1 in args.classifiers:
-        for classifier_2 in args.classifiers:
+    for classifier in args.classifiers:
+        for regressor in args.regressors:
             for bins in bins_to_explore:
-                cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_equal_freq_below_threshold/{}/\" --regressor=\"{}\" --log_lvl=warning".format(args.dataset_name, bins, classifier_1 + '_classifier', classifier_2))
+                cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_equal_freq_below_threshold/{}/\" --regressor=\"{}\" --log_lvl=warning".format(args.dataset_name, bins, classifier + '_classifier', regressor))
 
     # Compute the metrics
-    for classifier_1 in args.classifiers:
-        for classifier_2 in args.classifiers:
+    for classifier in args.classifiers:
+        for regressor in args.regressors:
             for bins in bins_to_explore:
-                cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_equal_freq_below_threshold/{}/{}/\" --log_lvl=warning".format(args.dataset_name, bins, classifier_1 + '_classifier', classifier_2 + '_regressor'))
+                cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_equal_freq_below_threshold/{}/{}/\" --log_lvl=warning".format(args.dataset_name, bins, classifier + '_classifier', regressor + '_regressor'))
 
     # Compute the baseline
-    for classifier in args.classifiers:
-        cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/5_bins_equal_freq_below_threshold/\" --regressor=\"{}\" --log_lvl=warning".format(args.dataset_name, classifier))
-        cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/5_bins_equal_freq_below_threshold/Standard/{}\" --log_lvl=warning".format(args.dataset_name, classifier + '_regressor'))
+    for regressor in args.regressors:
+        cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/5_bins_equal_freq_below_threshold/\" --regressor=\"{}\" --log_lvl=warning".format(args.dataset_name, regressor))
+        cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/5_bins_equal_freq_below_threshold/Standard/{}\" --log_lvl=warning".format(args.dataset_name, regressor + '_regressor'))
 
     # Create the graphs
     cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"r_squared\"".format(args.dataset_name))
