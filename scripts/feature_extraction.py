@@ -4,8 +4,11 @@ Authors : Colin Troisemaine & Vincent Lemaire
 contact : colin.troisemaine@gmail.com
 """
 
+from os.path import isfile, join
+from os import listdir
 import pandas as pd
 import argparse
+import platform
 import logging
 import time
 import sys
@@ -19,10 +22,14 @@ from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 from src.models.RandomForestC import RandomForestC
 from src.models.GaussianNBC import GaussianNBC
-from src.models.PyKhiopsC import PyKhiopsC
 from src.models.XGBoostC import XGBoostC
-from os.path import isfile, join
-from os import listdir
+
+if platform.system() == "Windows":
+    if os.environ.get('KhiopsHome') is not None:
+        from src.models.PyKhiopsC import PyKhiopsC
+else:
+    if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):
+        from src.models.PyKhiopsC import PyKhiopsC
 
 
 def argument_parser():
