@@ -1,7 +1,7 @@
 """
 Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
-contact : colin.troisemaine@gmail.com
+Maintainer : colin.troisemaine@gmail.com
 """
 
 from os.path import isfile, join
@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
         train_metrics_list.append(train_metrics)
         test_metrics_list.append(test_metrics)
-        logging.info('Split ' + train_fold_num + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
+        logging.debug('Split ' + train_fold_num + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
                      ' & test = {0:.2f}'.format(test_metrics["r_squared"]))
 
         # Expressly free the variables from the memory
@@ -157,5 +157,7 @@ if __name__ == "__main__":
 
     metrics_dataframe.to_csv(path_or_buf=os.path.join(output_path, filename), index=False)
 
-    logging.info('Mean R² score : train =  {0:.4f}'.format(np.mean(metrics_dataframe['train_r_squared']))
+    logging.info('Mean R² : train =  {0:.4f}'.format(np.mean(metrics_dataframe['train_r_squared']))
                  + ' & test =  {0:.4f}'.format(np.mean(metrics_dataframe['test_r_squared'])))
+    logging.info('Mean RMSE : train =  {0:.4f}'.format(np.mean(metrics_dataframe['train_root_mean_squared_error']))
+                 + ' & test =  {0:.4f}'.format(np.mean(metrics_dataframe['test_root_mean_squared_error'])))

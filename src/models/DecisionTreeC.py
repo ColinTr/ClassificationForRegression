@@ -4,25 +4,26 @@ Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
 
-from sklearn.naive_bayes import GaussianNB
+from sklearn.tree import DecisionTreeClassifier
 from . import BaseModel
 import pandas as pd
+import numpy as np
 
 
-class GaussianNBC(BaseModel.BaseModel):
+class DecisionTreeC(BaseModel.BaseModel):
     def __init__(self):
-        super(GaussianNBC, self).__init__()
-        self.model = GaussianNB()
+        super(DecisionTreeC, self).__init__()
+        self.model = DecisionTreeClassifier()
 
     def fit(self, X_train, Y_train):
-        self.model.fit(X_train, Y_train)
+        self.model.fit(np.ascontiguousarray(X_train), Y_train)
 
     def extract_features(self, X, Y):
-        model_score = self.model.score(X, Y)
+        model_score = self.model.score(np.ascontiguousarray(X), Y)
         extracted_features = pd.DataFrame([])
 
         # Extract the conditional probabilities of each class
-        predicted_class_probabilities = self.model.predict_proba(X)
+        predicted_class_probabilities = self.model.predict_proba(np.ascontiguousarray(X))
         for index in range(0, predicted_class_probabilities.shape[1]):
             extracted_features["P(C_" + str(index) + "|X)"] = predicted_class_probabilities[:, index]
 

@@ -1,7 +1,7 @@
 """
 Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
-contact : colin.troisemaine@gmail.com
+Maintainer : colin.troisemaine@gmail.com
 """
 
 import pandas as pd
@@ -20,7 +20,7 @@ from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+from sklearn.tree import DecisionTreeRegressor
 from os.path import isfile, join
 from xgboost import XGBRegressor
 from os import listdir
@@ -48,8 +48,30 @@ def argument_parser():
     parser.add_argument('--regressor',
                         type=str,
                         help='The regression model to use',
-                        choices=["RandomForest", "LinearRegression", "XGBoost", "GaussianNB", "Khiops"],
+                        choices=["RandomForest", "LinearRegression", "XGBoost", "Khiops", "DecisionTree"],
                         required=True)
+
+    parser.add_argument('--n_estimators',
+                        type=str,
+                        help='The number of trees in the forest of RandomForest or the number of gradient boosted trees'
+                             ' for XGBoost',
+                        default=None)
+
+    parser.add_argument('--max_depth',
+                        type=str,
+                        help='The maximum depth of the trees in RandomForest, XGBoost or DecisionTree',
+                        default=None)
+
+    parser.add_argument('--max_features',
+                        type=str,
+                        help='The number of features to consider when looking for the best split in RandomForest or '
+                             'DecisionTree',
+                        default=None)
+
+    parser.add_argument('--learning_rate',
+                        type=str,
+                        help='Boosting learning rate of XGBoost',
+                        default=None)
 
     parser.add_argument('--log_lvl',
                         type=str,
@@ -157,11 +179,27 @@ if __name__ == "__main__":
         # Before predicting on both training and testing data to compute the metrics
         model, Y_train_pred, Y_test_pred = None, None, None
         if args.regressor == "RandomForest":
-            model = RandomForestRegressor(n_jobs=-1)
+            n_estimators = 100 if (args.n_estimators is None or args.n_estimators == 'None') else args.n_estimators  # Default value is 100
+            n_estimators = int(n_estimators)
+
+            max_depth = None if (args.max_depth is None or args.max_depth == "None") else args.max_depth  # Default value is None
+            if max_depth is not None:
+                max_depth = int(max_depth)
+
+            max_features = 'auto' if (args.max_features is None or args.max_features == 'None') else args.max_features  # Default value is 'auto'
+            if max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
+                max_features = int(max_features)
+
+            logging.info('Using the following parameters for RandomForestRegressor : '
+                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+            model = RandomForestRegressor(n_jobs=-1, n_estimators=n_estimators,
+                                          max_depth=max_depth, max_features=max_features)
+
             model.fit(X_train, Y_train)
 
             Y_train_pred = model.predict(X_train)
             Y_test_pred = model.predict(X_test)
+
         elif args.regressor == "LinearRegression":
             model = LinearRegression(n_jobs=-1)
             model.fit(X_train, Y_train)
@@ -169,20 +207,47 @@ if __name__ == "__main__":
             Y_train_pred = model.predict(X_train)
             Y_test_pred = model.predict(X_test)
 
-            # print('Test R² : ' + str(r2_score(Y_train, Y_train_pred)))
         elif args.regressor == "XGBoost":
-            model = XGBRegressor(n_jobs=-1, n_estimators=100, max_depth=7, eta=0.1, subsample=0.7, colsample_bytree=0.8)
+            n_estimators = 100 if (args.n_estimators is None or args.n_estimators == 'None') else args.n_estimators  # Default value is 100
+            n_estimators = int(n_estimators)
+
+            max_depth = 6 if (args.max_depth is None or args.max_depth == 'None') else args.max_depth  # Default value is 6
+            max_depth = int(max_depth)
+
+            learning_rate = 0.3 if (args.learning_rate is None or args.learning_rate == 'None') else args.learning_rate  # Default value is 0.3
+            learning_rate = int(learning_rate)
+
+            logging.info('Using the following parameters for XGBRegressor : '
+                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
+            model = XGBRegressor(n_jobs=-1, n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate)
+
             model.fit(X_train, Y_train)
 
             Y_train_pred = model.predict(np.ascontiguousarray(X_train))
             Y_test_pred = model.predict(np.ascontiguousarray(X_test))
-            pass
-        elif args.regressor == "GaussianNB":
-            # TODO
-            raise ValueError('This regressor hasn\'t been implemented yet')
+
         elif args.regressor == "Khiops":
             # TODO
             raise ValueError('This regressor hasn\'t been implemented yet')
+
+        elif args.regressor == "DecisionTree":
+            max_depth = None if (args.max_depth is None or args.max_depth == 'None') else args.max_depth  # Default value is None
+            if max_depth is not None:
+                max_depth = int(max_depth)
+
+            max_features = None if (args.max_features is None or args.max_features == 'None') else args.max_features  # Default value is None
+            if max_features is not None and max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
+                max_features = int(max_features)
+
+            logging.info('Using the following parameters for DecisionTreeRegressor : '
+                         'max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+            model = DecisionTreeRegressor(max_depth=max_depth, max_features=max_features)
+
+            model.fit(X_train, Y_train)
+
+            Y_train_pred = model.predict(X_train)
+            Y_test_pred = model.predict(X_test)
+
         else:
             raise ValueError('Unknown parameter for regressor')
 

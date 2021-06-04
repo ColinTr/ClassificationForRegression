@@ -1,7 +1,7 @@
 """
 Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
-contact : colin.troisemaine@gmail.com
+Maintainer : colin.troisemaine@gmail.com
 """
 
 from os.path import isfile, join
@@ -20,6 +20,7 @@ from src.utils.DataProcessingUtils import detect_class_columns
 from src.models.LogisticRegressionC import LogisticRegressionC
 from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
+from src.models.DecisionTreeC import DecisionTreeC
 from src.models.RandomForestC import RandomForestC
 from src.models.GaussianNBC import GaussianNBC
 from src.models.XGBoostC import XGBoostC
@@ -52,7 +53,7 @@ def argument_parser():
     parser.add_argument('--classifier',
                         type=str,
                         help='The classifier model to use',
-                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops"],
+                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops", "DecisionTree"],
                         required=True)
 
     parser.add_argument('--log_lvl',
@@ -82,6 +83,8 @@ def create_new_classifier_model(classifier_name):
         return GaussianNBC()
     elif classifier_name == 'Khiops':
         return PyKhiopsC()
+    elif classifier_name == 'DecisionTree':
+        return DecisionTreeC()
     else:
         raise ValueError('Unknown parameter for classifier.')
 

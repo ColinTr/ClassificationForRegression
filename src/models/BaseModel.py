@@ -1,7 +1,7 @@
 """
 Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
-contact : colin.troisemaine@gmail.com
+Maintainer : colin.troisemaine@gmail.com
 """
 
 from abc import ABC, abstractmethod
