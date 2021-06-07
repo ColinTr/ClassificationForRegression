@@ -25,7 +25,7 @@ def argument_parser():
     parser.add_argument('--goal_index',
                         type=int,
                         help='The index of the goal variable',
-                        required=True)
+                        required=False)
 
     parser.add_argument('--classifiers',
                         type=str,
@@ -90,6 +90,8 @@ if __name__ == "__main__":
     cmd_list = []
 
     if args.preprocess == 'True':
+        if args.goal_index is None:
+            raise ValueError('Specify goal_index parameter to preprocess the dataset.')
         # Process the dataset
         for bins in bins_to_explore:
             cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --goal_var_index=\"{}\" --n_bins=\"{}\" --log_lvl=\"{}\""

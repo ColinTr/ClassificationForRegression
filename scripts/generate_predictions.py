@@ -215,7 +215,7 @@ if __name__ == "__main__":
             max_depth = int(max_depth)
 
             learning_rate = 0.3 if (args.learning_rate is None or args.learning_rate == 'None') else args.learning_rate  # Default value is 0.3
-            learning_rate = int(learning_rate)
+            learning_rate = float(learning_rate)
 
             logging.info('Using the following parameters for XGBRegressor : '
                          'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
