@@ -15,11 +15,12 @@ import os
 import gc
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from src.utils.DataProcessingUtils import compute_log_losses
+from src.utils.Metrics import compute_log_losses
+from src.utils.Metrics import compute_mean_roc_auc_score
 from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 from src.utils.Metrics import compute_all_metrics
-from sklearn.metrics import r2_score
+
 
 def argument_parser():
     """
@@ -129,6 +130,9 @@ if __name__ == "__main__":
         split_metrics_df = pd.concat([split_metrics_df, pd.DataFrame({'train_mean_log_loss': [train_log_loss],
                                                                       'test_mean_log_loss': [test_log_loss]})], axis=1)
 
+        split_metrics_df = pd.concat([split_metrics_df, pd.DataFrame({'train_mean_roc_auc_score': [compute_mean_roc_auc_score(train_predictions_dataframe)],
+                                                                      'test_mean_roc_auc_score': [compute_mean_roc_auc_score(test_predictions_dataframe)]})], axis=1)
+
         metrics_dataframe_list.append(split_metrics_df)
 
         logging.debug('Computed metrics : \n' + str(split_metrics_df))
@@ -136,7 +140,7 @@ if __name__ == "__main__":
         train_metrics_list.append(train_metrics)
         test_metrics_list.append(test_metrics)
         logging.debug('Split ' + train_fold_num + ' R² score : train = {0:.2f}'.format(train_metrics["r_squared"]) +
-                     ' & test = {0:.2f}'.format(test_metrics["r_squared"]))
+                      ' & test = {0:.2f}'.format(test_metrics["r_squared"]))
 
         # Expressly free the variables from the memory
         del Y_train_pred, Y_train, Y_test_pred, Y_test, train_predictions_dataframe, test_predictions_dataframe

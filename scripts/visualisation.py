@@ -206,12 +206,15 @@ if __name__ == "__main__":
                                                                         'mean_of_test_' + metric: [],
                                                                         'var_of_test_' + metric: [],
                                                                         'mean_train_log_loss': [],
-                                                                        'mean_test_log_loss': []}
+                                                                        'mean_test_log_loss': [],
+                                                                        'train_mean_roc_auc_score': [],
+                                                                        'test_mean_roc_auc_score': []}
                             # Cast keys into ints so we can easily sort them
                             tmp_dict = {}
                             for key, value in \
-                            sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name][
-                                classifier_name].items():
+                                    sub_directories_dict[steps_encoding_method][class_generation_method][
+                                        regressor_name][
+                                        classifier_name].items():
                                 tmp_dict[int(key)] = value
                             files_in_classifier_folder = OrderedDict(sorted(tmp_dict.items(), key=lambda t: t[0]))
                             tmp_index = 0
@@ -231,6 +234,11 @@ if __name__ == "__main__":
                                         (tmp_index, np.mean(tmp_df['train_mean_log_loss'])))
                                     classifier_metrics_dict[classifier_name]['mean_test_log_loss'].append(
                                         (tmp_index, np.mean(tmp_df['test_mean_log_loss'])))
+                                if 'train_mean_roc_auc_score' in list(tmp_df.columns.values):
+                                    classifier_metrics_dict[classifier_name]['train_mean_roc_auc_score'].append(
+                                        (tmp_index, np.mean(tmp_df['train_mean_roc_auc_score'])))
+                                    classifier_metrics_dict[classifier_name]['test_mean_roc_auc_score'].append(
+                                        (tmp_index, np.mean(tmp_df['test_mean_roc_auc_score'])))
                                 tmp_index = tmp_index + 1
 
                     # We can now generate a figure with a line for each classifier
@@ -247,9 +255,12 @@ if __name__ == "__main__":
 
                         plt.plot(mean_test_metric_df["x"], mean_test_metric_df["y"], label=key, marker='o')
 
-                        for tmp_tuple in classifier_metrics_dict[key]['mean_test_log_loss']:
-                            ax.annotate('{0:.2f}'.format(tmp_tuple[1]), (
-                                mean_test_metric_df["x"][tmp_tuple[0]], mean_test_metric_df["y"][tmp_tuple[0]]))
+                        for log_loss_tuple in classifier_metrics_dict[key]['mean_test_log_loss']:
+                            tag = '{0:.2f}'.format(log_loss_tuple[1])
+                            for auc_tuple in classifier_metrics_dict[key]['test_mean_roc_auc_score']:
+                                if auc_tuple[0] == log_loss_tuple[0]:
+                                    tag += ' / {0:.2f}'.format(auc_tuple[1])
+                            ax.annotate(tag, (mean_test_metric_df["x"][log_loss_tuple[0]], mean_test_metric_df["y"][log_loss_tuple[0]]))
 
                         if args.show_variance == 'true':
                             plt.fill_between(mean_test_metric_df["x"],
@@ -280,9 +291,12 @@ if __name__ == "__main__":
 
                         plt.plot(mean_train_metric_df["x"], mean_train_metric_df["y"], label=key, marker='o')
 
-                        for tmp_tuple in classifier_metrics_dict[key]['mean_train_log_loss']:
-                            ax.annotate('{0:.2f}'.format(tmp_tuple[1]), (
-                                mean_train_metric_df["x"][tmp_tuple[0]], mean_train_metric_df["y"][tmp_tuple[0]]))
+                        for log_loss_tuple in classifier_metrics_dict[key]['mean_train_log_loss']:
+                            tag = '{0:.2f}'.format(log_loss_tuple[1])
+                            for auc_tuple in classifier_metrics_dict[key]['train_mean_roc_auc_score']:
+                                if auc_tuple[0] == log_loss_tuple[0]:
+                                    tag += ' / {0:.2f}'.format(auc_tuple[1])
+                            ax.annotate(tag, (mean_train_metric_df["x"][log_loss_tuple[0]], mean_train_metric_df["y"][log_loss_tuple[0]]))
 
                         if args.show_variance == 'true':
                             plt.fill_between(mean_train_metric_df["x"],

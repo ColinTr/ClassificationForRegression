@@ -82,6 +82,15 @@ def argument_parser():
     return parser.parse_args()
 
 
+def get_column_with_word(full_dataframe, word):
+    thresholds_cols_indexes = []
+    for column_name, column_index in zip(list(full_dataframe.columns.values), range(0, len(list(full_dataframe.columns.values)))):
+        if word in column_name.split('_'):
+            thresholds_cols_indexes.append(column_index)
+    classes_df = full_dataframe[full_dataframe.columns[thresholds_cols_indexes]]
+    return classes_df
+
+
 if __name__ == "__main__":
     args = argument_parser()
 
@@ -261,7 +270,18 @@ if __name__ == "__main__":
         test_prediction_dataset = pd.DataFrame({'Y_test_pred': Y_test_pred,
                                                 'Y_test': Y_test})
 
+        # If the predictions were made on an extended dataset, we add the classifiers predictions as well
+        #    for future metrics computation
         if extended:
+            # Real class numbers, needed for AUC ROC for instance
+            train_prediction_dataset = pd.concat([train_prediction_dataset, get_column_with_word(train_dataframe, 'class')], axis=1)
+            test_prediction_dataset = pd.concat([test_prediction_dataset, get_column_with_word(test_dataframe, 'class')], axis=1)
+
+            # The predicted probabilities for each class of every classifier associated to the thresholds
+            train_prediction_dataset = pd.concat([train_prediction_dataset, get_column_with_word(train_dataframe, 'threshold')], axis=1)
+            test_prediction_dataset = pd.concat([test_prediction_dataset, get_column_with_word(test_dataframe, 'threshold')], axis=1)
+
+            # And finally the predicted probability of the real classes
             train_prediction_dataset = pd.concat([train_prediction_dataset, train_df_predicted_probas], axis=1)
             test_prediction_dataset = pd.concat([test_prediction_dataset, test_df_predicted_probas], axis=1)
 

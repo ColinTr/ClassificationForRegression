@@ -132,32 +132,3 @@ def get_real_class_predicted_probas(df):
                 df.loc[index, 'threshold_' + str(class_column_name) + '_P(C_' + str(real_class_value) + '|X)'])
 
     return pd.DataFrame(predicted_probas_dict)
-
-
-def compute_log_losses(df):
-    """
-    For each class_X column inside the given dataframe of predictions, compute the mean log loss.
-    :param df: The dataframe of predictions. Header must be a list of : class_ + 'class_number'
-    :return: The mean log loss of every class.
-    """
-    classes_mean_log_loss_dict = {}
-
-    classes_names = []
-    for column_name in list(df.columns.values):
-        if 'class' in column_name.split('_'):
-            classes_names.append(column_name)
-
-    for class_name in classes_names:
-        # We add 1e-15 to the predicted probability so we don't get errors on log(0), it shouldn't change the result
-        log_loss = (-1 / len(df[class_name])) * np.sum([np.log(predicted_proba + 1e-15)
-                                                        for predicted_proba in df[class_name]])
-        classes_mean_log_loss_dict['class_' + class_name.split('_')[1] + '_mean_log_loss'] = [log_loss]
-
-    # Either return individual losses with
-    # return pd.DataFrame(classes_mean_log_loss_dict)
-
-    # Or return the mean log loss of all the classifiers with
-    if len(classes_mean_log_loss_dict.values()) > 0:
-        return np.mean([values[0] for values in classes_mean_log_loss_dict.values()])
-    else:
-        return None
