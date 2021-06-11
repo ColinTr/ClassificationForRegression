@@ -29,7 +29,10 @@ from src.models.XGBoostC import XGBoostC
 
 if platform.system() == "Windows":
     if os.environ.get('KhiopsHome') is not None:
-        from src.models.PyKhiopsC import PyKhiopsC
+        import importlib
+        khiops_spec = importlib.util.find_spec("PyKhiopsC")
+        if khiops_spec is not None:
+            from src.models.PyKhiopsC import PyKhiopsC
 else:
     if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):
         from src.models.PyKhiopsC import PyKhiopsC

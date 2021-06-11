@@ -5,6 +5,7 @@ Maintainer : colin.troisemaine@gmail.com
 """
 
 from . import CustomClassGenerator
+from decimal import *
 import numpy as np
 
 
@@ -34,16 +35,16 @@ class InsideBinClassGenerator(CustomClassGenerator.CustomClassGenerator):
         :param Y: np.array or list : The goal variable
         :return: list[int] : The classes
         """
-        thresholds_pairs = [[np.min(Y), self.thresholds_list[0]]]
+        thresholds_pairs = [[Decimal(np.min(Y)), self.thresholds_list[0]]]
         for threshold_index in range(0, len(self.thresholds_list) - 1):
             thresholds_pairs.append([self.thresholds_list[threshold_index], self.thresholds_list[threshold_index + 1]])
-        thresholds_pairs.append([self.thresholds_list[-1], np.max(Y)])
+        thresholds_pairs.append([self.thresholds_list[-1], Decimal(np.max(Y))])
 
         classes = []
         for value in np.array(Y):
             class_of_instance = -1
             # If the value is the maximum of the range, its class is the last one
-            if value == np.max(Y):
+            if value >= np.max(Y):
                 class_of_instance = len(thresholds_pairs) - 1
             else:
                 # Otherwise we iterate through the bins :

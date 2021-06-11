@@ -126,15 +126,19 @@ def compute_mean_roc_auc_score(df):
     # For every threshold, we have certain number of possible classes
     # If it is greater than 2, we are in a multiclass configuration
     thresholds_columns_dict = {}
+    classes = []
 
     for column_name in list(df.columns.values):
         if 'threshold' in column_name.split('_'):
             threshold_number = column_name.split('_')[1]
-            class_number = column_name.split('_')[3][0]
+            class_number = int(column_name.split('_')[3].split('|')[0])
+            classes.append(class_number)
             if threshold_number in thresholds_columns_dict.keys():
                 thresholds_columns_dict[threshold_number].append(column_name)
             else:
                 thresholds_columns_dict[threshold_number] = [column_name]
+
+    classes = list(np.unique(classes))
 
     if len(thresholds_columns_dict.values()) == 0:
         return None
@@ -174,6 +178,11 @@ def compute_mean_roc_auc_score(df):
         for threshold_col in thresholds_columns_dict['0']:
             y_pred_proba.append(list(df[threshold_col]))
         y_pred_proba = np.transpose(y_pred_proba)
+
+        # diff = [x for x in classes if x not in y_true]
+        # print('diff =', diff)
+
+        # tmp = np.delete(y_pred_proba, diff, axis=1)
 
         computed_roc_auc_score = roc_auc_score(y_true, y_pred_proba, multi_class='ovr')
 
