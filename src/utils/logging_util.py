@@ -53,7 +53,7 @@ def generate_output_path(input_path, elements_to_replace, new_element):
     split_path = path.split(os.sep)  # Split the path with the system separator ('/' or '\')
 
     index_to_replace = find_index_in_list(split_path, elements_to_replace)
-    if index_to_replace is None:
+    if index_to_replace == None:
         raise ValueError('Unable to generate an output path, please define explicitly the parameter --output_path')
 
     split_path[index_to_replace] = new_element

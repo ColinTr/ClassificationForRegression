@@ -113,7 +113,7 @@ def get_real_class_predicted_probas(df):
     class_columns_names = list(classes_df.columns.values)
 
     # If there is only one class (case of the 'inside bin' class generation method), change the name to :
-    if len(class_columns_names) is 1:
+    if len(class_columns_names) == 1:
         class_columns_names[0] = 'class_0'
 
     class_columns_names = [class_column_name.split('_')[1] for class_column_name in class_columns_names]
