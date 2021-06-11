@@ -165,3 +165,5 @@ if __name__ == "__main__":
                  + ' & test =  {0:.4f}'.format(np.mean(metrics_dataframe['test_r_squared'])))
     logging.info('Mean RMSE : train =  {0:.4f}'.format(np.mean(metrics_dataframe['train_root_mean_squared_error']))
                  + ' & test =  {0:.4f}'.format(np.mean(metrics_dataframe['test_root_mean_squared_error'])))
+    logging.info('Mean ROC AUC : train =  {0:.4f}'.format(np.mean(metrics_dataframe['train_mean_roc_auc_score']))
+                 + ' & test =  {0:.4f}'.format(np.mean(metrics_dataframe['test_mean_roc_auc_score'])))

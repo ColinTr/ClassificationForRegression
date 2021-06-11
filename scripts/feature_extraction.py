@@ -6,6 +6,8 @@ Maintainer : colin.troisemaine@gmail.com
 
 from os.path import isfile, join
 from os import listdir
+
+import numpy as np
 import pandas as pd
 import argparse
 import platform
@@ -56,6 +58,11 @@ def argument_parser():
                         choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops", "DecisionTree"],
                         required=True)
 
+    parser.add_argument('--n_jobs',
+                        type=int,
+                        help='The number of cores to use',
+                        default=-1)
+
     parser.add_argument('--log_lvl',
                         type=str,
                         default='info',
@@ -72,13 +79,13 @@ def sort_dict(dictionary):
     return sorted_dict
 
 
-def create_new_classifier_model(classifier_name):
+def create_new_classifier_model(classifier_name, n_jobs):
     if classifier_name == 'RandomForest':
-        return RandomForestC()
+        return RandomForestC(n_jobs)
     elif classifier_name == 'LogisticRegression':
-        return LogisticRegressionC()
+        return LogisticRegressionC(n_jobs)
     elif classifier_name == 'XGBoost':
-        return XGBoostC()
+        return XGBoostC(n_jobs)
     elif classifier_name == 'GaussianNB':
         return GaussianNBC()
     elif classifier_name == 'Khiops':
@@ -167,8 +174,8 @@ if __name__ == "__main__":
         logging.debug('Y_test :\n' + str(Y_test.head(3)))
 
         # For each class column, train a classifier and extract its features
-        for train_column, test_column, index in zip(Y_train, Y_test, range(0, len(Y_train))):
-            classifier_model = create_new_classifier_model(args.classifier)
+        for train_column, test_column, index in zip(Y_train, Y_test, range(len(np.unique(list(Y_train.columns))))):
+            classifier_model = create_new_classifier_model(args.classifier, args.n_jobs)
 
             # We fit the classifier on the TRAIN data
             classifier_model.fit(X_train, Y_train[train_column])
@@ -181,8 +188,9 @@ if __name__ == "__main__":
             # print(np.array(test_extracted_features))
 
             # We can now add the extracted features to the dataframes :
-            for ef_train_key, ef_test_key in zip(train_extracted_features.keys(), test_extracted_features.keys()):
+            for ef_train_key in train_extracted_features.keys():
                 train_extended_dataset['threshold_' + str(index) + '_' + str(ef_train_key)] = train_extracted_features[ef_train_key]
+            for ef_test_key in test_extracted_features.keys():
                 test_extended_dataset['threshold_' + str(index) + '_' + str(ef_test_key)] = test_extracted_features[ef_test_key]
 
         # And finally add the (box-cox transformed) goal variable to be used by the upcoming regression

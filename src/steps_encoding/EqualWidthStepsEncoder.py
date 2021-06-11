@@ -5,6 +5,7 @@ Maintainer : colin.troisemaine@gmail.com
 """
 
 from . import StepsEncoder
+from decimal import *
 import numpy as np
 
 
@@ -28,8 +29,11 @@ class EqualWidthStepsEncoder(StepsEncoder.StepsEncoder):
         """
         Y_min = np.min(Y)
         Y_max = np.max(Y)
-        step = (Y_max - Y_min) / n_bins
 
-        thresholds_list = [(Y_min + index * step) for index in range(1, n_bins)]
+        getcontext().prec = 50
+
+        step = Decimal(Y_max - Y_min) / Decimal(n_bins)
+
+        thresholds_list = [(Decimal(Y_min) + index * step) for index in range(1, n_bins)]
 
         return thresholds_list

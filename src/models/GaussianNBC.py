@@ -23,8 +23,8 @@ class GaussianNBC(BaseModel.BaseModel):
 
         # Extract the conditional probabilities of each class
         predicted_class_probabilities = self.model.predict_proba(X)
-        for index in range(0, predicted_class_probabilities.shape[1]):
-            extracted_features["P(C_" + str(index) + "|X)"] = predicted_class_probabilities[:, index]
+        for class_index, index in zip(self.model.classes_, range(len(self.model.classes_))):
+            extracted_features["P(C_" + str(class_index) + "|X)"] = predicted_class_probabilities[:, index]
 
         # TODO : Extract more features
 

@@ -11,9 +11,9 @@ import numpy as np
 
 
 class XGBoostC(BaseModel.BaseModel):
-    def __init__(self):
+    def __init__(self, n_jobs):
         super(XGBoostC, self).__init__()
-        self.model = XGBClassifier(n_jobs=-1, n_estimators=100, use_label_encoder=False, objective='binary:logistic', eval_metric='logloss')
+        self.model = XGBClassifier(n_jobs=n_jobs, n_estimators=100, use_label_encoder=False, objective='binary:logistic', eval_metric='logloss')
 
     def fit(self, X_train, Y_train):
         self.model.fit(np.ascontiguousarray(X_train), Y_train)
@@ -24,8 +24,8 @@ class XGBoostC(BaseModel.BaseModel):
 
         # Extract the conditional probabilities of each class
         predicted_class_probabilities = self.model.predict_proba(np.ascontiguousarray(X))
-        for index in range(0, predicted_class_probabilities.shape[1]):
-            extracted_features["P(C_" + str(index) + "|X)"] = predicted_class_probabilities[:, index]
+        for class_index, index in zip(self.model.classes_, range(len(self.model.classes_))):
+            extracted_features["P(C_" + str(class_index) + "|X)"] = predicted_class_probabilities[:, index]
 
         # TODO : Extract more features
 

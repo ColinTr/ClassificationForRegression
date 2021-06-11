@@ -41,8 +41,8 @@ class PyKhiopsC(BaseModel.BaseModel):
         # Since Khiops gives a dataframe with a first column being the predicted class and the others columns,
         #     we drop the first column
         predicted_class_probabilities = proba_dataframe.drop(proba_dataframe.columns[0], axis=1).to_numpy()
-        for index in range(0, predicted_class_probabilities.shape[1]):
-            extracted_features["P(C_" + str(index) + "|X)"] = predicted_class_probabilities[:, index]
+        for class_index, index in zip(self.model.classes_, range(len(self.model.classes_))):
+            extracted_features["P(C_" + str(class_index) + "|X)"] = predicted_class_probabilities[:, index]
 
         # TODO : Extract more features
 

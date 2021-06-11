@@ -149,7 +149,14 @@ def compute_mean_roc_auc_score(df):
             # For all the classes of a given threshold :
             threshold_number = threshold_col_list[0].split('_')[1]
 
-            y_true = list(df['class_' + str(threshold_number)])
+            # If there is only one class column, its name is just 'class'
+            if 'class' in list(df.columns.values):
+                tmp_class_name = 'class'
+            else:
+                tmp_class_name = 'class_' + str(threshold_number)
+
+            y_true = list(df[tmp_class_name])
+
             # As stated in the documentation, we use the 'probability of the class with the greater label' for y_pred
             y_pred_proba = list(df['threshold_' + str(threshold_number) + '_P(C_1|X)'])
 

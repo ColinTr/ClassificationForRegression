@@ -10,9 +10,9 @@ import pandas as pd
 
 
 class RandomForestC(BaseModel.BaseModel):
-    def __init__(self):
+    def __init__(self, n_jobs):
         super(RandomForestC, self).__init__()
-        self.model = RandomForestClassifier(n_jobs=-1)
+        self.model = RandomForestClassifier(n_jobs=n_jobs)
 
     def fit(self, X_train, Y_train):
         self.model.fit(X_train, Y_train)
@@ -23,8 +23,8 @@ class RandomForestC(BaseModel.BaseModel):
 
         # Extract the conditional probabilities of each class
         predicted_class_probabilities = self.model.predict_proba(X)
-        for index in range(0, predicted_class_probabilities.shape[1]):
-            extracted_features["P(C_" + str(index) + "|X)"] = predicted_class_probabilities[:, index]
+        for class_index, index in zip(self.model.classes_, range(len(self.model.classes_))):
+            extracted_features["P(C_" + str(class_index) + "|X)"] = predicted_class_probabilities[:, index]
 
         # TODO : Extract more features
 

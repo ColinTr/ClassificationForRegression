@@ -73,6 +73,11 @@ def argument_parser():
                         help='Boosting learning rate of XGBoost',
                         default=None)
 
+    parser.add_argument('--n_jobs',
+                        type=int,
+                        help='The number of cores to use',
+                        default=-1)
+
     parser.add_argument('--log_lvl',
                         type=str,
                         default='info',
@@ -201,7 +206,7 @@ if __name__ == "__main__":
 
             logging.info('Using the following parameters for RandomForestRegressor : '
                          'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
-            model = RandomForestRegressor(n_jobs=-1, n_estimators=n_estimators,
+            model = RandomForestRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators,
                                           max_depth=max_depth, max_features=max_features)
 
             model.fit(X_train, Y_train)
@@ -210,7 +215,7 @@ if __name__ == "__main__":
             Y_test_pred = model.predict(X_test)
 
         elif args.regressor == "LinearRegression":
-            model = LinearRegression(n_jobs=-1)
+            model = LinearRegression(n_jobs=args.n_jobs)
             model.fit(X_train, Y_train)
 
             Y_train_pred = model.predict(X_train)
@@ -228,7 +233,7 @@ if __name__ == "__main__":
 
             logging.info('Using the following parameters for XGBRegressor : '
                          'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
-            model = XGBRegressor(n_jobs=-1, n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate)
+            model = XGBRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate)
 
             model.fit(X_train, Y_train)
 
