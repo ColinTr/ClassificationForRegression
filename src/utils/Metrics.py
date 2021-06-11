@@ -167,7 +167,7 @@ def compute_mean_roc_auc_score(df):
         if len(thresholds_columns_dict.keys()) > 1:
             raise ValueError('More than one classifier for a multiclass configuration has been found.')
 
-        y_true = list(df['class'])
+        y_true = list(df['class_0'])
         y_pred_proba = []
         for threshold_col in thresholds_columns_dict['0']:
             y_pred_proba.append(list(df[threshold_col]))
