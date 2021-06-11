@@ -5,7 +5,6 @@ Maintainer : colin.troisemaine@gmail.com
 """
 
 from . import StepsEncoder
-from decimal import *
 import numpy as np
 
 
@@ -27,14 +26,15 @@ class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
         """
         thresholds_list = []
 
-        getcontext().prec = 50
-
-        split_sorted_Y = np.array_split(sorted(Y), n_bins)
+        # IMPORTANT : Now using only the UNIQUE values to define the thresholds
+        # When many data had the same value, some thresholds could fall between these same value data
+        #   which would result in classes never showing up
+        split_sorted_Y = np.array_split(sorted(np.unique(Y)), n_bins)
 
         # We define the thresholds as the mean between the last element of a list and the first of the next list
         for index in range(len(split_sorted_Y)):
             if index < len(split_sorted_Y) - 1:  # We wont have to compute a threshold for the last bin
-                threshold = Decimal(split_sorted_Y[index][-1][0] + split_sorted_Y[index + 1][0][0]) / Decimal(2)
+                threshold = split_sorted_Y[index][-1] + split_sorted_Y[index + 1][0] / 2.0
                 thresholds_list.append(threshold)
 
         return thresholds_list

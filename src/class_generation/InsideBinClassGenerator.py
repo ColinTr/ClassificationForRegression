@@ -5,7 +5,6 @@ Maintainer : colin.troisemaine@gmail.com
 """
 
 from . import CustomClassGenerator
-from decimal import *
 import numpy as np
 
 
@@ -33,15 +32,16 @@ class InsideBinClassGenerator(CustomClassGenerator.CustomClassGenerator):
         Note that the min and max value of Y consist the first element of the pair
         and the last element of the last pair respectively
         :param Y: np.array or list : The goal variable
-        :return: list[int] : The classes
+        :return: list[list[int]] : The classes
         """
-        thresholds_pairs = [[Decimal(np.min(Y)), self.thresholds_list[0]]]
+        thresholds_pairs = [[np.min(Y), self.thresholds_list[0]]]
         for threshold_index in range(0, len(self.thresholds_list) - 1):
             thresholds_pairs.append([self.thresholds_list[threshold_index], self.thresholds_list[threshold_index + 1]])
-        thresholds_pairs.append([self.thresholds_list[-1], Decimal(np.max(Y))])
+        thresholds_pairs.append([self.thresholds_list[-1], np.max(Y)])
 
         classes = []
         for value in np.array(Y):
+            value = value[0]
             class_of_instance = -1
             # If the value is the maximum of the range, its class is the last one
             if value >= np.max(Y):
@@ -53,6 +53,6 @@ class InsideBinClassGenerator(CustomClassGenerator.CustomClassGenerator):
                     if thresholds_pairs[class_index][0] <= value < thresholds_pairs[class_index][1]:
                         class_of_instance = class_index
 
-            classes.append(class_of_instance)
+            classes.append([class_of_instance])
 
-        return classes
+        return np.array(classes)

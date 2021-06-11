@@ -37,7 +37,7 @@ class BelowThresholdClassGenerator(CustomClassGenerator.CustomClassGenerator):
         classes = np.zeros((len(Y), len(self.thresholds_list)), dtype=int)
         for threshold_index, threshold in zip(range(len(self.thresholds_list)), self.thresholds_list):
             for i in range(len(Y)):
-                if Y[i] < threshold:
+                if Y[i][0] <= threshold:
                     classes[i][threshold_index] = 1
 
         return classes

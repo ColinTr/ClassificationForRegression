@@ -128,6 +128,8 @@ def compute_mean_roc_auc_score(df):
     thresholds_columns_dict = {}
     classes = []
 
+    print(str(list(df.columns)))
+
     for column_name in list(df.columns.values):
         if 'threshold' in column_name.split('_'):
             threshold_number = column_name.split('_')[1]

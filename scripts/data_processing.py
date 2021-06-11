@@ -205,7 +205,7 @@ if __name__ == "__main__":
                       + str(pd.DataFrame(train_discretized_classes).head(5)))
 
         # We then add the generated classes to the dataframe
-        for class_index in range(len(train_discretized_classes[1])):
+        for class_index in range(train_discretized_classes.shape[1]):
             X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]
             X_test['class_' + str(class_index)] = test_discretized_classes[:, class_index]
 
