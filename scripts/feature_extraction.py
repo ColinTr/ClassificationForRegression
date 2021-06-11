@@ -187,8 +187,6 @@ if __name__ == "__main__":
             train_extracted_features, train_score = classifier_model.extract_features(X_train, Y_train[test_column])
             test_extracted_features, test_score = classifier_model.extract_features(X_test, Y_test[test_column])
             logging.info('model ' + str(index) + ' accuracy : train = {0:.2f}'.format(train_score) + ' & test = {0:.2f}'.format(test_score))
-            # np.set_printoptions(threshold=sys.maxsize)
-            # print(np.array(test_extracted_features))
 
             # We can now add the extracted features to the dataframes :
             for ef_train_key in train_extracted_features.keys():

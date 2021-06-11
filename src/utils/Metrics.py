@@ -153,11 +153,7 @@ def compute_mean_roc_auc_score(df):
             # For all the classes of a given threshold :
             threshold_number = threshold_col_list[0].split('_')[1]
 
-            # If there is only one class column, its name is just 'class'
-            if 'class' in list(df.columns.values):
-                tmp_class_name = 'class'
-            else:
-                tmp_class_name = 'class_' + str(threshold_number)
+            tmp_class_name = 'class_' + str(threshold_number)
 
             y_true = list(df[tmp_class_name])
 

@@ -13,7 +13,7 @@ if __name__ == "__main__":
 
     bins_to_explore = [2, 4, 8, 16, 32]
     split_method = 'equal_freq'
-    output_classes = 'inside_bin'
+    output_classes = 'below_threshold'
     model = 'RandomForest'
     log_lvl = 'warning'
     n_jobs = -1

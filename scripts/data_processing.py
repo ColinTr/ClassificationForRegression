@@ -205,15 +205,9 @@ if __name__ == "__main__":
                       + str(pd.DataFrame(train_discretized_classes).head(5)))
 
         # We then add the generated classes to the dataframe
-        # If there is only one column of class add it directly
-        if type(train_discretized_classes[0]) == int:
-            X_train['class'] = train_discretized_classes
-            X_test['class'] = test_discretized_classes
-        # But if there are multiple class columns, add each of them to the dataframe
-        else:
-            for class_index in range(len(train_discretized_classes[1])):
-                X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]
-                X_test['class_' + str(class_index)] = test_discretized_classes[:, class_index]
+        for class_index in range(len(train_discretized_classes[1])):
+            X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]
+            X_test['class_' + str(class_index)] = test_discretized_classes[:, class_index]
 
         # And finally add the (box-cox transformed) goal variable to be used by the upcoming regression
         X_train['reg_goal_var'] = Y_train

@@ -126,7 +126,7 @@ def get_real_class_predicted_probas(df):
     # For each row in the df, get for each class the predicted probability of the real class
     for index, row in df.iterrows():
         for class_column_name in class_columns_names:
-            real_class_value = classes_df.loc[index, 'class_' + str(class_column_name) if len(class_columns_names) > 1 else 'class']
+            real_class_value = classes_df.loc[index, 'class_' + str(class_column_name)]
             predicted_probas_dict['class_' + class_column_name + '_predicted_proba'].append(df.loc[index, 'threshold_' + str(class_column_name) + '_P(C_' + str(real_class_value) + '|X)'])
 
     return pd.DataFrame(predicted_probas_dict)
