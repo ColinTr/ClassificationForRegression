@@ -8,6 +8,19 @@ from . import StepsEncoder
 import numpy as np
 
 
+def put_first_item_from_list_to_other_list(list_to_remove_element_from, list_to_add_element_into):
+    """
+
+    :param list_to_remove_element_from:
+    :param list_to_add_element_into:
+    :return:
+    """
+    tmp_value = list_to_remove_element_from[0]
+    list_to_remove_element_from = np.delete(list_to_remove_element_from, 0)
+    list_to_add_element_into.append(tmp_value)
+    return list_to_remove_element_from, list_to_add_element_into
+
+
 class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
     """
     Generates thresholds to split the goal variable into n_bins containing the same number of goal variables.
@@ -26,15 +39,49 @@ class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
         """
         thresholds_list = []
 
-        # IMPORTANT : Now using only the UNIQUE values to define the thresholds
-        # When many data had the same value, some thresholds could fall between these same value data
-        #   which would result in classes never showing up
-        split_sorted_Y = np.array_split(sorted(np.unique(Y)), n_bins)
+        # Simple buggy version that doesn't handle overlapping edges
+        # split_sorted_Y = np.array_split(sorted(np.array(Y).ravel()), n_bins)
 
-        # We define the thresholds as the mean between the last element of a list and the first of the next list
-        for index in range(len(split_sorted_Y)):
+        values_stock = sorted(np.concatenate(Y).ravel())  # We will remove values one by one from this list
+        split_sorted_Y = []
+        bins_left = n_bins
+        ideal_bin_length = int(len(values_stock) / n_bins)
+        switch_cond = True  # True = Allow to go above ideal_bin_length, False don't allow
+
+        for bin_number in range(n_bins):
+            split_sorted_Y.append([])
+
+            # While we are not exceeding the size of the ideal bin and we still have values to add...
+            while len(split_sorted_Y[bin_number]) < ideal_bin_length and len(values_stock) > 0:
+                # Take the first element from values_stock and add it to the current bin
+                values_stock, split_sorted_Y[bin_number] = put_first_item_from_list_to_other_list(values_stock, split_sorted_Y[bin_number])
+
+                # Then count the number of values from the stock that are equal to the current last value
+                equal_data_index = 0
+                while len(values_stock) > 0 and values_stock[equal_data_index] == split_sorted_Y[bin_number][-1]:
+                    equal_data_index += 1
+
+                # If there are identical values...
+                if equal_data_index > 0:
+                    # Either switch_cond is True and we will add them to the current bin, disregarding if its size will exceed the ideal_bin_length
+                    # Either switch_cond is False and we will only add them if it doesn't make the size of the current bin exceed the ideal_bin_length
+                    if (switch_cond == True) or (switch_cond == False and (len(split_sorted_Y[bin_number]) + equal_data_index) <= ideal_bin_length):
+                        while equal_data_index > 0:
+                            values_stock, split_sorted_Y[bin_number] = put_first_item_from_list_to_other_list(values_stock, split_sorted_Y[bin_number])
+                            equal_data_index -= 1
+                        switch_cond = not switch_cond  # Inverse switch_cond
+
+            bins_left -= 1
+
+        # Since ideal_bin_length is rounded to the floor value, we might still have values left in the stock
+        # So we simply add the remaining values to the last bin
+        while len(values_stock) > 0:
+            values_stock, split_sorted_Y[-1] = put_first_item_from_list_to_other_list(values_stock, split_sorted_Y[-1])
+
+        # We can now define the thresholds as the mean between the last element of a list and the first of the next list
+        for index in range(n_bins):
             if index < len(split_sorted_Y) - 1:  # We wont have to compute a threshold for the last bin
-                threshold = split_sorted_Y[index][-1] + split_sorted_Y[index + 1][0] / 2.0
+                threshold = (split_sorted_Y[index][-1] + split_sorted_Y[index + 1][0]) / 2.0
                 thresholds_list.append(threshold)
 
         return thresholds_list

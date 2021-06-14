@@ -204,6 +204,14 @@ if __name__ == "__main__":
         logging.debug("Generated classes (for train dataset) :\n"
                       + str(pd.DataFrame(train_discretized_classes).head(5)))
 
+        # Plot the distribution of the values
+        # plt.figure()
+        # sns.countplot(data=pd.DataFrame({"values": train_discretized_classes.ravel()}), x="values")
+        # plt.savefig("train" + str(np.random.random()) + ".png")
+        # plt.figure()
+        # sns.countplot(data=pd.DataFrame({"values": test_discretized_classes.ravel()}), x="values")
+        # plt.savefig("test.png")
+
         # We then add the generated classes to the dataframe
         for class_index in range(train_discretized_classes.shape[1]):
             X_train['class_' + str(class_index)] = train_discretized_classes[:, class_index]

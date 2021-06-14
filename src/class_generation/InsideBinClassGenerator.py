@@ -46,13 +46,18 @@ class InsideBinClassGenerator(CustomClassGenerator.CustomClassGenerator):
             # If the value is the maximum of the range, its class is the last one
             if value >= np.max(Y):
                 class_of_instance = len(thresholds_pairs) - 1
+            elif value <= np.min(Y):
+                class_of_instance = 0
             else:
                 # Otherwise we iterate through the bins :
                 for class_index in range(0, len(thresholds_pairs)):
-                    # Notice the <= for the first element, which is why we needed to check for the maximum value earlier
                     if thresholds_pairs[class_index][0] <= value < thresholds_pairs[class_index][1]:
                         class_of_instance = class_index
 
             classes.append([class_of_instance])
+
+        # for class_nb in np.unique(classes):
+        #     print(classes.count(class_nb))
+        # print('===================')
 
         return np.array(classes)
