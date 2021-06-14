@@ -59,7 +59,7 @@ class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
 
                 # Then count the number of values from the stock that are equal to the current last value
                 equal_data_index = 0
-                while len(values_stock) > 0 and values_stock[equal_data_index] == split_sorted_Y[bin_number][-1]:
+                while len(values_stock) > equal_data_index and values_stock[equal_data_index] == split_sorted_Y[bin_number][-1]:
                     equal_data_index += 1
 
                 # If there are identical values...
