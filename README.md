@@ -16,9 +16,11 @@
     │   └── raw                                     <- The original datasets
     │       └── Combined_Cycle_Power_Plant_Dataset  <- A sample dataset
     ├── notebooks                                   <- The jupyter notebooks
-    │   └── Datasets_First_Study.ipynb              <- Notebook to check the datasets
+    │   ├── Datasets_First_Study.ipynb              <- Notebook to check the datasets
+    │   ├── Hyperparameters study.ipynb             <- Notebook used to explore the best hyperparameters
+    │   └── New dataset choice.ipynb                <- Notebook to select difficult datasets to add to our study
     ├── scripts                                     <- The scripts
-    │   ├── compute_test_metrics.py                 <- Used to compute regression performance on a results folder
+    │   ├── compute_metrics.py                      <- Used to compute regression performance on a results folder
     │   ├── data_processing.py                      <- Used to pre-process a dataset
     │   ├── feature_extraction.py                   <- Used to extract the features of a dataset folder
     │   ├── generate_predictions.py                 <- Generate the predictions of a regressor
@@ -31,18 +33,24 @@
         │   └── InsideBinClassGenerator.py          <- Thresholds define bins with classes numbers
         ├── models                                  <- The models used for classification or regression
         │   ├── BaseModel.py                        <- The abstract classification model to inherit from
-        │   └── RandomForestC.py                    <- The random forests classifier
+        │   ├── DecisionTreeC.py                    <- The Decision Tree classifier
+        │   ├── GaussianNBC.py                      <- The Gaussian Naive Bayes classifier
+        │   ├── LogisticRegressionC.py              <- The Logistic Regression classifier
+        │   ├── PyKhiopsC.py                        <- The PyKhiops classifier
+        │   ├── RandomForestC.py                    <- The Random Forest classifier
+        │   └── XGBoostC.py                         <- The XGBoost classifier
         ├── steps_encoding                          <- The thresholds generation methods
         │   ├── EqualFreqStepsEncoder.py            <- Generates thresholds with equal frequency
         │   ├── EqualWidthStepsEncoder.py           <- Generates thresholds with equal width
         │   └── StepsEncoder.py                     <- The abstract class to inherit from
         └── utils                                   <- Various utility methods
             ├── DataProcessingUtils.py              <- Methods used to pre-prorcess the datasets
-            └── logging_util.py                     <- Message logging utility methods
+            ├── logging_util.py                     <- Message logging utility methods
+            └── Metrics.py                          <- Methods to compute all the metrics needed
 
 
 ## Install
-This project requires python 3.7, and the libraries described in requirements.txt.
+This project was written using python 3.7.10, and the libraries described in requirements.txt.
 
 It is recommended to create a virtual environment with virtualenv to install the exact versions of the packages used in this project. You will first need to install *virtualenv* with pip :
 > pip install virtualenv
@@ -65,7 +73,7 @@ Here is a list of examples of usages of the scripts :
 **Note :** The following examples are meant to be used from inside the 'scripts' directory.
 
 1) We start with the Pre-processing of a dataset :
-> python data_processing.py --dataset_path="../data/raw/Combined_Cycle_Power_Plant_Dataset/Folds5x2_pp.csv" --goal_var_index=4
+> python data_processing.py --dataset_path="../data/cleaned/Combined_Cycle_Power_Plant_Dataset/data.csv"
 
 2) We then extract the features of a pre-processed dataset using a classification algorithm :
 > python feature_extraction.py --dataset_folder="../data/processed/Combined_Cycle_Power_Plant_Dataset/10_bins_equal_freq_below_threshold/" --classifier="RandomForest"
@@ -73,8 +81,11 @@ Here is a list of examples of usages of the scripts :
 3) We can now generate the predictions using a regression model :
 > python generate_predictions.py --dataset_folder="../data/extracted_features/Combined_Cycle_Power_Plant_Dataset/10_bins_equal_freq_below_threshold/RandomForest_classifier/" --regressor="RandomForest"
 
-4) Finally, we compute the metrics on the predictions:
+4) Then, we compute the metrics on the predictions:
 > python compute_metrics.py --predictions_folder="../data/predictions/Combined_Cycle_Power_Plant_Dataset/10_bins_equal_freq_below_threshold/RandomForest_classifier/RandomForest_regressor/"
+
+5) Finally, we can generate figures (note that the figures are meant to represent the evolution of a metric when the number of thresholds varies, so the figures we will generate here will only have a single point)
+> python visualisation.py --parent_folder="../data/metrics/Combined_Cycle_Power_Plant_Dataset/" --metric="RMSE"
 
 For easier understanding of the flow of the dataset through the scripts, refer to the following diagram :
 
@@ -92,6 +103,7 @@ Here are the scripts and the details about every usable parameter :
     * dataset_path : The dataset to process
    
     The optional parameters are :
+    * goal_var_index : The index of the column to use as the goal variable (will try to find a .index file beside the dataset's file if not defined)
     * output_path : The folder where the results will be saved (will be generated if not defined)
     * split_method : The splitting method to use (Choices : equal_width, equal_freq, kmeans)
     * output_classes : The method of class generation (Choices : below_threshold, inside_bin)
@@ -100,7 +112,6 @@ Here are the scripts and the details about every usable parameter :
     * decimal : Character to recognize as decimal point
     * na_values : Additional string to recognize as NA/NaN
     * usecols : The indexes of the columns to keep
-    * goal_var_index : The index of the column to use as the goal variable
     * n_bins : The number of bins to create
     * k_folds : The number of folds in the k-folds
     * log_lvl : Change the log display level (Choices : debug, info, warning)
@@ -128,6 +139,11 @@ Here are the scripts and the details about every usable parameter :
 
     The options are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
+    * n_estimators : The number of trees in the forest of RandomForest or the number of gradient boosted trees for XGBoost
+    * max_depth : The maximum depth of the trees in RandomForest, XGBoost or DecisionTree
+    * max_features : number of features to consider when looking for the best split in RandomForest or DecisionTree
+    * learning_rate : Boosting learning rate of XGBoost
+    * n_jobs : The number of cores to use
     * log_lvl : Change the log display level (Choices : debug, info, warning)
    
 
@@ -146,7 +162,7 @@ Here are the scripts and the details about every usable parameter :
    > python visualisation.py [parent_folder] [options]
 
     The mandatory parameters are :
-    * results_folder : The folder where the results of the script *generate_predictions.py* are stored
+    * parent_folder : The folder where the results of the script *generate_predictions.py* are stored
 
     The options are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
@@ -155,10 +171,19 @@ Here are the scripts and the details about every usable parameter :
     * log_lvl : Change the log display level (Choices : debug, info, warning)
    
 
-6) **runner.py :**
+6) **runner.py :** Allows to sequentially launch any number of scripts to generate results.
    > python runner.py [dataset_name] [goal_index] [classifiers]+
 
     The mandatory parameters are :
     * dataset_name : The dataset to use
     * goal_index : The index of the goal variable
+    * output_classes : The method of class generation (Choices : below_threshold, inside_bin)
+    * split_method : The splitting method to use (Choices : equal_width, equal_freq, kmeans)
     * classifiers : The classifiers to compare (choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
+    * regressors : The regression models to use (Choices : RandomForest, LinearRegression, XGBoost, GaussianNB, Khiops)
+    * n_estimators : The number of trees in the forest of RandomForest or the number of gradient boosted trees for XGBoost
+    * max_depth : The maximum depth of the trees in RandomForest, XGBoost or DecisionTree
+    * max_features : number of features to consider when looking for the best split in RandomForest or DecisionTree
+    * learning_rate : Boosting learning rate of XGBoost
+    * preprocess : Do the pre-processing step or not
+    * log_lvl : Change the log display level (Choices : debug, info, warning)

@@ -8,6 +8,7 @@ import argparse
 import logging
 import ntpath
 import time
+import glob
 import sys
 import gc
 import os
@@ -80,7 +81,6 @@ def argument_parser():
 
     parser.add_argument('--goal_var_index',
                         type=int,
-                        required=True,
                         help='The index of the column to use as the goal variable')
 
     parser.add_argument('--n_bins',
@@ -130,6 +130,20 @@ if __name__ == "__main__":
         output_path = os.path.join(output_path, str(n_bins) + '_bins_' + split_method + '_' + output_classes)
 
         logging.info('Generated output path : ' + output_path)
+
+    # If no value was given for the parameter 'goal_var_index', try to find if a .index file is in the dataset's folder
+    if goal_var_index is None:
+        indexes_paths = glob.glob(os.path.join(dataset_path.replace(os.path.basename(dataset_path), ''), '*.index'))
+        if len(indexes_paths) > 1:
+            raise ValueError('More than one index file was found in the dataset\'s folder.')
+        elif len(indexes_paths) == 0:
+            raise ValueError('No index file was found in the dataset\'s folder, please create one or define a value for'
+                             ' the parameter "goal_var_index" when calling this script.')
+        else:
+            with open(indexes_paths[0]) as f:
+                goal_var_index = int(f.readline())
+            logging.info('Using goal_var_index = ' + str(goal_var_index) + " found in "
+                         + str(os.path.join(dataset_path, '*.index')))
 
     # Declare the thresholds generator
     thresholds_generator = None

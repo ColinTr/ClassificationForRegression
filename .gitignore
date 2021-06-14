@@ -106,7 +106,6 @@ venv.bak/
 # Ignore the datasets
 data/raw/*
 !data/raw/.gitkeep
-!data/raw/Combined_Cycle_Power_Plant_Dataset/
 
 data/processed/*
 !data/processed/.gitkeep
@@ -118,6 +117,7 @@ data/extracted_features/*
 !data/extracted_features/.gitkeep
 
 data/cleaned/*
+!data/cleaned/Combined_Cycle_Power_Plant_Dataset/
 !data/cleaned/.gitkeep
 
 data/predictions/*

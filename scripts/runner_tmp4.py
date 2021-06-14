@@ -22,17 +22,10 @@ if __name__ == "__main__":
     datasets_names = [dataset_directory.split('/')[-1] for dataset_directory in datasets_directories]
     datasets_names = sorted(datasets_names)
 
-    indexes_paths = [glob.glob(dataset_directory + '/*.index')[0] for dataset_directory in datasets_directories]
-    indexes_paths = sorted(indexes_paths)  # Sort alphabetically
-
     cmd_list = []
-    for dataset_name, index_path in zip(datasets_names, indexes_paths):
-        goal_index = None
-        with open(index_path) as f:
-            goal_index = int(f.readline())
-
+    for dataset_name in datasets_names:
         for bins in bins_to_explore:
-            cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --goal_var_index=\"{}\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\"".format(dataset_name, goal_index, bins, output_classes, split_method, log_lvl))
+            cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\"".format(dataset_name, bins, output_classes, split_method, log_lvl))
             cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}".format(dataset_name, bins, split_method, output_classes, model, log_lvl, n_jobs))
             cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}_classifier\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={}".format(dataset_name, bins, split_method, output_classes, model, model, log_lvl, n_jobs))
             cmd_list.append("python compute_metrics.py  --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}_classifier/{}_regressor\" --log_lvl=\"{}\"".format(dataset_name, bins, split_method, output_classes, model, model, 'info'))
