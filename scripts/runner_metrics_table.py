@@ -15,7 +15,7 @@ if __name__ == "__main__":
     Allows to sequentially launch any number of scripts to generate results.
     """
 
-    datasets_directories = [f.path for f in os.scandir('..', 'data', 'metrics') if f.is_dir()]
+    datasets_directories = [f.path for f in os.scandir(os.path.join('..', 'data', 'metrics')) if f.is_dir()]
     datasets_names = [dataset_directory.split(os.path.sep)[-1] for dataset_directory in datasets_directories]
     datasets_names = sorted(datasets_names)
 
