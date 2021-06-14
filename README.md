@@ -90,7 +90,7 @@ Here is a list of examples of usages of the scripts :
 For easier understanding of the flow of the dataset through the scripts, refer to the following diagram :
 
 <div style="text-align:center">
-   <img src="./scripts_diagram.png" alt="scripts_diagram" width="60%"/>
+   <img src="./scripts_diagram.png" alt="scripts_diagram" width="100%"/>
 </div>
 
 ## Usage
