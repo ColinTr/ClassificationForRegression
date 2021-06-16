@@ -157,6 +157,8 @@ def compute_mean_roc_auc_score(df):
             # As stated in the documentation, we use the 'probability of the class with the greater label' for y_pred
             y_pred_proba = list(df['threshold_' + str(threshold_number) + '_P(C_1|X)'])
 
+            print(np.unique(y_true))
+
             classifiers_roc_auc_scores.append(roc_auc_score(y_true, y_pred_proba))
 
         computed_roc_auc_score = np.mean(classifiers_roc_auc_scores)

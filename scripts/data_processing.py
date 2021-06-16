@@ -218,13 +218,17 @@ if __name__ == "__main__":
         logging.debug("Generated classes (for train dataset) :\n"
                       + str(pd.DataFrame(train_discretized_classes).head(5)))
 
+        for col_test, col_train, index in zip(test_discretized_classes.T, train_discretized_classes.T, range(len(test_discretized_classes.T))):
+            if len(np.unique(col_test)) != len(np.unique(col_train)):
+                logging.warning("Train classes " + str(list(set(np.unique(col_train)) - set(np.unique(col_test)))) + " of class column " + str(index) + " of file " + str(k_fold_index) + " are not present in test")
+
         # Plot the distribution of the values
-        # plt.figure()
-        # sns.countplot(data=pd.DataFrame({"values": train_discretized_classes.ravel()}), x="values")
-        # plt.savefig("train" + str(np.random.random()) + ".png")
-        # plt.figure()
-        # sns.countplot(data=pd.DataFrame({"values": test_discretized_classes.ravel()}), x="values")
-        # plt.savefig("test.png")
+        plt.figure()
+        sns.countplot(data=pd.DataFrame({"values": train_discretized_classes.ravel()}), x="values")
+        plt.savefig("train.png")  # " + str(np.random.random()) + "
+        plt.figure()
+        sns.countplot(data=pd.DataFrame({"values": test_discretized_classes.ravel()}), x="values")
+        plt.savefig("test.png")
 
         # We then add the generated classes to the dataframe
         for class_index in range(train_discretized_classes.shape[1]):
