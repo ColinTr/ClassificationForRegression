@@ -11,6 +11,11 @@ from sklearn.metrics import r2_score
 import numpy as np
 
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set()
+
+
 def compute_all_metrics(y_true, y_pred, n, p):
     """
     Computes the following metrics : MAE, MSE, RMSE, R² and Adjusted R².
@@ -145,6 +150,7 @@ def compute_mean_roc_auc_score(df):
         # Then we are in a binary classification configuration
 
         classifiers_roc_auc_scores = []
+        tmp_classifiers_roc_auc_scores = []
 
         for threshold_col_list in thresholds_columns_dict.values():
             # For all the classes of a given threshold :
@@ -157,11 +163,12 @@ def compute_mean_roc_auc_score(df):
             # As stated in the documentation, we use the 'probability of the class with the greater label' for y_pred
             y_pred_proba = list(df['threshold_' + str(threshold_number) + '_P(C_1|X)'])
 
-            print(np.unique(y_true))
-
             classifiers_roc_auc_scores.append(roc_auc_score(y_true, y_pred_proba))
+            # classifiers_roc_auc_scores.append(custom_roc_auc_score_binary_classification(y_true, y_pred_proba))
+            tmp_classifiers_roc_auc_scores.append(custom_roc_auc_score_binary_classification(y_true, y_pred_proba))
 
         computed_roc_auc_score = np.mean(classifiers_roc_auc_scores)
+        print("sklearn = " + str(computed_roc_auc_score) + " tmp = " + str(np.mean(tmp_classifiers_roc_auc_scores)))
 
     elif highest_number_of_classes_of_threshold_found > 2:
         # Then we are in a multiclass configuration
@@ -174,7 +181,28 @@ def compute_mean_roc_auc_score(df):
             y_pred_proba.append(list(df[threshold_col]))
         y_pred_proba = np.transpose(y_pred_proba)
 
-        computed_roc_auc_score = roc_auc_score(y_true, y_pred_proba, multi_class='ovr')
+        ovr_roc_auc_list = []
+        for class_number in range(len(y_pred_proba[0])):
+            # First we compute the emprical probability of encountering the class
+            class_probability = y_true.count(class_number) / len(y_true)
+
+            if class_probability != 0:
+                # We now encode y_true and y_pred_proba to compute the roc_auc_score in a One vs Rest manner
+                encoded_y_true = [1 if val == class_number else 0 for val in y_true]
+                encoded_y_pred_proba = [y_pred_proba[row_index][class_number] for row_index in range(len(y_pred_proba))]
+                ovr_roc_auc_list.append((class_probability, roc_auc_score(encoded_y_true, encoded_y_pred_proba)))
+
+        # Now we compute the weighted mean
+        tmp_roc_auc_score = np.sum([ovr_roc_auc_list[row_index][0]*ovr_roc_auc_list[row_index][1] for row_index in range(len(ovr_roc_auc_list))])
+        # tmp_roc_auc_score = np.mean([ovr_roc_auc_list[row_index][1] for row_index in range(len(ovr_roc_auc_list))])  # => THIS IS WHAT SKLEARN SEEMS TO BE DOING
+
+        if len(np.unique(y_true)) == len(y_pred_proba[0]):
+            computed_roc_auc_score = roc_auc_score(y_true, y_pred_proba, multi_class='ovr')
+            # custom_roc_auc_score_one_vs_rest(y_true, y_pred_proba)
+            print("sklearn = " + str(computed_roc_auc_score) + " & tmp = " + str(tmp_roc_auc_score))
+        else:
+            computed_roc_auc_score = tmp_roc_auc_score
+            print("sklearn = Error & tmp = " + str(tmp_roc_auc_score))
 
     else:
         raise ValueError('Incoherent number of classes for a threshold found.')
@@ -182,5 +210,46 @@ def compute_mean_roc_auc_score(df):
     return computed_roc_auc_score
 
 
-def custom_roc_auc_score(df):
-    pass
+def true_false_positive(threshold_vector, y_test):
+    true_positive = np.equal(threshold_vector, 1) & np.equal(y_test, 1)
+    true_negative = np.equal(threshold_vector, 0) & np.equal(y_test, 0)
+    false_positive = np.equal(threshold_vector, 1) & np.equal(y_test, 0)
+    false_negative = np.equal(threshold_vector, 0) & np.equal(y_test, 1)
+
+    tpr = true_positive.sum() / (true_positive.sum() + false_negative.sum())
+    fpr = false_positive.sum() / (false_positive.sum() + true_negative.sum())
+
+    return tpr, fpr
+
+
+def custom_roc_binary_classification(y_true, y_pred_proba, partitions=100):
+    roc = np.array([])
+    for partition_index in range(partitions + 1):
+        current_threshold = partition_index / partitions
+        threshold_vector = np.greater_equal(y_pred_proba, current_threshold).astype(int)
+        tpr, fpr = true_false_positive(threshold_vector, y_true)
+        roc = np.append(roc, [fpr, tpr])
+    roc = roc.reshape(-1, 2)
+    return roc
+
+
+def custom_roc_auc_score_binary_classification(y_true, y_pred_proba):
+    roc = custom_roc_binary_classification(y_true, y_pred_proba)
+    fpr, tpr = roc[:, 0], roc[:, 1]
+    return np.trapz(y=np.flip(tpr), x=np.flip(fpr))
+
+
+def custom_roc_auc_score_one_vs_rest(y_true, y_pred_proba):
+    if len(y_true) == 0:
+        return 1
+
+    empirical_probabilities = []
+
+    print(len(y_true))
+    print(len(y_pred_proba), ",", len(y_pred_proba[0]))
+
+    transposed_y_pred_proba = np.transpose(np.array(y_pred_proba))
+    for y_true_column, class_index in zip(transposed_y_pred_proba, range(len(transposed_y_pred_proba))):
+        print(y_true_column.shape)
+
+    return None
