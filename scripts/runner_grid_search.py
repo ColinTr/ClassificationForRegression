@@ -1,0 +1,82 @@
+"""
+Orange Labs
+Authors : Colin Troisemaine & Vincent Lemaire
+Maintainer : colin.troisemaine@gmail.com
+"""
+
+from sklearn.preprocessing import PowerTransformer, MinMaxScaler
+from sklearn.model_selection import GridSearchCV
+from sklearn import preprocessing
+from xgboost import XGBRegressor
+import pandas as pd
+import numpy as np
+import glob
+import os
+import gc
+
+
+def box_cox(Y):
+    Y = Y.reshape(-1, 1)
+
+    scaler = MinMaxScaler(feature_range=(1, 2))
+    scaler.fit(Y)
+    Y = scaler.transform(Y)
+
+    # Fit BoxCox on the training dataset
+    transform = PowerTransformer(method='box-cox')  # Only works with strictly positive values !
+    transform.fit(Y)
+    return transform.transform(Y)
+
+
+def normalize(X):
+    scaler = preprocessing.StandardScaler()
+    scaler.fit(X)
+    return pd.DataFrame(scaler.transform(X))
+
+
+if __name__ == "__main__":
+    """
+    Allows to sequentially launch any number of scripts to generate results.
+    """
+
+    output_classes = 'below_threshold'
+    split_method = 'equal_freq'
+    log_lvl = 'warning'
+    model = 'XGBoost'
+    xgboost_regr_grid = {'n_jobs': [4],
+                         'n_estimators': [100],
+                         'max_depth': [4, 8, 16, 32],
+                         'learning_rate': [0.01, 0.1, 0.3]}
+
+    datasets_directories = [x[0] for x in os.walk('../data/cleaned/')][1:]
+    datasets_paths = [glob.glob(dataset_directory + '/*.csv')[0] for dataset_directory in datasets_directories]
+    datasets_paths = sorted(datasets_paths)  # Sort alphabetically
+
+    indexes_paths = [glob.glob(dataset_directory + '/*.index')[0] for dataset_directory in datasets_directories]
+    indexes_paths = sorted(indexes_paths)  # Sort alphabetically
+
+    for dataset_path, index_path in zip(datasets_paths, indexes_paths):
+        target_var_index = None
+        with open(index_path) as f:
+            target_var_index = int(f.readline())
+
+        print('├── ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
+        full_data = pd.read_csv(dataset_path)
+        X = full_data.drop(full_data.columns[target_var_index], axis=1)
+        Y = np.ascontiguousarray(full_data[full_data.columns[target_var_index]])
+
+        X = np.ascontiguousarray(normalize(X))
+        Y = np.ascontiguousarray(box_cox(Y))
+        Y = Y.ravel()
+
+        print('│   └── XGBRegressor...')
+        grid = GridSearchCV(estimator=XGBRegressor(),
+                            param_grid=xgboost_regr_grid,
+                            scoring='neg_mean_squared_error',
+                            n_jobs=4)
+        grid.fit(X, Y)
+
+        print('       ' + str(grid.best_params_))
+
+        del grid, X, Y, full_data
+        gc.collect()

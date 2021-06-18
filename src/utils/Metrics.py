@@ -180,3 +180,7 @@ def compute_mean_roc_auc_score(df):
         raise ValueError('Incoherent number of classes for a threshold found.')
 
     return computed_roc_auc_score
+
+
+def custom_roc_auc_score(df):
+    pass

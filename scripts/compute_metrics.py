@@ -130,9 +130,9 @@ if __name__ == "__main__":
         split_metrics_df = pd.concat([split_metrics_df, pd.DataFrame({'train_mean_log_loss': [train_log_loss],
                                                                       'test_mean_log_loss': [test_log_loss]})], axis=1)
 
-        print("train")
+        # print("train")
         train_auc = compute_mean_roc_auc_score(train_predictions_dataframe)
-        print("test" + test_filename)
+        # print("test" + test_filename)
         test_auc = compute_mean_roc_auc_score(test_predictions_dataframe)
 
         split_metrics_df = pd.concat([split_metrics_df, pd.DataFrame({'train_mean_roc_auc_score': [train_auc],
