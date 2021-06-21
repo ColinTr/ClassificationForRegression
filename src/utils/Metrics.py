@@ -9,11 +9,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import r2_score
 import numpy as np
-
-
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set()
+import logging
 
 
 def compute_all_metrics(y_true, y_pred, n, p):
@@ -132,6 +128,7 @@ def compute_mean_roc_auc_score(df):
     thresholds_columns_dict = {}
     classes = []
 
+    # We start by sorting all the classes columns by threshold (classifier)
     for column_name in list(df.columns.values):
         if 'threshold' in column_name.split('_'):
             threshold_number = column_name.split('_')[1]
@@ -146,11 +143,11 @@ def compute_mean_roc_auc_score(df):
         return None
 
     highest_number_of_classes_of_threshold_found = np.max([len(elem) for elem in thresholds_columns_dict.values()])
+
     if highest_number_of_classes_of_threshold_found == 2:
-        # Then we are in a binary classification configuration
+        # We are in a binary classification configuration
 
         classifiers_roc_auc_scores = []
-        tmp_classifiers_roc_auc_scores = []
 
         for threshold_col_list in thresholds_columns_dict.values():
             # For all the classes of a given threshold :
@@ -160,15 +157,14 @@ def compute_mean_roc_auc_score(df):
 
             y_true = list(df[tmp_class_name])
 
-            # As stated in the documentation, we use the 'probability of the class with the greater label' for y_pred
-            y_pred_proba = list(df['threshold_' + str(threshold_number) + '_P(C_1|X)'])
-
-            classifiers_roc_auc_scores.append(roc_auc_score(y_true, y_pred_proba))
-            # classifiers_roc_auc_scores.append(custom_roc_auc_score_binary_classification(y_true, y_pred_proba))
-            tmp_classifiers_roc_auc_scores.append(custom_roc_auc_score_binary_classification(y_true, y_pred_proba))
+            if len(np.unique(y_true)) == 2:
+                # As in the documentation, we use the 'probability of the class with the greater label' for y_pred
+                y_pred_proba = list(df['threshold_' + str(threshold_number) + '_P(C_1|X)'])
+                classifiers_roc_auc_scores.append(roc_auc_score(y_true, y_pred_proba))
+            else:
+                logging.warning("Only one class present in binary classification data sample")
 
         computed_roc_auc_score = np.mean(classifiers_roc_auc_scores)
-        print("sklearn = " + str(computed_roc_auc_score) + " tmp = " + str(np.mean(tmp_classifiers_roc_auc_scores)))
 
     elif highest_number_of_classes_of_threshold_found > 2:
         # Then we are in a multiclass configuration
@@ -208,48 +204,3 @@ def compute_mean_roc_auc_score(df):
         raise ValueError('Incoherent number of classes for a threshold found.')
 
     return computed_roc_auc_score
-
-
-def true_false_positive(threshold_vector, y_test):
-    true_positive = np.equal(threshold_vector, 1) & np.equal(y_test, 1)
-    true_negative = np.equal(threshold_vector, 0) & np.equal(y_test, 0)
-    false_positive = np.equal(threshold_vector, 1) & np.equal(y_test, 0)
-    false_negative = np.equal(threshold_vector, 0) & np.equal(y_test, 1)
-
-    tpr = true_positive.sum() / (true_positive.sum() + false_negative.sum())
-    fpr = false_positive.sum() / (false_positive.sum() + true_negative.sum())
-
-    return tpr, fpr
-
-
-def custom_roc_binary_classification(y_true, y_pred_proba, partitions=100):
-    roc = np.array([])
-    for partition_index in range(partitions + 1):
-        current_threshold = partition_index / partitions
-        threshold_vector = np.greater_equal(y_pred_proba, current_threshold).astype(int)
-        tpr, fpr = true_false_positive(threshold_vector, y_true)
-        roc = np.append(roc, [fpr, tpr])
-    roc = roc.reshape(-1, 2)
-    return roc
-
-
-def custom_roc_auc_score_binary_classification(y_true, y_pred_proba):
-    roc = custom_roc_binary_classification(y_true, y_pred_proba)
-    fpr, tpr = roc[:, 0], roc[:, 1]
-    return np.trapz(y=np.flip(tpr), x=np.flip(fpr))
-
-
-def custom_roc_auc_score_one_vs_rest(y_true, y_pred_proba):
-    if len(y_true) == 0:
-        return 1
-
-    empirical_probabilities = []
-
-    print(len(y_true))
-    print(len(y_pred_proba), ",", len(y_pred_proba[0]))
-
-    transposed_y_pred_proba = np.transpose(np.array(y_pred_proba))
-    for y_true_column, class_index in zip(transposed_y_pred_proba, range(len(transposed_y_pred_proba))):
-        print(y_true_column.shape)
-
-    return None
