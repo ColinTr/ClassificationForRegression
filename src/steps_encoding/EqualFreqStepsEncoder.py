@@ -96,14 +96,14 @@ class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
         #
         # print("ideal_bin_length = " + str(ideal_bin_length) + " & len last = " + str(len(split_sorted_Y[-1])))
 
-        sorted_values = sorted(np.concatenate(Y).ravel())
+        sorted_values = sorted(Y.reshape(-1))
         n = len(sorted_values)
 
         # Let's define the list of the possible thresholds :
-        possible_thresholds = np.array([])
+        possible_thresholds = []
         unique_sorted_values = np.unique(sorted_values)
         for t_index in range(0, len(unique_sorted_values) - 1):
-            possible_thresholds = np.append(possible_thresholds, (unique_sorted_values[t_index] + unique_sorted_values[t_index + 1]) / 2.0)
+            possible_thresholds.append((unique_sorted_values[t_index] + unique_sorted_values[t_index + 1]) / 2.0)
 
         for bin_index in range(1, n_bins + 1):
             ideal_bin_index = bin_index * (n / (n_bins + 1))
@@ -114,7 +114,7 @@ class EqualFreqStepsEncoder(StepsEncoder.StepsEncoder):
             ideal_bin_position = sorted_values[ideal_bin_index]
 
             # Let's find the closest possible thresholds to the ideal bin position
-            tmp_difference = np.abs(possible_thresholds - ideal_bin_position)
+            tmp_difference = np.abs(np.array(possible_thresholds) - ideal_bin_position)
             min_value_indexes = np.argwhere(tmp_difference == np.amin(tmp_difference)).flatten().tolist()
 
             if bin_index < (n_bins + 1) / 2.0:
