@@ -68,7 +68,7 @@ if __name__ == "__main__":
         with open(index_path) as f:
             target_var_index = int(f.readline())
 
-        logging.info('├── ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
+        logging.info('--- ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
         full_data = pd.read_csv(dataset_path)
         X = full_data.drop(full_data.columns[target_var_index], axis=1)
         Y = np.ascontiguousarray(full_data[full_data.columns[target_var_index]])
@@ -82,7 +82,7 @@ if __name__ == "__main__":
         values_to_explore = np.unique(values_to_explore)
         rf_regr_grid['max_features'] = values_to_explore
 
-        logging.info('│   └── RandomForestRegressor...')
+        logging.info('    --- RandomForestRegressor...')
         grid = GridSearchCV(estimator=RandomForestRegressor(),
                             param_grid=rf_regr_grid,
                             scoring='neg_mean_squared_error',

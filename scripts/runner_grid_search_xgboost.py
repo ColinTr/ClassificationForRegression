@@ -68,7 +68,7 @@ if __name__ == "__main__":
         with open(index_path) as f:
             target_var_index = int(f.readline())
 
-        logging.info('├── ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
+        logging.info('--- ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
         full_data = pd.read_csv(dataset_path)
         X = full_data.drop(full_data.columns[target_var_index], axis=1)
         Y = np.ascontiguousarray(full_data[full_data.columns[target_var_index]])
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         Y = np.ascontiguousarray(box_cox(Y))
         Y = Y.ravel()
 
-        logging.info('│   └── XGBRegressor...')
+        logging.info('    --- XGBRegressor...')
         grid = GridSearchCV(estimator=XGBRegressor(),
                             param_grid=xgboost_regr_grid,
                             scoring='neg_mean_squared_error',
