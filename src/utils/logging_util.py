@@ -10,7 +10,7 @@ import os
 
 
 def setup_file_logging():
-    log_file_path = os.path.join('..', 'data', 'logs', 'grid_search_' + str(datetime.now()) + '.log')
+    log_file_path = os.path.join('..', 'data', 'logs', 'grid_search_' + str(datetime.now()).replace(':', '-') + '.log')
     if not os.path.exists(log_file_path):
         f = open(log_file_path, "w")
         f.write("")
