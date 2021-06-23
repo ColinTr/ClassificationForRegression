@@ -4,8 +4,21 @@ Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
 
+from datetime import datetime
 import logging
 import os
+
+
+def setup_file_logging():
+    log_file_path = os.path.join('../data/logs', 'grid_search_' + str(datetime.now()) + '.log')
+    if not os.path.exists(log_file_path):
+        os.mknod(log_file_path)
+
+    root_logger = logging.getLogger()
+    file_handler = logging.FileHandler(log_file_path)
+    root_logger.addHandler(file_handler)
+    console_handler = logging.StreamHandler()
+    root_logger.addHandler(console_handler)
 
 
 def setup_logging_level(level):

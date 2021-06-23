@@ -3,6 +3,7 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
+import logging
 
 from sklearn.preprocessing import PowerTransformer, MinMaxScaler
 from sklearn.model_selection import GridSearchCV
@@ -11,8 +12,13 @@ from xgboost import XGBRegressor
 import pandas as pd
 import numpy as np
 import glob
+import sys
 import os
 import gc
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.utils.logging_util import setup_file_logging
+from src.utils.logging_util import setup_logging_level
 
 
 def box_cox(Y):
@@ -38,6 +44,8 @@ if __name__ == "__main__":
     """
     Allows to sequentially launch any number of scripts to generate results.
     """
+    setup_file_logging()
+    setup_logging_level('info')
 
     output_classes = 'below_threshold'
     split_method = 'equal_freq'
@@ -60,7 +68,7 @@ if __name__ == "__main__":
         with open(index_path) as f:
             target_var_index = int(f.readline())
 
-        print('├── ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
+        logging.info('├── ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
         full_data = pd.read_csv(dataset_path)
         X = full_data.drop(full_data.columns[target_var_index], axis=1)
         Y = np.ascontiguousarray(full_data[full_data.columns[target_var_index]])
@@ -69,14 +77,14 @@ if __name__ == "__main__":
         Y = np.ascontiguousarray(box_cox(Y))
         Y = Y.ravel()
 
-        print('│   └── XGBRegressor...')
+        logging.info('│   └── XGBRegressor...')
         grid = GridSearchCV(estimator=XGBRegressor(),
                             param_grid=xgboost_regr_grid,
                             scoring='neg_mean_squared_error',
                             n_jobs=4)
         grid.fit(X, Y)
 
-        print('       ' + str(grid.best_params_))
+        logging.info('       ' + str(grid.best_params_))
 
         del grid, X, Y, full_data
         gc.collect()
