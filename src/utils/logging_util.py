@@ -12,7 +12,9 @@ import os
 def setup_file_logging():
     log_file_path = os.path.join('../data/logs', 'grid_search_' + str(datetime.now()) + '.log')
     if not os.path.exists(log_file_path):
-        os.mknod(log_file_path)
+        f = open(log_file_path, "w")
+        f.write("")
+        f.close()
 
     root_logger = logging.getLogger()
     file_handler = logging.FileHandler(log_file_path)
