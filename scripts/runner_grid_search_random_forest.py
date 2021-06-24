@@ -90,6 +90,7 @@ if __name__ == "__main__":
         grid.fit(X, Y)
 
         logging.info('       ' + str(grid.best_params_))
+        logging.info('        best_score_ :' + str(grid.best_score_))
 
         del grid, X, Y, full_data
         gc.collect()

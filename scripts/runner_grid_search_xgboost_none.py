@@ -53,7 +53,7 @@ if __name__ == "__main__":
     model = 'XGBoost'
     xgboost_regr_grid = {'n_jobs': [4],
                          'n_estimators': [100],
-                         'max_depth': [4, 8, 16, 32],
+                         'max_depth': [None],
                          'learning_rate': [0.01, 0.1, 0.3]}
 
     datasets_directories = [x[0] for x in os.walk('../data/cleaned/')][1:]
@@ -85,6 +85,7 @@ if __name__ == "__main__":
         grid.fit(X, Y)
 
         logging.info('       ' + str(grid.best_params_))
+        logging.info('        Max est.get_depth() :' + str(grid.best_estimator_.max_depth))
         logging.info('        best_score_ :' + str(grid.best_score_))
 
         del grid, X, Y, full_data
