@@ -11,12 +11,12 @@ if __name__ == "__main__":
     Allows to sequentially launch any number of scripts to generate results.
     """
 
-    bins_to_explore = [32]
+    bins_to_explore = [2, 4, 8, 16, 32]
     split_method = 'equal_freq'
     output_classes = 'inside_bin'
     model = 'RandomForest'
     log_lvl = 'warning'
-    n_jobs = -1
+    n_jobs = 16
 
     datasets_directories = [f.path for f in os.scandir('../data/cleaned/') if f.is_dir()]
     datasets_names = [dataset_directory.split('/')[-1] for dataset_directory in datasets_directories]

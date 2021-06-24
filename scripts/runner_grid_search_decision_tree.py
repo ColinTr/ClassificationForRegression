@@ -51,9 +51,7 @@ if __name__ == "__main__":
     split_method = 'equal_freq'
     log_lvl = 'warning'
     model = 'RandomForest'
-    dt_regr_grid = {'n_jobs': [4],
-                    'n_estimators': [100],
-                    'max_depth': [4, 8, 16, 32],
+    dt_regr_grid = {'max_depth': [4, 8, 16, 32],
                     'max_features': []}
 
     datasets_directories = [x[0] for x in os.walk('../data/cleaned/')][1:]
