@@ -34,23 +34,28 @@ class InsideBinClassGenerator(CustomClassGenerator.CustomClassGenerator):
         :param Y: np.array or list : The goal variable
         :return: list[list[int]] : The classes
         """
-        thresholds_pairs = [[np.min(Y), self.thresholds_list[0]]]
+        Y = list(Y.reshape(-1))
+        Y_max = np.max(Y)
+        Y_min = np.min(Y)
+
+        thresholds_pairs = [[Y_min, self.thresholds_list[0]]]
         for threshold_index in range(0, len(self.thresholds_list) - 1):
             thresholds_pairs.append([self.thresholds_list[threshold_index], self.thresholds_list[threshold_index + 1]])
-        thresholds_pairs.append([self.thresholds_list[-1], np.max(Y)])
+        thresholds_pairs.append([self.thresholds_list[-1], Y_max])
+
+        num_thresholds = len(thresholds_pairs)
 
         classes = []
-        for value in np.array(Y):
-            value = value[0]
+        for value in Y:
             class_of_instance = -1
             # If the value is the maximum of the range, its class is the last one
-            if value >= np.max(Y):
-                class_of_instance = len(thresholds_pairs) - 1
-            elif value <= np.min(Y):
+            if value >= Y_max:
+                class_of_instance = num_thresholds - 1
+            elif value <= Y_min:
                 class_of_instance = 0
             else:
                 # Otherwise we iterate through the bins :
-                for class_index in range(0, len(thresholds_pairs)):
+                for class_index in range(0, num_thresholds):
                     if thresholds_pairs[class_index][0] <= value < thresholds_pairs[class_index][1]:
                         class_of_instance = class_index
 
