@@ -3,7 +3,7 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
-
+import time
 from os.path import isfile
 from os import listdir
 import pandas as pd
@@ -79,4 +79,6 @@ if __name__ == "__main__":
 
     for c in cmd_list:
         print("Launching :\n" + str(c))
+        start_time = time.time()
         os.system(c)
+        print("Elapsed time : {0:.2f}".format(time.time() - start_time))

@@ -9,6 +9,8 @@ import numpy as np
 import argparse
 import logging
 import time
+import glob
+import json
 import sys
 import os
 import gc
@@ -73,6 +75,13 @@ def argument_parser():
                         help='Boosting learning rate of XGBoost',
                         default=None)
 
+    parser.add_argument('--use_hyperparam_file',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Use the hyperparameters in the hyperparameters.json file that is '
+                             'in the same folder of the dataset',
+                        default='False')
+
     parser.add_argument('--n_jobs',
                         type=int,
                         help='The number of cores to use',
@@ -104,6 +113,7 @@ if __name__ == "__main__":
 
     dataset_folder = args.dataset_folder
     output_path = args.output_path
+    use_hyperparam_file = args.use_hyperparam_file
 
     directory_files = [f for f in listdir(dataset_folder) if isfile(join(dataset_folder, f))]
 
@@ -134,6 +144,25 @@ if __name__ == "__main__":
         output_path = os.path.join(output_path, args.regressor + '_regressor')
 
         logging.info('Generated output path : ' + output_path)
+
+    # If no value was given for the parameter 'goal_var_index', try to find if a .index file is in the dataset's folder
+    hyperparameters = None
+    if use_hyperparam_file == 'True':
+        dataset_name = dataset_folder.split(os.path.sep)[dataset_folder.split(os.path.sep).index('data') + 2]
+        hyperparameters_files = glob.glob(os.path.join('..', 'data', 'cleaned', dataset_name, 'hyperparameters.json'))
+        if len(hyperparameters_files) > 1:
+            raise ValueError('More than one hyperparameters file was found in the dataset\'s folder.')
+        elif len(hyperparameters_files) == 0:
+            raise ValueError('No index hyperparameters was found in the dataset\'s folder, please create one or'
+                             'define explicitly each hyperparameter.')
+        else:
+            with open(hyperparameters_files[0]) as f:
+                data = json.load(f)
+            if args.regressor not in data.keys():
+                raise ValueError('Hyperparameters file does not contain values for ' + args.regressor)
+            else:
+                hyperparameters = data[args.regressor]
+            logging.info('Using file\'s hyperparameters : ' + str(hyperparameters))
 
     train_predictions_list, test_predictions_list = [],  []
 
@@ -196,11 +225,19 @@ if __name__ == "__main__":
             n_estimators = 100 if (args.n_estimators is None or args.n_estimators == 'None') else args.n_estimators  # Default value is 100
             n_estimators = int(n_estimators)
 
-            max_depth = None if (args.max_depth is None or args.max_depth == "None") else args.max_depth  # Default value is None
-            if max_depth is not None:
+            max_depth = None  # Default value is None
+            if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
+                max_depth = hyperparameters['max_depth']
+            if args.max_depth is not None:
+                max_depth = args.max_depth
+            if max_depth is not None and max_depth != 'None':
                 max_depth = int(max_depth)
 
-            max_features = 'auto' if (args.max_features is None or args.max_features == 'None') else args.max_features  # Default value is 'auto'
+            max_features = 'auto'  # Default value is 'auto'
+            if use_hyperparam_file == 'True' and 'max_features' in hyperparameters.keys():
+                max_features = hyperparameters['max_features']
+            if args.max_features is not None:
+                max_features = args.max_features
             if max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
                 max_features = int(max_features)
 
@@ -225,10 +262,19 @@ if __name__ == "__main__":
             n_estimators = 100 if (args.n_estimators is None or args.n_estimators == 'None') else args.n_estimators  # Default value is 100
             n_estimators = int(n_estimators)
 
-            max_depth = 6 if (args.max_depth is None or args.max_depth == 'None') else args.max_depth  # Default value is 6
-            max_depth = int(max_depth)
+            max_depth = 6  # Default value is 6
+            if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
+                max_depth = hyperparameters['max_depth']
+            if args.max_depth is not None:
+                max_depth = args.max_depth
+            if max_depth is not None and max_depth != 'None':
+                max_depth = int(max_depth)
 
-            learning_rate = 0.3 if (args.learning_rate is None or args.learning_rate == 'None') else args.learning_rate  # Default value is 0.3
+            learning_rate = 0.3  # Default value is 0.3
+            if use_hyperparam_file == 'True' and 'learning_rate' in hyperparameters.keys():
+                learning_rate = hyperparameters['learning_rate']
+            if args.learning_rate is not None:
+                learning_rate = args.learning_rate
             learning_rate = float(learning_rate)
 
             logging.info('Using the following parameters for XGBRegressor : '
@@ -245,11 +291,19 @@ if __name__ == "__main__":
             raise ValueError('This regressor hasn\'t been implemented yet')
 
         elif args.regressor == "DecisionTree":
-            max_depth = None if (args.max_depth is None or args.max_depth == 'None') else args.max_depth  # Default value is None
-            if max_depth is not None:
+            max_depth = None  # Default value is None
+            if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
+                max_depth = hyperparameters['max_depth']
+            if args.max_depth is not None:
+                max_depth = args.max_depth
+            if max_depth is not None and max_depth != 'None':
                 max_depth = int(max_depth)
 
-            max_features = None if (args.max_features is None or args.max_features == 'None') else args.max_features  # Default value is None
+            max_features = None  # Default value is None
+            if use_hyperparam_file == 'True' and 'max_features' in hyperparameters.keys():
+                max_features = hyperparameters['max_features']
+            if args.max_features is not None:
+                max_features = args.max_features
             if max_features is not None and max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
                 max_features = int(max_features)
 

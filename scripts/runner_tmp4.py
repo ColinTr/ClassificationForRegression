@@ -3,18 +3,18 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
-import glob
+
 import os
+import time
 
 if __name__ == "__main__":
     """
     Allows to sequentially launch any number of scripts to generate results.
     """
 
-    bins_to_explore = [2, 4, 8, 16, 32]
     split_method = 'equal_freq'
     output_classes = 'inside_bin'
-    model = 'RandomForest'
+    models = 'RandomForest', 'XGBoost', 'DecisionTree'
     log_lvl = 'warning'
     n_jobs = 16
 
@@ -24,16 +24,13 @@ if __name__ == "__main__":
 
     cmd_list = []
     for dataset_name in datasets_names:
-        for bins in bins_to_explore:
-            cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\"".format(dataset_name, bins, output_classes, split_method, log_lvl))
-            cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}".format(dataset_name, bins, split_method, output_classes, model, log_lvl, n_jobs))
-            cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}_classifier\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={}".format(dataset_name, bins, split_method, output_classes, model, model, log_lvl, n_jobs))
-            cmd_list.append("python compute_metrics.py  --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}_classifier/{}_regressor\" --log_lvl=\"{}\"".format(dataset_name, bins, split_method, output_classes, model, model, 'info'))
-
-        # cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={}".format(dataset_name, split_method, output_classes, model, log_lvl, n_jobs))
-        # cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\"".format(dataset_name, split_method, output_classes, model + '_regressor', log_lvl))
-        # cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"RMSE\"".format(dataset_name))
+        cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\"".format(dataset_name, 2, output_classes, split_method, log_lvl))
+        for model in models:
+            cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={}".format(dataset_name, 2, split_method, output_classes, model, log_lvl, n_jobs))
+            cmd_list.append("python compute_metrics.py  --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/Standard/{}_regressor\" --log_lvl=\"{}\"".format(dataset_name, 2, split_method, output_classes, model, 'info'))
 
     for c in cmd_list:
         print("\nLaunching : " + str(c))
+        start_time = time.time()
         os.system(c)
+        print("Elapsed time : {0:.2f}".format(time.time() - start_time))

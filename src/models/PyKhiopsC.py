@@ -9,6 +9,8 @@ import platform
 import sys
 
 # Check the Khiops python directory on linux
+import numpy as np
+
 if platform.system() == "Linux":
     khiopsPythonDir = os.path.join(os.environ["HOME"], "pykhiops")
     if not os.path.isdir(khiopsPythonDir):
@@ -41,7 +43,7 @@ class PyKhiopsC(BaseModel.BaseModel):
         # Since Khiops gives a dataframe with a first column being the predicted class and the others columns,
         #     we drop the first column
         predicted_class_probabilities = proba_dataframe.drop(proba_dataframe.columns[0], axis=1).to_numpy()
-        for class_index, index in zip(self.model.classes_, range(len(self.model.classes_))):
+        for class_index, index in zip(list(np.unique(Y)), range(len(np.unique(Y)))):
             extracted_features["P(C_" + str(class_index) + "|X)"] = predicted_class_probabilities[:, index]
 
         # TODO : Extract more features
