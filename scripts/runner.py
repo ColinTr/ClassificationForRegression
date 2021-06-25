@@ -23,11 +23,6 @@ def argument_parser():
                         help='The dataset to use',
                         required=True)
 
-    parser.add_argument('--goal_index',
-                        type=int,
-                        help='The index of the goal variable',
-                        required=False)
-
     parser.add_argument('--output_classes',
                         type=str,
                         default="below_threshold",
@@ -80,7 +75,7 @@ def argument_parser():
                         type=str,
                         help='Do the pre-processing step or not',
                         choices=["True", "False"],
-                        default=False)
+                        default='False')
 
     parser.add_argument('--log_lvl',
                         type=str,
@@ -98,17 +93,15 @@ if __name__ == "__main__":
 
     args = argument_parser()
 
-    bins_to_explore = [5, 10, 15, 20, 30, 40, 50]
+    bins_to_explore = [2, 4, 8, 16, 32]
 
     cmd_list = []
 
     if args.preprocess == 'True':
-        if args.goal_index is None:
-            raise ValueError('Specify goal_index parameter to preprocess the dataset.')
         # Process the dataset
         for bins in bins_to_explore:
-            cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --goal_var_index=\"{}\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\""
-                            .format(args.dataset_name, args.goal_index, bins, args.output_classes, args.split_method, args.log_lvl))
+            cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\""
+                            .format(args.dataset_name, bins, args.output_classes, args.split_method, args.log_lvl))
 
     # Extract the features
     for classifier in args.classifiers:
@@ -133,7 +126,7 @@ if __name__ == "__main__":
 
     # Compute the baseline
     for regressor in args.regressors:
-        cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/5_bins_{}_{}/\" "
+        cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" "
                         "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\""
                         .format(args.dataset_name, args.split_method, args.output_classes, regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
         cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/5_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""

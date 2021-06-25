@@ -3,9 +3,9 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
-
 import pandas as pd
 import numpy as np
+import platform
 import argparse
 import logging
 import time
@@ -26,6 +26,13 @@ from sklearn.tree import DecisionTreeRegressor
 from os.path import isfile, join
 from xgboost import XGBRegressor
 from os import listdir
+
+if platform.system() == "Windows":
+    if os.environ.get('KhiopsHome') is not None:
+        from pykhiops.sklearn import KhiopsRegressor
+else:
+    if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):
+        from pykhiops.sklearn import KhiopsRegressor
 
 
 def argument_parser():
@@ -287,8 +294,12 @@ if __name__ == "__main__":
             Y_test_pred = model.predict(np.ascontiguousarray(X_test))
 
         elif args.regressor == "Khiops":
-            # TODO
-            raise ValueError('This regressor hasn\'t been implemented yet')
+            model = KhiopsRegressor()
+
+            model.fit(X=X_train, y=Y_train)
+
+            Y_train_pred = model.predict(X_train)
+            Y_test_pred = model.predict(X_test)
 
         elif args.regressor == "DecisionTree":
             max_depth = None  # Default value is None
@@ -354,7 +365,7 @@ if __name__ == "__main__":
         logging.info("Split " + str(fold_num) + " predictions predictions saved.")
 
         # Expressly free the variables from the memory
-        del train_dataframe, test_dataframe, X_train, X_test, Y_train, Y_test, Y_train_pred, Y_test_pred
+        del train_dataframe, test_dataframe, X_train, X_test, Y_train, Y_test, Y_train_pred, Y_test_pred, model
 
         # Call python's garbage collector
         gc.collect()

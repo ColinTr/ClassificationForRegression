@@ -16,6 +16,7 @@ if __name__ == "__main__":
     output_classes = 'inside_bin'
     models = 'RandomForest', 'XGBoost', 'DecisionTree'
     log_lvl = 'warning'
+    use_hyperparam_file = 'False'
     n_jobs = 16
 
     datasets_directories = [f.path for f in os.scandir('../data/cleaned/') if f.is_dir()]
@@ -24,9 +25,9 @@ if __name__ == "__main__":
 
     cmd_list = []
     for dataset_name in datasets_names:
-        cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\"".format(dataset_name, 2, output_classes, split_method, log_lvl))
+        # cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\"".format(dataset_name, 2, output_classes, split_method, log_lvl))
         for model in models:
-            cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={}".format(dataset_name, 2, split_method, output_classes, model, log_lvl, n_jobs))
+            cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={} --use_hyperparam_file {}".format(dataset_name, 2, split_method, output_classes, model, log_lvl, n_jobs, use_hyperparam_file))
             cmd_list.append("python compute_metrics.py  --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/Standard/{}_regressor\" --log_lvl=\"{}\"".format(dataset_name, 2, split_method, output_classes, model, 'info'))
 
     for c in cmd_list:

@@ -6,7 +6,6 @@ Maintainer : colin.troisemaine@gmail.com
 
 from os.path import isfile, join
 from os import listdir
-
 import numpy as np
 import pandas as pd
 import argparse
@@ -186,7 +185,10 @@ if __name__ == "__main__":
             # We the extract features with this classifier on the train AND test data
             train_extracted_features, train_score = classifier_model.extract_features(X_train, Y_train[test_column])
             test_extracted_features, test_score = classifier_model.extract_features(X_test, Y_test[test_column])
-            logging.info('model ' + str(index) + ' accuracy : train = {0:.2f}'.format(train_score) + ' & test = {0:.2f}'.format(test_score))
+            if train_score is not None and test_score is not None:
+                logging.info('model ' + str(index) + ' accuracy : train = {0:.2f}'.format(train_score) + ' & test = {0:.2f}'.format(test_score))
+            else:
+                logging.info('model ' + str(index) + ' finished extracting features.')
 
             # We can now add the extracted features to the dataframes :
             for ef_train_key in train_extracted_features.keys():
