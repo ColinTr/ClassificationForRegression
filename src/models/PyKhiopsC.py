@@ -11,7 +11,7 @@ import platform
 import os
 
 if platform.system() == "Windows":
-    if os.environ.get('KhiopsHome') is not None:
+    if os.path.exists(os.path.join(os.environ.get('KhiopsHome'), "pykhiops", "lib")):
         from pykhiops.sklearn import KhiopsClassifier
 else:
     if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):

@@ -28,7 +28,7 @@ from xgboost import XGBRegressor
 from os import listdir
 
 if platform.system() == "Windows":
-    if os.environ.get('KhiopsHome') is not None:
+    if os.path.exists(os.path.join(os.environ.get('KhiopsHome'), "pykhiops", "lib")):
         from pykhiops.sklearn import KhiopsRegressor
 else:
     if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):
