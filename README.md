@@ -127,6 +127,7 @@ Here are the scripts and the details about every usable parameter :
     * output_path : The folder where the results will be saved (will be generated if not defined)
     * classifier : The classifier model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
     * class_cols : The indexes of the classes columns
+    * n_jobs : The number of cores to use
     * log_lvl : Change the log display level (Choices : debug, info, warning)
    
 

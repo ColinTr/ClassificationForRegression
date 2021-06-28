@@ -89,6 +89,7 @@ if __name__ == "__main__":
     args = argument_parser()
 
     bins_to_explore = [2, 4, 8, 16, 32]
+    n_jobs = 16
 
     cmd_list = []
 
@@ -107,16 +108,16 @@ if __name__ == "__main__":
         # Extract the features
         for classifier in args.classifiers:
             for bins in bins_to_explore:
-                cmd_list.append("python feature_extraction.py --dataset_folder=\"" + os.path.join('..', 'data', 'processed', dataset_name, str(bins) + '_bins_' + str(args.split_method) + '_' + str(args.output_classes)) + "\" --classifier=\"{}\" --log_lvl=\"{}\""
-                                .format(classifier, args.log_lvl))
+                cmd_list.append("python feature_extraction.py --dataset_folder=\"" + os.path.join('..', 'data', 'processed', dataset_name, str(bins) + '_bins_' + str(args.split_method) + '_' + str(args.output_classes)) + "\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
+                                .format(classifier, args.log_lvl, n_jobs))
 
         # Generate the predictions
         for classifier in args.classifiers:
             for regressor in args.regressors:
                 for bins in bins_to_explore:
                     cmd_list.append("python generate_predictions.py --dataset_folder=\"" + os.path.join('..', 'data', 'extracted_features', dataset_name, str(bins) + '_bins_' + str(args.split_method) + '_' + str(args.output_classes), classifier + '_classifier') + "\""
-                                    " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\""
-                                    .format(regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
+                                    " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
+                                    .format(regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl, n_jobs))
 
         # Compute the metrics
         for classifier in args.classifiers:
