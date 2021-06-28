@@ -16,7 +16,7 @@ if __name__ == "__main__":
     output_classes = 'inside_bin'
     models = 'RandomForest', 'XGBoost', 'DecisionTree'
     log_lvl = 'warning'
-    use_hyperparam_file = 'False'
+    use_hyperparam_file = 'True'
     n_jobs = 16
 
     datasets_directories = [f.path for f in os.scandir('../data/cleaned/') if f.is_dir()]
