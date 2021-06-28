@@ -101,32 +101,32 @@ if __name__ == "__main__":
         if args.preprocess == 'True':
             # Process the dataset
             for bins in bins_to_explore:
-                cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\""
-                                .format(dataset_name, bins, args.output_classes, args.split_method, args.log_lvl))
+                cmd_list.append("python data_processing.py --dataset_path=\"" + os.path.join('..', 'data', 'cleaned', dataset_name, 'data.csv') + "\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\""
+                                .format(bins, args.output_classes, args.split_method, args.log_lvl))
 
         # Extract the features
         for classifier in args.classifiers:
             for bins in bins_to_explore:
-                cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\""
-                                .format(dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl))
+                cmd_list.append("python feature_extraction.py --dataset_folder=\"" + os.path.join('..', 'data', 'processed', dataset_name, str(bins) + '_bins_' + str(args.split_method) + '_' + str(args.output_classes)) + "\" --classifier=\"{}\" --log_lvl=\"{}\""
+                                .format(classifier, args.log_lvl))
 
         # Generate the predictions
         for classifier in args.classifiers:
             for regressor in args.regressors:
                 for bins in bins_to_explore:
-                    cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""
+                    cmd_list.append("python generate_predictions.py --dataset_folder=\"" + os.path.join('..', 'data', 'extracted_features', dataset_name, str(bins) + '_bins_' + str(args.split_method) + '_' + str(args.output_classes), classifier + '_classifier') + "\""
                                     " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\""
-                                    .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
+                                    .format(regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
 
         # Compute the metrics
         for classifier in args.classifiers:
             for regressor in args.regressors:
                 for bins in bins_to_explore:
-                    cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}/{}/\" --log_lvl=\"{}\""
-                                    .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor + '_regressor', args.log_lvl))
+                    cmd_list.append("python compute_metrics.py --predictions_folder=\"" + os.path.join('..', 'data', 'predictions', dataset_name, str(bins) + '_bins_' + str(args.split_method) + '_' + str(args.output_classes), classifier + '_classifier', regressor + '_regressor') + "\" --log_lvl=\"{}\""
+                                    .format(args.log_lvl))
 
         # Create the graph
-        cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"RMSE\"".format(dataset_name))
+        cmd_list.append("python visualisation.py --parent_folder=\"" + os.path.join('..', 'data', 'metrics', dataset_name) + "\" --metric=\"RMSE\"")
 
     for c in cmd_list:
         print("Launching :\n" + str(c))
