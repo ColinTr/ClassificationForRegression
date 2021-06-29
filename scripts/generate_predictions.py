@@ -3,6 +3,7 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
+from sklearn.model_selection import GridSearchCV
 import pandas as pd
 import numpy as np
 import platform
@@ -28,8 +29,9 @@ from xgboost import XGBRegressor
 from os import listdir
 
 if platform.system() == "Windows":
-    if os.path.exists(os.path.join(os.environ.get('KhiopsHome'), "pykhiops", "lib")):
-        from pykhiops.sklearn import KhiopsRegressor
+    if os.environ.get('KhiopsHome') is not None:
+        if os.path.exists(os.path.join(os.environ.get('KhiopsHome'), "pykhiops", "lib")):
+            from pykhiops.sklearn import KhiopsRegressor
 else:
     if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):
         from pykhiops.sklearn import KhiopsRegressor
@@ -94,6 +96,13 @@ def argument_parser():
                         help='The number of cores to use',
                         default=-1)
 
+    parser.add_argument('--grid_search',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Automatically optimize the hyperparameters for '
+                             'the given dataset using a grid search',
+                        default='False')
+
     parser.add_argument('--log_lvl',
                         type=str,
                         default='info',
@@ -110,6 +119,92 @@ def get_column_with_word(full_dataframe, word):
             thresholds_cols_indexes.append(column_index)
     classes_df = full_dataframe[full_dataframe.columns[thresholds_cols_indexes]]
     return classes_df
+
+
+def xgboost_grid_search(X, Y):
+    """
+    TODO
+    :param X: TODO
+    :param Y: TODO
+    :return: TODO
+    """
+    param_grid = {'n_jobs': [4],
+                  'n_estimators': [100],
+                  'max_depth': [4, 8, 16, 32],
+                  'learning_rate': [0.01, 0.1, 0.3]}
+
+    grid = GridSearchCV(estimator=XGBRegressor(),
+                        param_grid=param_grid,
+                        scoring='neg_mean_squared_error',
+                        n_jobs=4)
+
+    grid.fit(X, Y)
+
+    logging.info('Grid search\'s optimal parameters are : '
+                 'max_depth=' + str(grid.best_params_['max_depth']) +
+                 ' & learning_rate=' + str(grid.best_params_['learning_rate']))
+
+    return grid.best_params_['max_depth'], grid.best_params_['learning_rate']
+
+
+def random_forest_grid_search(X, Y):
+    """
+    TODO
+    :param X: TODO
+    :param Y: TODO
+    :return: TODO
+    """
+    param_grid = {'n_jobs': [4],
+                  'n_estimators': [100],
+                  'max_depth': [4, 8, 16, 32],
+                  'max_features': []}
+
+    values_to_explore = list(map(int, np.linspace(2, X.shape[1], num=4)))
+    values_to_explore.append(int(np.sqrt(X.shape[1])))
+    values_to_explore = np.unique(values_to_explore)
+    param_grid['max_features'] = values_to_explore
+
+    grid = GridSearchCV(estimator=RandomForestRegressor(),
+                        param_grid=param_grid,
+                        scoring='neg_mean_squared_error',
+                        n_jobs=4)
+
+    grid.fit(X, Y)
+
+    logging.info('Grid search\'s optimal parameters are : '
+                 'max_depth=' + str(grid.best_params_['max_depth']) +
+                 ' & max_features=' + str(grid.best_params_['max_features']))
+
+    return grid.best_params_['max_depth'], grid.best_params_['max_features']
+
+
+def decision_tree_grid_search(X, Y):
+    """
+    TODO
+    :param X: TODO
+    :param Y: TODO
+    :return: TODO
+    """
+    param_grid = {'max_depth': [4, 8, 16, 32],
+                  'max_features': []}
+
+    values_to_explore = list(map(int, np.linspace(2, X.shape[1], num=4)))
+    values_to_explore.append(int(np.sqrt(X.shape[1])))
+    values_to_explore = np.unique(values_to_explore)
+    param_grid['max_features'] = values_to_explore
+
+    grid = GridSearchCV(estimator=DecisionTreeRegressor(),
+                        param_grid=param_grid,
+                        scoring='neg_mean_squared_error',
+                        n_jobs=4)
+
+    grid.fit(X, Y)
+
+    logging.info('Grid search\'s optimal parameters are : '
+                 'max_depth=' + str(grid.best_params_['max_depth']) +
+                 ' & max_features=' + str(grid.best_params_['max_features']))
+
+    return grid.best_params_['max_depth'], grid.best_params_['max_features']
 
 
 if __name__ == "__main__":
@@ -232,24 +327,29 @@ if __name__ == "__main__":
             n_estimators = 100 if (args.n_estimators is None or args.n_estimators == 'None') else args.n_estimators  # Default value is 100
             n_estimators = int(n_estimators)
 
-            max_depth = None  # Default value is None
-            if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
-                max_depth = hyperparameters['max_depth']
-            if args.max_depth is not None and args.max_depth != 'None':
-                max_depth = args.max_depth
-            if max_depth is not None and max_depth != 'None':
-                max_depth = int(max_depth)
+            if args.grid_search == 'True' or args.grid_search is True:
+                logging.info('Starting grid_search for RandomForest...')
+                max_depth, max_features = random_forest_grid_search(X_train, Y_train)
+            else:
+                max_depth = None  # Default value is None
+                if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
+                    max_depth = hyperparameters['max_depth']
+                if args.max_depth is not None and args.max_depth != 'None':
+                    max_depth = args.max_depth
+                if max_depth is not None and max_depth != 'None':
+                    max_depth = int(max_depth)
 
-            max_features = 'auto'  # Default value is 'auto'
-            if use_hyperparam_file == 'True' and 'max_features' in hyperparameters.keys():
-                max_features = hyperparameters['max_features']
-            if args.max_features is not None and args.max_features != 'None':
-                max_features = args.max_features
-            if max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
-                max_features = int(max_features)
+                max_features = 'auto'  # Default value is 'auto'
+                if use_hyperparam_file == 'True' and 'max_features' in hyperparameters.keys():
+                    max_features = hyperparameters['max_features']
+                if args.max_features is not None and args.max_features != 'None':
+                    max_features = args.max_features
+                if max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
+                    max_features = int(max_features)
 
-            logging.info('Using the following parameters for RandomForestRegressor : '
-                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+                logging.info('Using the following parameters for RandomForestRegressor : '
+                             'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+
             model = RandomForestRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators,
                                           max_depth=max_depth, max_features=max_features)
 
@@ -269,23 +369,28 @@ if __name__ == "__main__":
             n_estimators = 100 if (args.n_estimators is None or args.n_estimators == 'None') else args.n_estimators  # Default value is 100
             n_estimators = int(n_estimators)
 
-            max_depth = 6  # Default value is 6
-            if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
-                max_depth = hyperparameters['max_depth']
-            if args.max_depth is not None and args.max_depth != 'None':
-                max_depth = args.max_depth
-            if max_depth is not None and max_depth != 'None':
-                max_depth = int(max_depth)
+            if args.grid_search == 'True' or args.grid_search is True:
+                logging.info('Starting grid_search for XGBoost...')
+                max_depth, learning_rate = xgboost_grid_search(X_train, Y_train)
+            else:
+                max_depth = 6  # Default value is 6
+                if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
+                    max_depth = hyperparameters['max_depth']
+                if args.max_depth is not None and args.max_depth != 'None':
+                    max_depth = args.max_depth
+                if max_depth is not None and max_depth != 'None':
+                    max_depth = int(max_depth)
 
-            learning_rate = 0.3  # Default value is 0.3
-            if use_hyperparam_file == 'True' and 'learning_rate' in hyperparameters.keys():
-                learning_rate = hyperparameters['learning_rate']
-            if args.learning_rate is not None and args.learning_rate != 'None':
-                learning_rate = args.learning_rate
-            learning_rate = float(learning_rate)
+                learning_rate = 0.3  # Default value is 0.3
+                if use_hyperparam_file == 'True' and 'learning_rate' in hyperparameters.keys():
+                    learning_rate = hyperparameters['learning_rate']
+                if args.learning_rate is not None and args.learning_rate != 'None':
+                    learning_rate = args.learning_rate
+                learning_rate = float(learning_rate)
 
-            logging.info('Using the following parameters for XGBRegressor : '
-                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
+                logging.info('Using the following parameters for XGBRegressor : '
+                             'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
+
             model = XGBRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate)
 
             model.fit(X_train, Y_train)
@@ -302,24 +407,29 @@ if __name__ == "__main__":
             Y_test_pred = model.predict(X_test)
 
         elif args.regressor == "DecisionTree":
-            max_depth = None  # Default value is None
-            if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
-                max_depth = hyperparameters['max_depth']
-            if args.max_depth is not None and args.max_depth != 'None':
-                max_depth = args.max_depth
-            if max_depth is not None and max_depth != 'None':
-                max_depth = int(max_depth)
+            if args.grid_search == 'True' or args.grid_search is True:
+                logging.info('Starting grid_search for DecisionTree...')
+                max_depth, max_features = decision_tree_grid_search(X_train, Y_train)
+            else:
+                max_depth = None  # Default value is None
+                if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
+                    max_depth = hyperparameters['max_depth']
+                if args.max_depth is not None and args.max_depth != 'None':
+                    max_depth = args.max_depth
+                if max_depth is not None and max_depth != 'None':
+                    max_depth = int(max_depth)
 
-            max_features = None  # Default value is None
-            if use_hyperparam_file == 'True' and 'max_features' in hyperparameters.keys():
-                max_features = hyperparameters['max_features']
-            if args.max_features is not None and args.max_features != 'None':
-                max_features = args.max_features
-            if max_features is not None and max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
-                max_features = int(max_features)
+                max_features = None  # Default value is None
+                if use_hyperparam_file == 'True' and 'max_features' in hyperparameters.keys():
+                    max_features = hyperparameters['max_features']
+                if args.max_features is not None and args.max_features != 'None':
+                    max_features = args.max_features
+                if max_features is not None and max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
+                    max_features = int(max_features)
 
-            logging.info('Using the following parameters for DecisionTreeRegressor : '
-                         'max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+                logging.info('Using the following parameters for DecisionTreeRegressor : '
+                             'max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+
             model = DecisionTreeRegressor(max_depth=max_depth, max_features=max_features)
 
             model.fit(X_train, Y_train)
