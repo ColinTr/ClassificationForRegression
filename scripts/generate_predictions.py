@@ -237,7 +237,7 @@ if __name__ == "__main__":
                 max_depth = hyperparameters['max_depth']
             if args.max_depth is not None and args.max_depth != 'None':
                 max_depth = args.max_depth
-            if max_depth is not None:
+            if max_depth is not None and max_depth != 'None':
                 max_depth = int(max_depth)
 
             max_features = 'auto'  # Default value is 'auto'
@@ -274,7 +274,8 @@ if __name__ == "__main__":
                 max_depth = hyperparameters['max_depth']
             if args.max_depth is not None and args.max_depth != 'None':
                 max_depth = args.max_depth
-            max_depth = int(max_depth)
+            if max_depth is not None and max_depth != 'None':
+                max_depth = int(max_depth)
 
             learning_rate = 0.3  # Default value is 0.3
             if use_hyperparam_file == 'True' and 'learning_rate' in hyperparameters.keys():

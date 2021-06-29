@@ -53,7 +53,7 @@ if __name__ == "__main__":
     model = 'XGBoost'
     xgboost_regr_grid = {'n_jobs': [4],
                          'n_estimators': [100],
-                         'max_depth': [None],
+                         'max_depth': [None],  # Will actually be 6 as it is xgboost's default value
                          'learning_rate': [0.01, 0.1, 0.3]}
 
     datasets_directories = [x[0] for x in os.walk('../data/cleaned/')][1:]
