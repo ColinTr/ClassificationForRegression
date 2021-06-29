@@ -123,10 +123,11 @@ def get_column_with_word(full_dataframe, word):
 
 def xgboost_grid_search(X, Y):
     """
-    TODO
-    :param X: TODO
-    :param Y: TODO
-    :return: TODO
+    Execute a grid search for XGBoost regressor on the given dataset to find
+    the optimal max_depth and learning_rate
+    :param X: DataFrame or np.array : The dataset
+    :param Y: DataFrame or np.array : The target values
+    :return: best_max_depth, best_learning_rate
     """
     param_grid = {'n_jobs': [4],
                   'n_estimators': [100],
@@ -149,10 +150,11 @@ def xgboost_grid_search(X, Y):
 
 def random_forest_grid_search(X, Y):
     """
-    TODO
-    :param X: TODO
-    :param Y: TODO
-    :return: TODO
+    Execute a grid search for Random Forest regressor on the given dataset to
+    find the optimal max_depth and max_features
+    :param X: DataFrame or np.array : The dataset
+    :param Y: DataFrame or np.array : The target values
+    :return: best_max_depth, best_max_features
     """
     param_grid = {'n_jobs': [4],
                   'n_estimators': [100],
@@ -180,10 +182,11 @@ def random_forest_grid_search(X, Y):
 
 def decision_tree_grid_search(X, Y):
     """
-    TODO
-    :param X: TODO
-    :param Y: TODO
-    :return: TODO
+    Execute a grid search for Decision Tree regressor on the given dataset to
+    find the optimal max_depth and max_features
+    :param X: DataFrame or np.array : The dataset
+    :param Y: DataFrame or np.array : The target values
+    :return: best_max_depth, best_max_features
     """
     param_grid = {'max_depth': [4, 8, 16, 32],
                   'max_features': []}
