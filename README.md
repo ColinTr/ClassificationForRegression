@@ -139,6 +139,8 @@ Here are the scripts and the details about every usable parameter :
     * regressor : The regression model to use (Choices : RandomForest, LinearRegression, XGBoost, GaussianNB, Khiops)
 
     The options are :
+    * grid_search : Automatically optimize the hyperparameters for the given dataset using a grid search (Choices : True, False)
+    * use_hyperparam_file : Use the hyperparameters in the hyperparameters.json file that is in the same folder of the dataset (Choices : True, False)
     * output_path : The folder where the results will be saved (will be generated if not defined)
     * n_estimators : The number of trees in the forest of RandomForest or the number of gradient boosted trees for XGBoost
     * max_depth : The maximum depth of the trees in RandomForest, XGBoost or DecisionTree
@@ -177,11 +179,12 @@ Here are the scripts and the details about every usable parameter :
 
     The mandatory parameters are :
     * dataset_name : The dataset to use
-    * goal_index : The index of the goal variable
-    * output_classes : The method of class generation (Choices : below_threshold, inside_bin)
-    * split_method : The splitting method to use (Choices : equal_width, equal_freq, kmeans)
     * classifiers : The classifiers to compare (choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
     * regressors : The regression models to use (Choices : RandomForest, LinearRegression, XGBoost, GaussianNB, Khiops)
+
+    The options are :
+    * output_classes : The method of class generation (Choices : below_threshold, inside_bin)
+    * split_method : The splitting method to use (Choices : equal_width, equal_freq, kmeans)
     * n_estimators : The number of trees in the forest of RandomForest or the number of gradient boosted trees for XGBoost
     * max_depth : The maximum depth of the trees in RandomForest, XGBoost or DecisionTree
     * max_features : number of features to consider when looking for the best split in RandomForest or DecisionTree
