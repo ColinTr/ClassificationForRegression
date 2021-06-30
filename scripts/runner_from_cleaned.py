@@ -94,6 +94,7 @@ if __name__ == "__main__":
     args = argument_parser()
 
     bins_to_explore = [2, 4, 8, 16, 32]
+    grid_search = 'False'
 
     cmd_list = []
 
@@ -112,6 +113,7 @@ if __name__ == "__main__":
         # Extract the features
         for classifier in args.classifiers:
             for bins in bins_to_explore:
+                pass
                 cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\""
                                 .format(dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl))
 
@@ -120,8 +122,8 @@ if __name__ == "__main__":
             for regressor in args.regressors:
                 for bins in bins_to_explore:
                     cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""
-                                    " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\""
-                                    .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
+                                    " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search {}"
+                                    .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, 'info', grid_search))
 
         # Compute the metrics
         for classifier in args.classifiers:
@@ -133,13 +135,12 @@ if __name__ == "__main__":
         # Compute the baseline
         for regressor in args.regressors:
             cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" "
-                            "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\""
-                            .format(dataset_name, args.split_method, args.output_classes, regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
+                            "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search {}"
+                            .format(dataset_name, args.split_method, args.output_classes, regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, 'info', grid_search))
             cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""
                             .format(dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
 
         # Create the graphs
-        cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"r_squared\"".format(dataset_name))
         cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"RMSE\"".format(dataset_name))
 
     for c in cmd_list:
