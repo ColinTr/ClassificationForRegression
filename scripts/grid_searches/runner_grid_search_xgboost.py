@@ -6,9 +6,9 @@ Maintainer : colin.troisemaine@gmail.com
 import logging
 
 from sklearn.preprocessing import PowerTransformer, MinMaxScaler
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn import preprocessing
+from xgboost import XGBRegressor
 import pandas as pd
 import numpy as np
 import glob
@@ -16,7 +16,7 @@ import sys
 import os
 import gc
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from src.utils.logging_util import setup_file_logging
 from src.utils.logging_util import setup_logging_level
 
@@ -50,13 +50,13 @@ if __name__ == "__main__":
     output_classes = 'below_threshold'
     split_method = 'equal_freq'
     log_lvl = 'warning'
-    model = 'RandomForest'
-    rf_regr_grid = {'n_jobs': [4],
-                    'n_estimators': [100],
-                    'max_depth': [4, 8, 16, 32],
-                    'max_features': []}
+    model = 'XGBoost'
+    xgboost_regr_grid = {'n_jobs': [4],
+                         'n_estimators': [100],
+                         'max_depth': [4, 8, 16, 32],
+                         'learning_rate': [0.01, 0.1, 0.3]}
 
-    datasets_directories = [x[0] for x in os.walk('../data/cleaned/')][1:]
+    datasets_directories = [x[0] for x in os.walk('../../data/cleaned/')][1:]
     datasets_paths = [glob.glob(dataset_directory + '/*.csv')[0] for dataset_directory in datasets_directories]
     datasets_paths = sorted(datasets_paths)  # Sort alphabetically
 
@@ -77,14 +77,9 @@ if __name__ == "__main__":
         Y = np.ascontiguousarray(box_cox(Y))
         Y = Y.ravel()
 
-        values_to_explore = list(map(int, np.linspace(2, X.shape[1], num=4)))
-        values_to_explore.append(int(np.sqrt(X.shape[1])))
-        values_to_explore = np.unique(values_to_explore)
-        rf_regr_grid['max_features'] = values_to_explore
-
-        logging.info('    --- RandomForestRegressor...')
-        grid = GridSearchCV(estimator=RandomForestRegressor(),
-                            param_grid=rf_regr_grid,
+        logging.info('    --- XGBRegressor...')
+        grid = GridSearchCV(estimator=XGBRegressor(),
+                            param_grid=xgboost_regr_grid,
                             scoring='neg_mean_squared_error',
                             n_jobs=4)
         grid.fit(X, Y)

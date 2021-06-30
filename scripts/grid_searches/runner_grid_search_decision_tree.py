@@ -16,7 +16,7 @@ import sys
 import os
 import gc
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from src.utils.logging_util import setup_file_logging
 from src.utils.logging_util import setup_logging_level
 
@@ -51,10 +51,10 @@ if __name__ == "__main__":
     split_method = 'equal_freq'
     log_lvl = 'warning'
     model = 'RandomForest'
-    dt_regr_grid = {'max_depth': [None],
+    dt_regr_grid = {'max_depth': [4, 8, 16, 32],
                     'max_features': []}
 
-    datasets_directories = [x[0] for x in os.walk('../data/cleaned/')][1:]
+    datasets_directories = [x[0] for x in os.walk('../../data/cleaned/')][1:]
     datasets_paths = [glob.glob(dataset_directory + '/*.csv')[0] for dataset_directory in datasets_directories]
     datasets_paths = sorted(datasets_paths)  # Sort alphabetically
 
@@ -87,7 +87,7 @@ if __name__ == "__main__":
                             n_jobs=4)
         grid.fit(X, Y)
 
-        logging.info('       ' + str(grid.best_params_) + 'Actual max_depth :' + str(grid.best_estimator_.get_depth()))
+        logging.info('       ' + str(grid.best_params_))
         logging.info('        best_score_ :' + str(grid.best_score_))
 
         del grid, X, Y, full_data

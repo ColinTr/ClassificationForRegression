@@ -6,7 +6,7 @@ Maintainer : colin.troisemaine@gmail.com
 import logging
 
 from sklearn.preprocessing import PowerTransformer, MinMaxScaler
-from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
 from sklearn import preprocessing
 import pandas as pd
@@ -16,7 +16,7 @@ import sys
 import os
 import gc
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from src.utils.logging_util import setup_file_logging
 from src.utils.logging_util import setup_logging_level
 
@@ -51,10 +51,12 @@ if __name__ == "__main__":
     split_method = 'equal_freq'
     log_lvl = 'warning'
     model = 'RandomForest'
-    dt_regr_grid = {'max_depth': [4, 8, 16, 32],
+    rf_regr_grid = {'n_jobs': [4],
+                    'n_estimators': [100],
+                    'max_depth': [4, 8, 16, 32],
                     'max_features': []}
 
-    datasets_directories = [x[0] for x in os.walk('../data/cleaned/')][1:]
+    datasets_directories = [x[0] for x in os.walk('../../data/cleaned/')][1:]
     datasets_paths = [glob.glob(dataset_directory + '/*.csv')[0] for dataset_directory in datasets_directories]
     datasets_paths = sorted(datasets_paths)  # Sort alphabetically
 
@@ -78,11 +80,11 @@ if __name__ == "__main__":
         values_to_explore = list(map(int, np.linspace(2, X.shape[1], num=4)))
         values_to_explore.append(int(np.sqrt(X.shape[1])))
         values_to_explore = np.unique(values_to_explore)
-        dt_regr_grid['max_features'] = values_to_explore
+        rf_regr_grid['max_features'] = values_to_explore
 
-        logging.info('    --- DecisionTreeRegressor...')
-        grid = GridSearchCV(estimator=DecisionTreeRegressor(),
-                            param_grid=dt_regr_grid,
+        logging.info('    --- RandomForestRegressor...')
+        grid = GridSearchCV(estimator=RandomForestRegressor(),
+                            param_grid=rf_regr_grid,
                             scoring='neg_mean_squared_error',
                             n_jobs=4)
         grid.fit(X, Y)
