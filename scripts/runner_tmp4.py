@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     split_method = 'equal_freq'
     output_classes = 'inside_bin'
-    models = 'RandomForest', 'XGBoost', 'DecisionTree'
+    models = ['RandomForest', 'XGBoost', 'DecisionTree']
     log_lvl = 'warning'
     use_hyperparam_file = 'True'
     n_jobs = 16

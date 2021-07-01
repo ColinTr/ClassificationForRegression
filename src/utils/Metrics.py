@@ -195,10 +195,10 @@ def compute_mean_roc_auc_score(df):
         if len(np.unique(y_true)) == len(y_pred_proba[0]):
             computed_roc_auc_score = roc_auc_score(y_true, y_pred_proba, multi_class='ovr')
             # custom_roc_auc_score_one_vs_rest(y_true, y_pred_proba)
-            print("sklearn = " + str(computed_roc_auc_score) + " & tmp = " + str(tmp_roc_auc_score))
+            # print("sklearn = " + str(computed_roc_auc_score) + " & tmp = " + str(tmp_roc_auc_score))
         else:
             computed_roc_auc_score = tmp_roc_auc_score
-            print("sklearn = Error & tmp = " + str(tmp_roc_auc_score))
+            # print("sklearn = Error & tmp = " + str(tmp_roc_auc_score))
 
     else:
         raise ValueError('Incoherent number of classes for a threshold found.')
