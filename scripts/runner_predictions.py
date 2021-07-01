@@ -4,33 +4,14 @@ Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
 
-import argparse
 import time
 import os
-
-
-def argument_parser():
-    """
-    A parser to allow user to easily generate the results of any number of classifiers using our method.
-    """
-
-    parser = argparse.ArgumentParser(usage='\n python runner.py [dataset_name] [goal_index] [classifiers]+',
-                                     description="This program allows to run all the scripts necessary to generate the"
-                                                 " final figures on any number of classifiers for a given dataset.")
-
-    parser.add_argument('--n_bins',
-                        type=int,
-                        help='The number of bins',
-                        required=True)
-
-    return parser.parse_args()
 
 
 if __name__ == "__main__":
     """
     Extract features for all the datasets.
     """
-    args = argument_parser()
 
     regressors = ['RandomForest', 'LinearRegression', 'XGBoost', 'Khiops', 'DecisionTree']
     split_method = 'equal_freq'
