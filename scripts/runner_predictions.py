@@ -13,7 +13,7 @@ if __name__ == "__main__":
     Extract features for all the datasets.
     """
 
-    regressors = ['RandomForest', 'LinearRegression', 'XGBoost', 'Khiops', 'DecisionTree']
+    regressors = ['RandomForest', 'LinearRegression', 'XGBoost', 'DecisionTree']
     split_method = 'equal_freq'
     output_classes = 'inside_bin'
     log_lvl = 'warning'
