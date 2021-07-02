@@ -29,8 +29,8 @@ if __name__ == "__main__":
     for dataset_name in datasets_names:
         for regressor in regressors:
             for bins in n_bins:
-                cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={} --grid_search {}"
-                                .format(dataset_name, bins, split_method, output_classes, regressor, log_lvl, n_jobs, grid_search))
+                cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\" --regressor=\"{}\" --log_lvl=\"{}\" --n_jobs={} --grid_search {}"
+                                .format(dataset_name, bins, split_method, output_classes, 'RandomForest_classifier', regressor, log_lvl, n_jobs, grid_search))
 
     for c in cmd_list:
         print("\nLaunching : " + str(c))

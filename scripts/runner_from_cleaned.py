@@ -18,11 +18,6 @@ def argument_parser():
                                      description="This program allows to run all the scripts necessary to generate the"
                                                  " final figures on any number of classifiers for a given dataset.")
 
-    parser.add_argument('--dataset_name',
-                        type=str,
-                        help='The dataset to use',
-                        required=False)
-
     parser.add_argument('--output_classes',
                         type=str,
                         default="below_threshold",
@@ -94,7 +89,7 @@ if __name__ == "__main__":
     args = argument_parser()
 
     bins_to_explore = [2, 4, 8, 16, 32]
-    grid_search = 'False'
+    grid_search = 'True'
 
     cmd_list = []
 

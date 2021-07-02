@@ -33,7 +33,7 @@ if __name__ == "__main__":
     args = argument_parser()
 
     split_method = 'equal_freq'
-    output_classes = 'inside_bin'
+    output_classes = 'below_threshold'
     n_jobs = 16
 
     datasets_directories = [f.path for f in os.scandir('../data/cleaned/') if f.is_dir()]
@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     cmd_list = []
     for dataset_name in datasets_names:
-        cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\"".format(dataset_name, args.n_bins, output_classes, split_method, 'warning'))
+        cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl warning".format(dataset_name, args.n_bins, output_classes, split_method))
 
     for c in cmd_list:
         print("\nLaunching : " + str(c))

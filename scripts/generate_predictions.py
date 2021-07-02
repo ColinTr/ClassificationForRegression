@@ -139,7 +139,7 @@ def xgboost_grid_search(X, Y):
                         scoring='neg_mean_squared_error',
                         n_jobs=4)
 
-    grid.fit(X, Y)
+    grid.fit(np.ascontiguousarray(X), np.ascontiguousarray(Y))
 
     logging.info('Grid search\'s optimal parameters are : '
                  'max_depth=' + str(grid.best_params_['max_depth']) +
