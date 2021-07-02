@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     regressors = ['RandomForest', 'LinearRegression', 'XGBoost', 'DecisionTree']
     split_method = 'equal_freq'
-    output_classes = 'inside_bin'
+    output_classes = 'below_threshold'
     log_lvl = 'warning'
     n_bins = [2, 4, 8, 16, 32]
     n_jobs = 16

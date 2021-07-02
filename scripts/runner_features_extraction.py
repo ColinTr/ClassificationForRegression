@@ -14,7 +14,7 @@ if __name__ == "__main__":
     """
 
     split_method = 'equal_freq'
-    output_classes = 'inside_bin'
+    output_classes = 'below_threshold'
     classifier = 'RandomForest'
     log_lvl = 'warning'
     n_bins = [2, 4, 8, 16, 32]

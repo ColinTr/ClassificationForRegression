@@ -13,7 +13,7 @@ if __name__ == "__main__":
     """
 
     split_method = 'equal_freq'
-    output_classes = 'inside_bin'
+    output_classes = 'below_threshold'
     models = ['RandomForest', 'XGBoost', 'DecisionTree']
     log_lvl = 'warning'
     use_hyperparam_file = 'True'
