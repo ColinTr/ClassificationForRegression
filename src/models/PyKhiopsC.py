@@ -29,7 +29,6 @@ class PyKhiopsC(BaseModel.BaseModel):
         self.classes = list(np.unique(Y_train))
 
     def extract_features(self, X, Y):
-        # model_score = acc(self.model.predict(X=X), Y)
         extracted_features = pd.DataFrame([])
 
         # Extract the conditional probabilities of each class
@@ -39,4 +38,4 @@ class PyKhiopsC(BaseModel.BaseModel):
 
         # TODO : Extract more features
 
-        return extracted_features, None
+        return extracted_features

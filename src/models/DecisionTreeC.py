@@ -19,7 +19,6 @@ class DecisionTreeC(BaseModel.BaseModel):
         self.model.fit(np.ascontiguousarray(X_train), Y_train)
 
     def extract_features(self, X, Y):
-        model_score = self.model.score(np.ascontiguousarray(X), Y)
         extracted_features = pd.DataFrame([])
 
         # Extract the conditional probabilities of each class
@@ -29,4 +28,4 @@ class DecisionTreeC(BaseModel.BaseModel):
 
         # TODO : Extract more features
 
-        return extracted_features, model_score
+        return extracted_features

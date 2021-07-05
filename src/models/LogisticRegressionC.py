@@ -18,7 +18,6 @@ class LogisticRegressionC(BaseModel.BaseModel):
         self.model.fit(X_train, Y_train)
 
     def extract_features(self, X, Y):
-        model_score = self.model.score(X, Y)
         extracted_features = pd.DataFrame([])
 
         # Extract the conditional probabilities of each class
@@ -28,4 +27,4 @@ class LogisticRegressionC(BaseModel.BaseModel):
 
         # TODO : Extract more features
 
-        return extracted_features, model_score
+        return extracted_features

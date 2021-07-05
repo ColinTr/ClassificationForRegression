@@ -149,8 +149,17 @@ if __name__ == "__main__":
 
         logging.info("Reading the dataset's train and test file...")
         reading_start_time = time.time()
-        imported_train_dataset = pd.read_csv(os.path.join(dataset_folder, train_dataset_path))
-        imported_test_dataset = pd.read_csv(os.path.join(dataset_folder, test_dataset_path))
+
+        train_dataframe_path = os.path.join(dataset_folder, train_dataset_path)
+        col_names = pd.read_csv(train_dataframe_path, nrows=0).columns
+        types_dict = {}
+        for col_name in col_names:
+            if 'class' in col_name.split('_'):
+                types_dict[col_name] = np.int16
+            else:
+                types_dict[col_name] = np.float16
+        imported_train_dataset = pd.read_csv(train_dataframe_path, dtype=types_dict)
+        imported_test_dataset = pd.read_csv(os.path.join(dataset_folder, test_dataset_path), dtype=types_dict)
         logging.info("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
         # We keep all the columns except the goal variable ones and the one for regression
@@ -183,12 +192,9 @@ if __name__ == "__main__":
             classifier_model.fit(X_train, Y_train[train_column])
 
             # We the extract features with this classifier on the train AND test data
-            train_extracted_features, train_score = classifier_model.extract_features(X_train, Y_train[test_column])
-            test_extracted_features, test_score = classifier_model.extract_features(X_test, Y_test[test_column])
-            if train_score is not None and test_score is not None:
-                logging.info('model ' + str(index) + ' accuracy : train = {0:.2f}'.format(train_score) + ' & test = {0:.2f}'.format(test_score))
-            else:
-                logging.info('model ' + str(index) + ' finished extracting features.')
+            train_extracted_features = classifier_model.extract_features(X_train, Y_train[test_column])
+            test_extracted_features = classifier_model.extract_features(X_test, Y_test[test_column])
+            logging.info('model ' + str(index) + ' finished extracting features.')
 
             # We can now add the extracted features to the dataframes :
             for ef_train_key in train_extracted_features.keys():
