@@ -117,10 +117,18 @@ def get_real_class_predicted_probas(df):
     for class_column_name in class_columns_names:
         predicted_probas_dict['class_' + class_column_name + '_predicted_proba'] = []
 
+    classes_loc_dict = {}
+    for class_column_name in class_columns_names:
+        classes_loc_dict['class_' + str(class_column_name)] = df.columns.get_loc('class_' + str(class_column_name))
+
+    thresholds_classes_loc_dict = {}
+    for threshold_column_name in [column_name for column_name in list(df.columns.values) if 'threshold' in column_name.split('_')]:
+        thresholds_classes_loc_dict[threshold_column_name] = df.columns.get_loc(threshold_column_name)
+
     # For each row in the df, get for each class the predicted probability of the real class
     for index, row in enumerate(df.itertuples(index=False)):
         for class_column_name in class_columns_names:
-            real_class_value = row[df.columns.get_loc('class_' + str(class_column_name))]
-            predicted_probas_dict['class_' + class_column_name + '_predicted_proba'].append(row[df.columns.get_loc('threshold_' + str(class_column_name) + '_P(C_' + str(real_class_value) + '|X)')])
+            real_class_value = row[classes_loc_dict['class_' + str(class_column_name)]]
+            predicted_probas_dict['class_' + class_column_name + '_predicted_proba'].append(row[thresholds_classes_loc_dict['threshold_' + str(class_column_name) + '_P(C_' + str(real_class_value) + '|X)']])
 
     return pd.DataFrame(predicted_probas_dict)

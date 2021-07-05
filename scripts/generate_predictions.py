@@ -283,9 +283,17 @@ if __name__ == "__main__":
         if fold_num != test_fold_num:
             raise ValueError('Train and test files number don\'t match')
 
-        logging.debug('Reading training file : ' + os.path.join(dataset_folder, train_filename) + '...')
+        train_dataframe_path = os.path.join(dataset_folder, train_filename)
+        logging.debug('Reading training file : ' + train_dataframe_path + '...')
         reading_start_time = time.time()
-        train_dataframe = pd.read_csv(os.path.join(dataset_folder, train_filename))
+        col_names = pd.read_csv(train_dataframe_path, nrows=0).columns
+        types_dict = {}
+        for col_name in col_names:
+            if 'class' in col_name.split('_'):
+                types_dict[col_name] = np.int16
+            else:
+                types_dict[col_name] = np.float16
+        train_dataframe = pd.read_csv(train_dataframe_path, dtype=types_dict)
         logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
         # We keep all the columns except the goal variable ones and the class ones
@@ -303,9 +311,17 @@ if __name__ == "__main__":
         logging.debug('X_train :\n' + str(X_train.head(3)))
         logging.debug('Y_train :\n' + str(Y_train.head(3)))
 
-        logging.debug('Reading testing file : ' + os.path.join(dataset_folder, test_filename) + '...')
+        test_dataframe_path = os.path.join(dataset_folder, test_filename)
+        logging.debug('Reading testing file : ' + test_dataframe_path + '...')
         reading_start_time = time.time()
-        test_dataframe = pd.read_csv(os.path.join(dataset_folder, test_filename))
+        col_names = pd.read_csv(test_dataframe_path, nrows=0).columns
+        types_dict = {}
+        for col_name in col_names:
+            if 'class' in col_name.split('_'):
+                types_dict[col_name] = np.int16
+            else:
+                types_dict[col_name] = np.float16
+        test_dataframe = pd.read_csv(test_dataframe_path, dtype=types_dict)
         logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
         X_test = test_dataframe.drop(test_dataframe.columns[X_cols_to_drop], axis=1)
