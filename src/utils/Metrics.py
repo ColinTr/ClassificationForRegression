@@ -98,7 +98,10 @@ def compute_log_losses(df):
     for class_name in classes_names:
         # Log loss is undefined for p=0 or p=1, so probabilities are clipped to max(eps, min(1 - eps, p))
         eps = 1e-15
-        log_loss = (-1 / len(df[class_name])) * np.sum(np.log([max(eps, min(1 - eps, predicted_proba)) for predicted_proba in df[class_name]]))
+        tmp1 = [max(eps, min(1 - eps, predicted_proba)) for predicted_proba in df[class_name]]
+        tmp2 = np.log(tmp1)
+        tmp3 = np.sum(tmp2)
+        log_loss = (-1 / len(df[class_name])) * tmp3
 
         if len(classes_names) > 1:
             tmp_class_name = 'class_' + class_name.split('_')[1]
