@@ -4,8 +4,6 @@ Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
 
-from os.path import isfile, join
-from os import listdir
 import pandas as pd
 import numpy as np
 import argparse
@@ -15,11 +13,8 @@ import os
 import gc
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from src.utils.Metrics import compute_log_losses
-from src.utils.Metrics import compute_mean_roc_auc_score
-from src.utils.logging_util import generate_output_path
-from src.utils.logging_util import setup_logging_level
-from src.utils.Metrics import compute_all_metrics
+from src.utils.Metrics import compute_log_losses, compute_mean_roc_auc_score, compute_all_metrics
+from src.utils.logging_util import generate_output_path, setup_logging_level
 
 
 def argument_parser():
@@ -63,7 +58,7 @@ if __name__ == "__main__":
         output_path = generate_output_path(predictions_folder, ['predictions'], 'metrics')
         logging.info('Generated output path : ' + output_path)
 
-    directory_files = [f for f in listdir(predictions_folder) if isfile(join(predictions_folder, f))]
+    directory_files = [f for f in os.listdir(predictions_folder) if os.path.isfile(os.path.join(predictions_folder, f))]
 
     train_predictions_filename_list = [e for e in directory_files if 'TRAIN' in e.split('_')]
     train_predictions_filename_list.sort()
