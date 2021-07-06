@@ -157,7 +157,7 @@ if __name__ == "__main__":
             if 'class' in col_name.split('_'):
                 types_dict[col_name] = np.int16
             else:
-                types_dict[col_name] = np.float16
+                types_dict[col_name] = np.float16 if args.regressor != "XGBoost" else np.float32
         imported_train_dataset = pd.read_csv(train_dataframe_path, dtype=types_dict)
         imported_test_dataset = pd.read_csv(os.path.join(dataset_folder, test_dataset_path), dtype=types_dict)
         logging.info("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
