@@ -4,6 +4,7 @@ Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
 
+import time
 import os
 
 if __name__ == "__main__":
@@ -27,3 +28,9 @@ if __name__ == "__main__":
         for regressor in regressors:
             cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" --regressor=\"{}\" --log_lvl=\"{}\" --grid_search=\"{}\" --n_jobs={}"
                             .format(dataset_name, split_method, output_classes, regressor, log_lvl, grid_search, n_jobs))
+
+    for c in cmd_list:
+        print("\nLaunching : " + str(c))
+        start_time = time.time()
+        os.system(c)
+        print("Elapsed time : {0:.2f}".format(time.time() - start_time))
