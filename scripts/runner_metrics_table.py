@@ -3,7 +3,7 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
-import time
+
 from os.path import isfile
 from os import listdir
 import pandas as pd

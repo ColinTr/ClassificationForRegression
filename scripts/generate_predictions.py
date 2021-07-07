@@ -292,7 +292,7 @@ if __name__ == "__main__":
             if 'class' in col_name.split('_'):
                 types_dict[col_name] = np.int16
             else:
-                types_dict[col_name] = np.float16
+                types_dict[col_name] = np.float16 if args.regressor != "XGBoost" else np.float32
         train_dataframe = pd.read_csv(train_dataframe_path, dtype=types_dict)
         logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 
@@ -320,7 +320,7 @@ if __name__ == "__main__":
             if 'class' in col_name.split('_'):
                 types_dict[col_name] = np.int16
             else:
-                types_dict[col_name] = np.float16
+                types_dict[col_name] = np.float16 if args.regressor != "XGBoost" else np.float32
         test_dataframe = pd.read_csv(test_dataframe_path, dtype=types_dict)
         logging.debug("Dataset imported ({0:.2f}".format(time.time() - reading_start_time) + "sec)")
 

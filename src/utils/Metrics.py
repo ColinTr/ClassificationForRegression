@@ -3,6 +3,7 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
+import time
 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
@@ -97,8 +98,8 @@ def compute_log_losses(df):
     for class_name in classes_names:
         # Log loss is undefined for p=0 or p=1, so probabilities are clipped to max(eps, min(1 - eps, p))
         eps = 1e-15
-        log_loss = (-1 / len(df[class_name])) * np.sum([np.log(max(eps, min(1 - eps, predicted_proba)))
-                                                        for predicted_proba in df[class_name]])
+        log_loss = (-1 / len(df[class_name])) * np.sum(np.log(np.maximum(eps, np.minimum(1 - eps, np.array(df[class_name])))))
+
         if len(classes_names) > 1:
             tmp_class_name = 'class_' + class_name.split('_')[1]
         else:
@@ -179,7 +180,7 @@ def compute_mean_roc_auc_score(df):
 
         ovr_roc_auc_list = []
         for class_number in range(len(y_pred_proba[0])):
-            # First we compute the emprical probability of encountering the class
+            # First, we compute the empirical probability of encountering the class
             class_probability = y_true.count(class_number) / len(y_true)
 
             if class_probability != 0:

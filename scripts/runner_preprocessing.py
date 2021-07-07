@@ -36,8 +36,8 @@ if __name__ == "__main__":
     output_classes = 'below_threshold'
     n_jobs = 16
 
-    datasets_directories = [f.path for f in os.scandir('../data/cleaned/') if f.is_dir()]
-    datasets_names = [dataset_directory.split('/')[-1] for dataset_directory in datasets_directories]
+    datasets_directories = [f.path for f in os.scandir(os.path.join('..', 'data', 'cleaned')) if f.is_dir()]
+    datasets_names = [dataset_directory.split(os.path.sep)[-1] for dataset_directory in datasets_directories]
     datasets_names = sorted(datasets_names)
 
     cmd_list = []

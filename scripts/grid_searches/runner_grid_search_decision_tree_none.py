@@ -54,11 +54,11 @@ if __name__ == "__main__":
     dt_regr_grid = {'max_depth': [None],
                     'max_features': []}
 
-    datasets_directories = [x[0] for x in os.walk('../../data/cleaned/')][1:]
-    datasets_paths = [glob.glob(dataset_directory + '/*.csv')[0] for dataset_directory in datasets_directories]
+    datasets_directories = [x[0] for x in os.walk(os.path.join('..', '..', 'data', 'cleaned'))][1:]
+    datasets_paths = [glob.glob(dataset_directory + os.path.sep + '*.csv')[0] for dataset_directory in datasets_directories]
     datasets_paths = sorted(datasets_paths)  # Sort alphabetically
 
-    indexes_paths = [glob.glob(dataset_directory + '/*.index')[0] for dataset_directory in datasets_directories]
+    indexes_paths = [glob.glob(dataset_directory + os.path.sep + '*.index')[0] for dataset_directory in datasets_directories]
     indexes_paths = sorted(indexes_paths)  # Sort alphabetically
 
     for dataset_path, index_path in zip(datasets_paths, indexes_paths):
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         with open(index_path) as f:
             target_var_index = int(f.readline())
 
-        logging.info('--- ' + dataset_path.split('/')[3] + ' (target index = ' + str(target_var_index) + ')')
+        logging.info('--- ' + dataset_path.split(os.path.sep)[3] + ' (target index = ' + str(target_var_index) + ')')
         full_data = pd.read_csv(dataset_path)
         X = full_data.drop(full_data.columns[target_var_index], axis=1)
         Y = np.ascontiguousarray(full_data[full_data.columns[target_var_index]])
