@@ -19,7 +19,6 @@ if __name__ == "__main__":
     datasets_names = [dataset_directory.split(os.path.sep)[-1] for dataset_directory in datasets_directories]
     datasets_names = sorted(datasets_names)
 
-    cmd_list = []
     for dataset_name in datasets_names:
         bins_level_directories = [f.path for f in os.scandir(os.path.join('..', 'data', 'metrics', dataset_name)) if f.is_dir()]
         bins_level_directories = [bins_level_directory.split(os.path.sep)[-1] for bins_level_directory in bins_level_directories]
@@ -76,9 +75,3 @@ if __name__ == "__main__":
                         os.makedirs(results_dataframe_folder_path)
 
                     results_dataframe.to_csv(path_or_buf=results_dataframe_file_path, index=False)
-
-    for c in cmd_list:
-        print("Launching :\n" + str(c))
-        start_time = time.time()
-        os.system(c)
-        print("Elapsed time : {0:.2f}".format(time.time() - start_time))
