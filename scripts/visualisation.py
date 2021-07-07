@@ -47,7 +47,7 @@ def argument_parser():
 
     parser.add_argument('--metric',
                         type=str,
-                        default='r_squared',
+                        default='RMSE',
                         choices=['r_squared', 'adjusted_r_squared', 'MSE', 'RMSE', 'MAE'],
                         help='The metric to display')
 
