@@ -77,6 +77,13 @@ def argument_parser():
                         choices=["True", "False"],
                         default='False')
 
+    parser.add_argument('--grid_search',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Automatically optimize the hyperparameters for '
+                             'the given dataset using a grid search',
+                        default='False')
+
     parser.add_argument('--log_lvl',
                         type=str,
                         default='warning',
@@ -114,8 +121,8 @@ if __name__ == "__main__":
         for regressor in args.regressors:
             for bins in bins_to_explore:
                 cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""
-                                " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\""
-                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
+                                " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search=\"{}\""
+                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl, args.grid_search))
 
     # Compute the metrics
     for classifier in args.classifiers:
@@ -127,8 +134,8 @@ if __name__ == "__main__":
     # Compute the baseline
     for regressor in args.regressors:
         cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" "
-                        "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\""
-                        .format(args.dataset_name, args.split_method, args.output_classes, regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl))
+                        "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search=\"{}\""
+                        .format(args.dataset_name, args.split_method, args.output_classes, regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl, args.grid_search))
         cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""
                         .format(args.dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
 
