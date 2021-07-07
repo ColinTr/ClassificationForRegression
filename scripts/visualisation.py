@@ -161,7 +161,7 @@ if __name__ == "__main__":
                 files_in_folder = [join(sub_sub_path, f) for f in listdir(sub_sub_path) if
                                    isfile(join(sub_sub_path, f))]
                 if len(files_in_folder) != 1:
-                    raise ValueError('More than one file in ' + str(sub_sub_path) + ' (' + files_in_folder + ')')
+                    raise ValueError('More than one file in ' + str(sub_sub_path) + ' (' + str(files_in_folder) + ')')
                 sub_directories_dict[steps_encoding_name][class_generation_name][regressor_name][classifier_name][
                     bins_number] = files_in_folder[0]
 
