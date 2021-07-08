@@ -25,16 +25,7 @@ from src.models.DecisionTreeC import DecisionTreeC
 from src.models.RandomForestC import RandomForestC
 from src.models.GaussianNBC import GaussianNBC
 from src.models.XGBoostC import XGBoostC
-
-if platform.system() == "Windows":
-    if os.environ.get('KhiopsHome') is not None:
-        import importlib
-        khiops_spec = importlib.util.find_spec("PyKhiopsC")
-        if khiops_spec is not None:
-            from src.models.PyKhiopsC import PyKhiopsC
-else:
-    if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):
-        from src.models.PyKhiopsC import PyKhiopsC
+from src.models.PyKhiopsC import PyKhiopsC
 
 
 def argument_parser():
