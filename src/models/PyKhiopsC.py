@@ -7,15 +7,12 @@ Maintainer : colin.troisemaine@gmail.com
 from . import BaseModel
 import pandas as pd
 import numpy as np
-import platform
-import os
+import logging
 
-if platform.system() == "Windows":
-    if os.path.exists(os.path.join(os.environ.get('KhiopsHome'), "pykhiops", "lib")):
-        from pykhiops.sklearn import KhiopsClassifier
-else:
-    if os.path.exists(os.path.join(os.environ["HOME"], "pykhiops", "lib")):
-        from pykhiops.sklearn import KhiopsClassifier
+try:
+    from pykhiops.sklearn import KhiopsClassifier
+except ImportError:
+    logging.warning('Failed to import PyKhiops, KhiopsRegressor will be unavailable')
 
 
 class PyKhiopsC(BaseModel.BaseModel):
