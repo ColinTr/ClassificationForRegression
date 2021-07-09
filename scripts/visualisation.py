@@ -275,7 +275,7 @@ if __name__ == "__main__":
                     plt.suptitle(dataset_name + ' (test)')
                     fig.subplots_adjust(top=0.88)
                     plt.savefig(os.path.join(output_path,
-                                             'Test_' + metric + '_' + dataset_name + '_' + steps_encoding_method + '_' + class_generation_method + '_' + regressor_name + '.png'))
+                                             'Test_' + metric + '_' + steps_encoding_method + '_' + class_generation_method + '_' + regressor_name + '.png'))
                     # ==========================
 
                     # ========== Train ==========
@@ -311,5 +311,5 @@ if __name__ == "__main__":
                     plt.suptitle(dataset_name + ' (train)')
                     fig.subplots_adjust(top=0.88)
                     plt.savefig(os.path.join(output_path,
-                                             'Train_' + metric + '_' + dataset_name + '_' + steps_encoding_method + '_' + class_generation_method + '_' + regressor_name + '.png'))
+                                             'Train_' + metric + '_' + steps_encoding_method + '_' + class_generation_method + '_' + regressor_name + '.png'))
                     # ===========================

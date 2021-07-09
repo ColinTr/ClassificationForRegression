@@ -9,10 +9,6 @@ import os
 
 
 if __name__ == "__main__":
-    """
-    Extract features for all the datasets.
-    """
-
     regressors = ['Khiops']
     split_method = 'equal_freq'
     output_classes = 'below_threshold'
@@ -42,7 +38,7 @@ if __name__ == "__main__":
                                     .format(os.path.join('..', 'data', 'predictions', dataset_name, bins_level_directory, classifier_level_directory, regressor_level_directory)))
 
         cmd_list.append("python visualisation.py --parent_folder=\"{}\" --metric=\"RMSE\""
-                                    .format(os.path.join('..', 'data', 'metrics', dataset_name)))
+                        .format(os.path.join('..', 'data', 'metrics', dataset_name)))
 
     for c in cmd_list:
         print("\nLaunching : " + str(c))
