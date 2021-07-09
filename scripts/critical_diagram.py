@@ -3,11 +3,13 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
+
 from matplotlib import pyplot as plt
 from scipy import stats
 import pandas as pd
 import numpy as np
 import Orange
+import os
 
 
 if __name__ == "__main__":
@@ -15,16 +17,18 @@ if __name__ == "__main__":
 
     # The paths to the RMSE table where the results are stored. At least two tables must be given to be compared
     rmse_tables = [
-        ('..\\data\\results_tables\\equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor\\RMSE_table.csv', str(n_bins) + ' T Test RMSE'),
-        ('..\\data\\results_tables\\equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor\\RMSE_table.csv', 'Base Test RMSE'),
-        ('..\\data\\results_tables\\equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor\\RMSE_table.csv', str(n_bins) + ' T Test RMSE'),
-        ('..\\data\\results_tables\\equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor\\RMSE_table.csv', 'Base Test RMSE'),
-        ('..\\data\\results_tables\\equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor\\RMSE_table.csv', str(n_bins) + ' T Test RMSE'),
-        ('..\\data\\results_tables\\equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor\\RMSE_table.csv', 'Base Test RMSE')
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor', 'RMSE_table.csv'), 'Base Test RMSE'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor', 'RMSE_table.csv'), 'Base Test RMSE'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor', 'RMSE_table.csv'), 'Base Test RMSE'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_Khiops_classifier_Khiops_regressor', 'RMSE_table.csv'), 'Base Test RMSE'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_Khiops_classifier_Khiops_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE')
     ]
 
     # The labels corresponding to the paths (in the same order)
-    labels = ['DT+', 'DT', 'LR+', 'LR', 'RF+', 'RF']
+    labels = ['DT+', 'DT', 'LR+', 'LR', 'RF+', 'RF', 'Khiops', 'Khiops+']
 
     # The method that is compared with other methods If omitted, show pairwise comparison of methods
     cdmethod = None
