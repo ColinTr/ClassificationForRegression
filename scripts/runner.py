@@ -84,6 +84,11 @@ def argument_parser():
                              'the given dataset using a grid search',
                         default='False')
 
+    parser.add_argument('--n_jobs',
+                        type=int,
+                        help='The number of cores to use',
+                        default=16)
+
     parser.add_argument('--log_lvl',
                         type=str,
                         default='warning',
@@ -113,16 +118,19 @@ if __name__ == "__main__":
     # Extract the features
     for classifier in args.classifiers:
         for bins in bins_to_explore:
-            cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\""
-                            .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl))
+            cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
+                            .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl, args.n_jobs))
 
     # Generate the predictions
     for classifier in args.classifiers:
         for regressor in args.regressors:
             for bins in bins_to_explore:
                 cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""
-                                " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search=\"{}\""
-                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl, args.grid_search))
+                                " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "
+                                "--log_lvl=\"{}\" --grid_search=\"{}\"  --n_jobs={}"
+                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor,
+                                        args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
+                                        args.log_lvl, args.grid_search, args.n_jobs))
 
     # Compute the metrics
     for classifier in args.classifiers:
@@ -134,8 +142,11 @@ if __name__ == "__main__":
     # Compute the baseline
     for regressor in args.regressors:
         cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" "
-                        "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search=\"{}\""
-                        .format(args.dataset_name, args.split_method, args.output_classes, regressor, args.n_estimators, args.max_depth, args.max_features, args.learning_rate, args.log_lvl, args.grid_search))
+                        "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "
+                        "--log_lvl=\"{}\" --grid_search=\"{}\" --n_jobs={}"
+                        .format(args.dataset_name, args.split_method, args.output_classes, regressor,
+                                args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
+                                args.log_lvl, args.grid_search, args.n_jobs))
         cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""
                         .format(args.dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
 
