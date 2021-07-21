@@ -154,11 +154,12 @@ def random_forest_grid_search(X, Y):
     :return: best_max_depth, best_max_features
     """
     param_grid = {'n_jobs': [4],
-                  'n_estimators': [100],
-                  'max_depth': [4, 8, 16, 32],
+                  'n_estimators': [200, 400, 800],
+                  'max_depth': [4, 8, 32],
+                  'min_samples_leaf': [1, 2, 4],
                   'max_features': []}
 
-    values_to_explore = list(map(int, np.linspace(2, X.shape[1], num=4)))
+    values_to_explore = list(map(int, np.linspace(2, X.shape[1], num=3)))
     values_to_explore.append(int(np.sqrt(X.shape[1])))
     values_to_explore = np.unique(values_to_explore)
     param_grid['max_features'] = values_to_explore
@@ -170,11 +171,13 @@ def random_forest_grid_search(X, Y):
 
     grid.fit(X, Y)
 
-    logging.info('Grid search\'s optimal parameters are : '
-                 'max_depth=' + str(grid.best_params_['max_depth']) +
+    logging.info('Grid search\'s optimal parameters are : ' +
+                 ' & n_estimators=' + str(grid.best_params_['n_estimators']) +
+                 ' & min_samples_leaf=' + str(grid.best_params_['min_samples_leaf']) +
+                 ' & max_depth=' + str(grid.best_params_['max_depth']) +
                  ' & max_features=' + str(grid.best_params_['max_features']))
 
-    return grid.best_params_['max_depth'], grid.best_params_['max_features']
+    return grid.best_params_['max_depth'], grid.best_params_['max_features'], grid.best_params_['n_estimators']
 
 
 def decision_tree_grid_search(X, Y):
@@ -345,7 +348,7 @@ if __name__ == "__main__":
 
             if args.grid_search == 'True' or args.grid_search is True:
                 logging.info('Starting grid_search for RandomForest...')
-                max_depth, max_features = random_forest_grid_search(X_train, Y_train)
+                max_depth, max_features, n_estimators = random_forest_grid_search(X_train, Y_train)
             else:
                 max_depth = None  # Default value is None
                 if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
@@ -363,8 +366,8 @@ if __name__ == "__main__":
                 if max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
                     max_features = int(max_features)
 
-                logging.info('Using the following parameters for RandomForestRegressor : '
-                             'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+            logging.info('Using the following parameters for RandomForestRegressor : '
+                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
 
             model = RandomForestRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators,
                                           max_depth=max_depth, max_features=max_features)
@@ -404,8 +407,8 @@ if __name__ == "__main__":
                     learning_rate = args.learning_rate
                 learning_rate = float(learning_rate)
 
-                logging.info('Using the following parameters for XGBRegressor : '
-                             'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
+            logging.info('Using the following parameters for XGBRegressor : '
+                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
 
             model = XGBRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate)
 
@@ -443,8 +446,8 @@ if __name__ == "__main__":
                 if max_features is not None and max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
                     max_features = int(max_features)
 
-                logging.info('Using the following parameters for DecisionTreeRegressor : '
-                             'max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+            logging.info('Using the following parameters for DecisionTreeRegressor : '
+                         'max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
 
             model = DecisionTreeRegressor(max_depth=max_depth, max_features=max_features)
 
