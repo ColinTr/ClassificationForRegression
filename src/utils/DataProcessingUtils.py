@@ -34,7 +34,7 @@ def box_cox(Y_train, Y_test):
     transform.fit(Y_train)
 
     # Apply BoxCox on the training AND testing datasets
-    # sns.displot(Y)
+    # sns.displot(Y_train)
     # plt.savefig("Y_orignal.png")
     Y_train = transform.transform(Y_train)
     Y_test = transform.transform(Y_test)

@@ -100,6 +100,13 @@ def argument_parser():
                              'the given dataset using a grid search',
                         default='False')
 
+    parser.add_argument('--extracted_only',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Use only the extracted features to train the '
+                             'regressor',
+                        default='False')
+
     parser.add_argument('--log_lvl',
                         type=str,
                         default='info',
@@ -234,6 +241,10 @@ if __name__ == "__main__":
         extended = True
     else:
         extended = False
+        if args.extracted_only == 'True' or args.extracted_only is True:
+            raise ValueError('Can\'t train on extracted features only on '
+                             'unextended dataset. Set --extracted_only to '
+                             'False or apply on extended dataset.')
 
     # If no value was given for the 'output_path', we will generate it automatically
     if output_path is None:
@@ -299,6 +310,10 @@ if __name__ == "__main__":
         # It would be cheating to use the class_X columns since they are the goal variable encoded
         X_cols_to_drop = class_columns_indexes.copy()
         X_cols_to_drop.append(reg_goal_var_index)
+
+        if args.extracted_only == 'True' or args.extracted_only is True:
+            X_cols_to_drop.extend([tmp_col_index for tmp_col_index, tmp_col_name in zip(range(0, len(train_dataframe.columns.values)), train_dataframe.columns.values) if 'threshold' not in tmp_col_name.split('_')])
+        X_cols_to_drop = list(np.unique(X_cols_to_drop))
 
         X_train = train_dataframe.drop(train_dataframe.columns[X_cols_to_drop], axis=1)
         # This time, Y is the regression goal variable

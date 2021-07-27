@@ -3,7 +3,6 @@ Orange Labs
 Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
-import time
 
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error

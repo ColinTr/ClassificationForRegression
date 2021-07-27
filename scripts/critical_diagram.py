@@ -14,23 +14,29 @@ import os
 
 if __name__ == "__main__":
     n_bins = 32
+    n_bins_2 = 16
 
     # The paths to the RMSE table where the results are stored. At least two tables must be given to be compared
     rmse_tables = [
-        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'DT+'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'DT+32'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor', 'RMSE_table.csv'), str(n_bins_2) + ' T Test RMSE', 'DT+16'),
         (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_DecisionTree_regressor', 'RMSE_table.csv'), 'Base Test RMSE', 'DT'),
 
-        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'LR+'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'LR+32'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor', 'RMSE_table.csv'), str(n_bins_2) + ' T Test RMSE', 'LR+16'),
         (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_LinearRegression_regressor', 'RMSE_table.csv'), 'Base Test RMSE', 'LR'),
 
-        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'RF+'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'RF+32'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor', 'RMSE_table.csv'), str(n_bins_2) + ' T Test RMSE', 'RF+16'),
         (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_RandomForest_regressor', 'RMSE_table.csv'), 'Base Test RMSE', 'RF'),
 
-        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_XGBoost_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'XGB+'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_XGBoost_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'XGB+32'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_XGBoost_regressor', 'RMSE_table.csv'), str(n_bins_2) + ' T Test RMSE', 'XGB+16'),
         (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_RandomForest_classifier_XGBoost_regressor', 'RMSE_table.csv'), 'Base Test RMSE', 'XGB'),
 
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_Khiops_classifier_Khiops_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'Khiops+32'),
+        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_Khiops_classifier_Khiops_regressor', 'RMSE_table.csv'), str(n_bins_2) + ' T Test RMSE', 'Khiops+16'),
         (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_Khiops_classifier_Khiops_regressor', 'RMSE_table.csv'), 'Base Test RMSE', 'Khiops'),
-        (os.path.join('..', 'data', 'results_tables', 'equal_freq_below_threshold_Khiops_classifier_Khiops_regressor', 'RMSE_table.csv'), str(n_bins) + ' T Test RMSE', 'Khiops+')
     ]
 
     # The method that is compared with other methods If omitted, show pairwise comparison of methods
