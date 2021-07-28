@@ -49,20 +49,21 @@ if __name__ == "__main__":
                         output_classes_method = 'inside_bin'
 
                     results_dataframe = pd.DataFrame({'dataset_name': [dataset_name + '_' + bins_level_directory.split('_')[0] + '_bins'],
-                                                      'mean_train_mean_absolute_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_absolute_error']))],
-                                                      'mean_test_mean_absolute_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_absolute_error']))],
-                                                      'mean_train_mean_squared_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_squared_error']))],
-                                                      'mean_test_mean_squared_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_squared_error']))],
+                                                      #'mean_train_mean_absolute_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_absolute_error']))],
+                                                      #'mean_test_mean_absolute_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_absolute_error']))],
+                                                      #'mean_train_mean_squared_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_squared_error']))],
+                                                      #'mean_test_mean_squared_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_squared_error']))],
                                                       'mean_train_root_mean_squared_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_root_mean_squared_error']))],
                                                       'mean_test_root_mean_squared_error': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_root_mean_squared_error']))],
-                                                      'mean_train_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_r_squared']))],
-                                                      'mean_test_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_r_squared']))],
-                                                      'mean_train_adjusted_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_adjusted_r_squared']))],
-                                                      'mean_test_adjusted_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_adjusted_r_squared']))],
-                                                      'mean_train_mean_log_loss': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_log_loss']))],
-                                                      'mean_test_mean_log_loss': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_log_loss']))],
-                                                      'mean_train_mean_roc_auc_score': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_roc_auc_score']))],
-                                                      'mean_test_mean_roc_auc_score': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_roc_auc_score']))]})
+                                                      #'mean_train_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_r_squared']))],
+                                                      #'mean_test_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_r_squared']))],
+                                                      #'mean_train_adjusted_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_adjusted_r_squared']))],
+                                                      #'mean_test_adjusted_r_squared': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_adjusted_r_squared']))],
+                                                      #'mean_train_mean_log_loss': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_log_loss']))],
+                                                      #'mean_test_mean_log_loss': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_log_loss']))],
+                                                      #'mean_train_mean_roc_auc_score': ['{0:.4f}'.format(np.mean(metrics_dataframe['train_mean_roc_auc_score']))],
+                                                      #'mean_test_mean_roc_auc_score': ['{0:.4f}'.format(np.mean(metrics_dataframe['test_mean_roc_auc_score']))]
+                                                      })
 
                     results_dataframe_folder_path = os.path.join('..', 'data', 'results_tables', thresholds_gen_method + '_' + output_classes_method + '_' + classifier_level_directory + '_' + regressor_level_directory)
                     results_dataframe_file_path = os.path.join(results_dataframe_folder_path, 'results_table.csv')

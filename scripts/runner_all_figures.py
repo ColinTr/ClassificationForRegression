@@ -21,7 +21,7 @@ if __name__ == "__main__":
 
     cmd_list = []
     for dataset_name in datasets_names:
-        cmd_list.append("python visualisation.py --parent_folder=\"{}\" --metric=\"RMSE\"".format(os.path.join('..', 'data', 'metrics', dataset_name)))
+        cmd_list.append("python visualisation_fused.py --parent_folder=\"{}\" --metric=\"RMSE\"".format(os.path.join('..', 'data', 'metrics', dataset_name)))
 
     for c in cmd_list:
         print("\nLaunching : " + str(c))
