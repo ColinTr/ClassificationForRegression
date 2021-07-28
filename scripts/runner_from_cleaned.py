@@ -72,6 +72,19 @@ def argument_parser():
                         choices=["True", "False"],
                         default='False')
 
+    parser.add_argument('--extract',
+                        type=str,
+                        help='Do the feature_extraction step or not',
+                        choices=["True", "False"],
+                        default='True')
+
+    parser.add_argument('--grid_search',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Automatically optimize the hyperparameters for '
+                             'the given dataset using a grid search',
+                        default='True')
+
     parser.add_argument('--n_jobs',
                         type=int,
                         help='The number of cores to use',
@@ -94,7 +107,6 @@ if __name__ == "__main__":
     args = argument_parser()
 
     bins_to_explore = [2, 4, 8, 16, 32]
-    grid_search = 'True'
 
     cmd_list = []
 
@@ -112,10 +124,10 @@ if __name__ == "__main__":
 
         # Extract the features
         for classifier in args.classifiers:
-            for bins in bins_to_explore:
-                pass
-                cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
-                                .format(dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl, args.n_jobs))
+            if args.extract == 'True':
+                for bins in bins_to_explore:
+                    cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
+                                    .format(dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl, args.n_jobs))
 
         # Generate the predictions
         for classifier in args.classifiers:
@@ -126,7 +138,7 @@ if __name__ == "__main__":
                                     "--log_lvl=\"{}\" --grid_search {} --n_jobs={}"
                                     .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor,
                                             args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
-                                            'info', grid_search, args.n_jobs))
+                                            'info', args.grid_search, args.n_jobs))
 
         # Compute the metrics
         for classifier in args.classifiers:
@@ -142,7 +154,7 @@ if __name__ == "__main__":
                             "--learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search {} --n_jobs={}"
                             .format(dataset_name, args.split_method, args.output_classes, regressor,
                                     args.n_estimators, args.max_depth, args.max_features,
-                                    args.learning_rate, 'info', grid_search, args.n_jobs))
+                                    args.learning_rate, 'info', args.grid_search, args.n_jobs))
             cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""
                             .format(dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
 
