@@ -77,6 +77,12 @@ def argument_parser():
                         choices=["True", "False"],
                         default='False')
 
+    parser.add_argument('--extract',
+                        type=str,
+                        help='Do the feature_extraction step or not',
+                        choices=["True", "False"],
+                        default='True')
+
     parser.add_argument('--grid_search',
                         type=str,
                         choices=['True', 'False'],
@@ -116,10 +122,11 @@ if __name__ == "__main__":
                             .format(args.dataset_name, bins, args.output_classes, args.split_method, args.log_lvl))
 
     # Extract the features
-    for classifier in args.classifiers:
-        for bins in bins_to_explore:
-            cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
-                            .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl, args.n_jobs))
+    if args.extract == 'True':
+        for classifier in args.classifiers:
+            for bins in bins_to_explore:
+                cmd_list.append("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
+                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl, args.n_jobs))
 
     # Generate the predictions
     for classifier in args.classifiers:
@@ -151,7 +158,6 @@ if __name__ == "__main__":
                         .format(args.dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
 
     # Create the graphs
-    cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"r_squared\"".format(args.dataset_name))
     cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"RMSE\"".format(args.dataset_name))
 
     for c in cmd_list:

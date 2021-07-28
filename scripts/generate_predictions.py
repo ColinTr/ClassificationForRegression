@@ -93,6 +93,12 @@ def argument_parser():
                         help='The number of cores to use',
                         default=-1)
 
+    parser.add_argument('--tuning_size',
+                        type=float,
+                        help='The percentage of the training set to reserve for hyper-parameters tuning in '
+                             'the grid search. Only relevant if --grid_search is set to True.',
+                        default=0.33)
+
     parser.add_argument('--grid_search',
                         type=str,
                         choices=['True', 'False'],
@@ -177,11 +183,12 @@ def random_forest_grid_search(X, Y):
 
     grid.fit(X, Y)
 
-    logging.info('Grid search\'s optimal parameters are : '
-                 'max_depth=' + str(grid.best_params_['max_depth']) +
+    logging.info('Grid search\'s optimal parameters are : ' +
+                 ' n_estimators=' + str(grid.best_params_['n_estimators']) +
+                 ' & max_depth=' + str(grid.best_params_['max_depth']) +
                  ' & max_features=' + str(grid.best_params_['max_features']))
 
-    return grid.best_params_['max_depth'], grid.best_params_['max_features']
+    return grid.best_params_['max_depth'], grid.best_params_['max_features'], grid.best_params_['n_estimators']
 
 
 def decision_tree_grid_search(X, Y):
@@ -344,13 +351,6 @@ if __name__ == "__main__":
         logging.debug('X_test :\n' + str(X_test.head(3)))
         logging.debug('Y_test :\n' + str(Y_test.head(3)))
 
-        # We also extract the predicted probability of the real class of every classifier
-        #     so we can compute the accuracy of the classifiers later
-        train_df_predicted_probas, test_df_predicted_probas = None, None
-        if extended:
-            train_df_predicted_probas = get_real_class_predicted_probas(train_dataframe)
-            test_df_predicted_probas = get_real_class_predicted_probas(test_dataframe)
-
         # We fit the model on the TRAINING data
         # Before predicting on both training and testing data to compute the metrics
         model, Y_train_pred, Y_test_pred = None, None, None
@@ -360,7 +360,11 @@ if __name__ == "__main__":
 
             if args.grid_search == 'True' or args.grid_search is True:
                 logging.info('Starting grid_search for RandomForest...')
-                max_depth, max_features = random_forest_grid_search(X_train, Y_train)
+                tuning_size = int(X_train.shape[0] * args.tuning_size)
+                X_tuning, Y_tuning = X_train.iloc[:tuning_size, :], Y_train.iloc[:tuning_size]
+                X_train, Y_train = X_train.iloc[tuning_size:, :], Y_train.iloc[tuning_size:]
+                train_dataframe = train_dataframe.iloc[tuning_size:, :]  # Important when we will save the dataframe later
+                max_depth, max_features, n_estimators = random_forest_grid_search(X_tuning, Y_tuning)
             else:
                 max_depth = None  # Default value is None
                 if use_hyperparam_file == 'True' and 'max_depth' in hyperparameters.keys():
@@ -378,8 +382,8 @@ if __name__ == "__main__":
                 if max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
                     max_features = int(max_features)
 
-                logging.info('Using the following parameters for RandomForestRegressor : '
-                             'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+            logging.info('Using the following parameters for RandomForestRegressor : '
+                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
 
             model = RandomForestRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators,
                                           max_depth=max_depth, max_features=max_features)
@@ -402,6 +406,10 @@ if __name__ == "__main__":
 
             if args.grid_search == 'True' or args.grid_search is True:
                 logging.info('Starting grid_search for XGBoost...')
+                tuning_size = int(X_train.shape[0] * args.tuning_size)
+                X_tuning, Y_tuning = X_train.iloc[:tuning_size, :], Y_train.iloc[:tuning_size]
+                X_train, Y_train = X_train.iloc[tuning_size:, :], Y_train.iloc[tuning_size:]
+                train_dataframe = train_dataframe.iloc[tuning_size:, :]  # Important when we will save the dataframe later
                 max_depth, learning_rate = xgboost_grid_search(X_train, Y_train)
             else:
                 max_depth = 6  # Default value is 6
@@ -419,8 +427,8 @@ if __name__ == "__main__":
                     learning_rate = args.learning_rate
                 learning_rate = float(learning_rate)
 
-                logging.info('Using the following parameters for XGBRegressor : '
-                             'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
+            logging.info('Using the following parameters for XGBRegressor : '
+                         'n_estimators=' + str(n_estimators) + ' / max_depth=' + str(max_depth) + ' / learning_rate=' + str(learning_rate))
 
             model = XGBRegressor(n_jobs=args.n_jobs, n_estimators=n_estimators, max_depth=max_depth, learning_rate=learning_rate)
 
@@ -440,6 +448,10 @@ if __name__ == "__main__":
         elif args.regressor == "DecisionTree":
             if args.grid_search == 'True' or args.grid_search is True:
                 logging.info('Starting grid_search for DecisionTree...')
+                tuning_size = int(X_train.shape[0] * args.tuning_size)
+                X_tuning, Y_tuning = X_train.iloc[:tuning_size, :], Y_train.iloc[:tuning_size]
+                X_train, Y_train = X_train.iloc[tuning_size:, :], Y_train.iloc[tuning_size:]
+                train_dataframe = train_dataframe.iloc[tuning_size:, :]  # Important when we will save the dataframe later
                 max_depth, max_features = decision_tree_grid_search(X_train, Y_train)
             else:
                 max_depth = None  # Default value is None
@@ -458,8 +470,8 @@ if __name__ == "__main__":
                 if max_features is not None and max_features != 'auto' and max_features != 'sqrt' and max_features != 'log2':
                     max_features = int(max_features)
 
-                logging.info('Using the following parameters for DecisionTreeRegressor : '
-                             'max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
+            logging.info('Using the following parameters for DecisionTreeRegressor : '
+                         'max_depth=' + str(max_depth) + ' / max_features=' + str(max_features))
 
             model = DecisionTreeRegressor(max_depth=max_depth, max_features=max_features)
 
@@ -484,6 +496,12 @@ if __name__ == "__main__":
         # If the predictions were made on an extended dataset, we add the classifiers predictions as well
         #    for future metrics computation
         if extended:
+            train_dataframe.reset_index(drop=True, inplace=True)
+            test_dataframe.reset_index(drop=True, inplace=True)
+
+            train_prediction_dataset.reset_index(drop=True, inplace=True)
+            test_prediction_dataset.reset_index(drop=True, inplace=True)
+
             # Real class numbers, needed for AUC ROC for instance
             train_prediction_dataset = pd.concat([train_prediction_dataset, get_column_with_word(train_dataframe, 'class')], axis=1)
             test_prediction_dataset = pd.concat([test_prediction_dataset, get_column_with_word(test_dataframe, 'class')], axis=1)
@@ -493,8 +511,8 @@ if __name__ == "__main__":
             test_prediction_dataset = pd.concat([test_prediction_dataset, get_column_with_word(test_dataframe, 'threshold')], axis=1)
 
             # And finally the predicted probability of the real classes
-            train_prediction_dataset = pd.concat([train_prediction_dataset, train_df_predicted_probas], axis=1)
-            test_prediction_dataset = pd.concat([test_prediction_dataset, test_df_predicted_probas], axis=1)
+            train_prediction_dataset = pd.concat([train_prediction_dataset, get_real_class_predicted_probas(train_dataframe)], axis=1)
+            test_prediction_dataset = pd.concat([test_prediction_dataset, get_real_class_predicted_probas(test_dataframe)], axis=1)
 
         # Save the extended datasets in a CSV file
         if not os.path.exists(output_path):
