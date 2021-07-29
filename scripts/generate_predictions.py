@@ -119,6 +119,11 @@ def argument_parser():
                         choices=["debug", "info", "warning"],
                         help='Change the log display level')
 
+    parser.add_argument('--REMOVE_DUPLICATES',
+                        type=str,
+                        default='False',
+                        choices=["True", "False"])
+
     return parser.parse_args()
 
 
@@ -321,6 +326,9 @@ if __name__ == "__main__":
         if args.extracted_only == 'True' or args.extracted_only is True:
             X_cols_to_drop.extend([tmp_col_index for tmp_col_index, tmp_col_name in zip(range(0, len(train_dataframe.columns.values)), train_dataframe.columns.values) if 'threshold' not in tmp_col_name.split('_')])
         X_cols_to_drop = list(np.unique(X_cols_to_drop))
+
+        if args.REMOVE_DUPLICATES == 'True' or args.REMOVE_DUPLICATES is True:
+            X_cols_to_drop.extend([tmp_col_index for tmp_col_index, tmp_col_name in zip(range(0, len(train_dataframe.columns.values)), train_dataframe.columns.values) if 'threshold' in tmp_col_name.split('_') and '1|X)' in tmp_col_name.split('_')])
 
         X_train = train_dataframe.drop(train_dataframe.columns[X_cols_to_drop], axis=1)
         # This time, Y is the regression goal variable
