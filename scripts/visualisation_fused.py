@@ -175,28 +175,24 @@ if __name__ == "__main__":
                 # We will have a figure for each regression method
                 for regressor_name in regressor_list.keys():
                     baseline_mean_train_metric = None
+                    baseline_var_train_metric = None
                     baseline_mean_test_metric = None
-                    classifier_list = sub_directories_dict[steps_encoding_method][class_generation_method][
-                        regressor_name]
+                    baseline_var_test_metric = None
+                    classifier_list = sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name]
                     classifier_metrics_dict = {}
                     for classifier_name in classifier_list:
                         if classifier_name == 'Standard':
-                            if len(sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name][
-                                       classifier_name]) > 1:
-                                raise ValueError('More than one Standard file in ' + str(
-                                    sub_directories_dict[steps_encoding_method][class_generation_method][
-                                        regressor_name][classifier_name]))
+                            if len(sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name][classifier_name]) > 1:
+                                raise ValueError('More than one Standard file in ' + str(sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name][classifier_name]))
                             else:
-                                baseline_file_path = list(
-                                    sub_directories_dict[steps_encoding_method][class_generation_method][
-                                        regressor_name][classifier_name].values())[0]
+                                baseline_file_path = list(sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name][classifier_name].values())[0]
                                 baseline_df = pd.read_csv(baseline_file_path)
                                 baseline_mean_train_metric = np.mean(baseline_df['train_' + metric])
+                                baseline_var_train_metric = np.var(baseline_df['train_' + metric])
                                 baseline_mean_test_metric = np.mean(baseline_df['test_' + metric])
-                                logging.debug(
-                                    'baseline mean_train_metric : {0:.4f}'.format(baseline_mean_train_metric))
-                                logging.debug(
-                                    'baseline mean_test_metric : {0:.4f}'.format(baseline_mean_test_metric))
+                                baseline_var_test_metric = np.var(baseline_df['test_' + metric])
+                                logging.debug('baseline mean_train_metric : {0:.4f}'.format(baseline_mean_train_metric))
+                                logging.debug('baseline mean_test_metric : {0:.4f}'.format(baseline_mean_test_metric))
                         # If it is not named 'Standard', it means that it contains metrics
                         #     for a dataset with extracted features from a classifier
                         else:
@@ -211,34 +207,23 @@ if __name__ == "__main__":
                                                                         'test_mean_roc_auc_score': []}
                             # Cast keys into ints so we can easily sort them
                             tmp_dict = {}
-                            for key, value in \
-                                    sub_directories_dict[steps_encoding_method][class_generation_method][
-                                        regressor_name][
-                                        classifier_name].items():
+                            for key, value in sub_directories_dict[steps_encoding_method][class_generation_method][regressor_name][classifier_name].items():
                                 tmp_dict[int(key)] = value
                             files_in_classifier_folder = OrderedDict(sorted(tmp_dict.items(), key=lambda t: t[0]))
                             tmp_index = 0
                             for key, value in files_in_classifier_folder.items():
                                 classifier_metrics_dict[classifier_name]['abscissa'].append(key)
                                 tmp_df = pd.read_csv(value)
-                                classifier_metrics_dict[classifier_name]['mean_of_train_' + metric].append(
-                                    np.mean(tmp_df['train_' + metric]))
-                                classifier_metrics_dict[classifier_name]['var_of_train_' + metric].append(
-                                    np.var(tmp_df['train_' + metric]))
-                                classifier_metrics_dict[classifier_name]['mean_of_test_' + metric].append(
-                                    np.mean(tmp_df['test_' + metric]))
-                                classifier_metrics_dict[classifier_name]['var_of_test_' + metric].append(
-                                    np.var(tmp_df['test_' + metric]))
+                                classifier_metrics_dict[classifier_name]['mean_of_train_' + metric].append(np.mean(tmp_df['train_' + metric]))
+                                classifier_metrics_dict[classifier_name]['var_of_train_' + metric].append(np.var(tmp_df['train_' + metric]))
+                                classifier_metrics_dict[classifier_name]['mean_of_test_' + metric].append(np.mean(tmp_df['test_' + metric]))
+                                classifier_metrics_dict[classifier_name]['var_of_test_' + metric].append(np.var(tmp_df['test_' + metric]))
                                 if 'train_mean_log_loss' in list(tmp_df.columns.values):
-                                    classifier_metrics_dict[classifier_name]['mean_train_log_loss'].append(
-                                        (tmp_index, np.mean(tmp_df['train_mean_log_loss'])))
-                                    classifier_metrics_dict[classifier_name]['mean_test_log_loss'].append(
-                                        (tmp_index, np.mean(tmp_df['test_mean_log_loss'])))
+                                    classifier_metrics_dict[classifier_name]['mean_train_log_loss'].append((tmp_index, np.mean(tmp_df['train_mean_log_loss'])))
+                                    classifier_metrics_dict[classifier_name]['mean_test_log_loss'].append((tmp_index, np.mean(tmp_df['test_mean_log_loss'])))
                                 if 'train_mean_roc_auc_score' in list(tmp_df.columns.values):
-                                    classifier_metrics_dict[classifier_name]['train_mean_roc_auc_score'].append(
-                                        (tmp_index, np.mean(tmp_df['train_mean_roc_auc_score'])))
-                                    classifier_metrics_dict[classifier_name]['test_mean_roc_auc_score'].append(
-                                        (tmp_index, np.mean(tmp_df['test_mean_roc_auc_score'])))
+                                    classifier_metrics_dict[classifier_name]['train_mean_roc_auc_score'].append((tmp_index, np.mean(tmp_df['train_mean_roc_auc_score'])))
+                                    classifier_metrics_dict[classifier_name]['test_mean_roc_auc_score'].append((tmp_index, np.mean(tmp_df['test_mean_roc_auc_score'])))
                                 tmp_index = tmp_index + 1
 
                     # We can now generate a figure with a line for each classifier
@@ -248,6 +233,8 @@ if __name__ == "__main__":
                     ax.get_yaxis().get_major_formatter().set_useOffset(False)
                     if baseline_mean_test_metric is not None:
                         plt.axhline(y=baseline_mean_test_metric, color='blue', linestyle='--', label='test baseline')
+                        if args.show_variance == 'true':
+                            ax.axhspan(baseline_mean_test_metric - baseline_var_test_metric, baseline_mean_test_metric + baseline_var_test_metric, facecolor='blue', alpha=0.2)
                     for key, value in classifier_metrics_dict.items():
                         mean_test_metric_df = pd.DataFrame({'x': value['abscissa'],
                                                             'y': value['mean_of_test_' + metric],
@@ -270,6 +257,8 @@ if __name__ == "__main__":
                     # ----- Train
                     if baseline_mean_train_metric is not None:
                         plt.axhline(y=baseline_mean_train_metric, color='orange', linestyle='--', label='train baseline')
+                        if args.show_variance == 'true':
+                            ax.axhspan(baseline_mean_train_metric - baseline_var_train_metric, baseline_mean_train_metric + baseline_var_train_metric, facecolor='orange', alpha=0.2)
                     for key, value in classifier_metrics_dict.items():
                         mean_train_metric_df = pd.DataFrame({'x': value['abscissa'],
                                                              'y': value['mean_of_train_' + metric],

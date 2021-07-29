@@ -1,7 +1,7 @@
 import os
 import shutil
 
-folder_path = os.path.join('C:\\', 'Users', 'Colin', 'Desktop', 'metrics_full_new')
+folder_path = os.path.join('D:\\', 'metrics_vm_ubuntu')
 
 if os.path.exists(folder_path):
 
@@ -18,12 +18,23 @@ if os.path.exists(folder_path):
             classifier_level_directories = [classifier_level_directory.split(os.path.sep)[-1] for classifier_level_directory in classifier_level_directories]
 
             for classifier_level_directory in classifier_level_directories:
-                if classifier_level_directory == 'RandomForest_classifier' or classifier_level_directory == 'XGBoost_classifier' or classifier_level_directory == 'DecisionTree_classifier' :
+                if classifier_level_directory != 'Khiops_classifier' and classifier_level_directory != 'Standard' :
                     try:
                         print('Deleting ' + str(os.path.join(folder_path, dataset_name, bins_level_directory, classifier_level_directory)) + '...')
                         shutil.rmtree(os.path.join(folder_path, dataset_name, bins_level_directory, classifier_level_directory))
                     except OSError as e:
                         print("Error: %s - %s." % (e.filename, e.strerror))
+                else :
+                    regressor_level_directories = [f.path for f in os.scandir(os.path.join(folder_path, dataset_name, bins_level_directory, classifier_level_directory)) if f.is_dir()]
+                    regressor_level_directories = [regressor_level_directory.split(os.path.sep)[-1] for regressor_level_directory in regressor_level_directories]
+
+                    for regressor_level_directory in regressor_level_directories:
+                        if regressor_level_directory != 'Khiops_regressor' :
+                            try:
+                                print('Deleting ' + str(os.path.join(folder_path, dataset_name, bins_level_directory, classifier_level_directory, regressor_level_directory)) + '...')
+                                shutil.rmtree(os.path.join(folder_path, dataset_name, bins_level_directory, classifier_level_directory, regressor_level_directory))
+                            except OSError as e:
+                                print("Error: %s - %s." % (e.filename, e.strerror))
 
 else:
     # file not found message
