@@ -39,7 +39,7 @@ def argument_parser():
                         type=str,
                         nargs='+',  # 1 or more values expected
                         help='The classifier models to use',
-                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops", "DecisionTree"],
+                        # choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops", "DecisionTree"],
                         required=True)
 
     parser.add_argument('--regressors',
@@ -88,12 +88,25 @@ def argument_parser():
                         choices=['True', 'False'],
                         help='Automatically optimize the hyperparameters for '
                              'the given dataset using a grid search',
-                        default='False')
+                        default='True')
 
     parser.add_argument('--n_jobs',
                         type=int,
                         help='The number of cores to use',
                         default=16)
+
+    parser.add_argument('--baseline',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Compute the baseline or not',
+                        default='True')
+
+    parser.add_argument('--extracted_only',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Use only the extracted features to train the '
+                             'regressor',
+                        default='False')
 
     parser.add_argument('--log_lvl',
                         type=str,
@@ -111,7 +124,7 @@ if __name__ == "__main__":
 
     args = argument_parser()
 
-    bins_to_explore = [2, 4, 8, 16, 32]
+    bins_to_explore = [32]
 
     cmd_list = []
 
@@ -134,28 +147,29 @@ if __name__ == "__main__":
             for bins in bins_to_explore:
                 cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""
                                 " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "
-                                "--log_lvl=\"{}\" --grid_search=\"{}\"  --n_jobs={}"
-                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor,
+                                "--log_lvl=\"{}\" --grid_search=\"{}\"  --n_jobs={} --extracted_only {}"
+                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier.split('.')[-1] + '_classifier', regressor,
                                         args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
-                                        args.log_lvl, args.grid_search, args.n_jobs))
+                                        args.log_lvl, args.grid_search, args.n_jobs, args.extracted_only))
 
     # Compute the metrics
     for classifier in args.classifiers:
         for regressor in args.regressors:
             for bins in bins_to_explore:
                 cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}/{}/\" --log_lvl=\"{}\""
-                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor + '_regressor', args.log_lvl))
+                                .format(args.dataset_name, bins, args.split_method, args.output_classes, classifier.split('.')[-1] + '_classifier', regressor + '_regressor', args.log_lvl))
 
     # Compute the baseline
-    for regressor in args.regressors:
-        cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" "
-                        "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "
-                        "--log_lvl=\"{}\" --grid_search=\"{}\" --n_jobs={}"
-                        .format(args.dataset_name, args.split_method, args.output_classes, regressor,
-                                args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
-                                args.log_lvl, args.grid_search, args.n_jobs))
-        cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""
-                        .format(args.dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
+    if args.baseline == "True":
+        for regressor in args.regressors:
+            cmd_list.append("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" "
+                            "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "
+                            "--log_lvl=\"{}\" --grid_search=\"{}\" --n_jobs={} --extracted_only {}"
+                            .format(args.dataset_name, args.split_method, args.output_classes, regressor,
+                                    args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
+                                    args.log_lvl, args.grid_search, args.n_jobs, args.extracted_only))
+            cmd_list.append("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""
+                            .format(args.dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
 
     # Create the graphs
     cmd_list.append("python visualisation.py --parent_folder=\"../data/metrics/{}\" --metric=\"RMSE\"".format(args.dataset_name))

@@ -13,7 +13,7 @@ import os
 import gc
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from src.utils.Metrics import compute_log_losses, compute_mean_roc_auc_score, compute_all_metrics
+from src.utils.Metrics import compute_log_losses, compute_mean_roc_auc_score, compute_all_metrics, compute_f1_score
 from src.utils.logging_util import generate_output_path, setup_logging_level
 
 
@@ -125,13 +125,16 @@ if __name__ == "__main__":
         split_metrics_df = pd.concat([split_metrics_df, pd.DataFrame({'train_mean_log_loss': [train_log_loss],
                                                                       'test_mean_log_loss': [test_log_loss]})], axis=1)
 
-        # print("train")
         train_auc = compute_mean_roc_auc_score(train_predictions_dataframe)
-        # print("test" + test_filename)
         test_auc = compute_mean_roc_auc_score(test_predictions_dataframe)
 
+        train_f1 = compute_f1_score(train_predictions_dataframe)
+        test_f1 = compute_f1_score(test_predictions_dataframe)
+
         split_metrics_df = pd.concat([split_metrics_df, pd.DataFrame({'train_mean_roc_auc_score': [train_auc],
-                                                                      'test_mean_roc_auc_score': [test_auc]})], axis=1)
+                                                                      'test_mean_roc_auc_score': [test_auc],
+                                                                      'train_mean_f1_score': [train_f1],
+                                                                      'test_mean_f1_score': [test_f1]})], axis=1)
 
         metrics_dataframe_list.append(split_metrics_df)
 

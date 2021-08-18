@@ -92,7 +92,7 @@ For easier understanding of the flow of the dataset through the scripts, refer t
 <div style="text-align:center">
    <img src="./scripts_diagram.png" alt="scripts_diagram" width="100%"/>
 </div>
-
+ 
 ## Usage
 Here are the scripts and the details about every usable parameter :
 

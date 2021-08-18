@@ -8,6 +8,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import roc_auc_score
 from sklearn.metrics import r2_score
+from sklearn.metrics import f1_score
 import numpy as np
 import logging
 
@@ -204,3 +205,24 @@ def compute_mean_roc_auc_score(df):
         raise ValueError('Incoherent number of classes for a threshold found.')
 
     return computed_roc_auc_score
+
+
+def compute_f1_score(df, threshold=0.5):
+    class_columns = [e for e in df.columns if 'class' in e.split('_') and 'predicted' not in e.split('_')]
+    C0_threshold_columns = [e for e in df.columns if 'threshold' and '0|X)' in e.split('_')]
+
+    pairs = [(e1, e2) for e1, e2 in zip(class_columns, C0_threshold_columns)]
+
+    f1_scores = []
+
+    for pair in pairs:
+        if pair[0].split('_')[1] not in pair[1].split('_'):
+            raise ValueError('Incoherent metrics folder.')
+
+        class_column, prediction_column = np.array(df[pair[0]]), np.array(df[pair[1]])
+
+        predicted_class_column = [0 if probability > threshold else 1 for probability in prediction_column]
+
+        f1_scores.append(f1_score(class_column, predicted_class_column))
+
+    return np.mean(f1_scores)

@@ -4,9 +4,11 @@ Authors : Colin Troisemaine & Vincent Lemaire
 Maintainer : colin.troisemaine@gmail.com
 """
 
+import pandas as pd
+import numpy as np
 import argparse
-import os
 import time
+import os
 
 
 def argument_parser():
@@ -106,7 +108,7 @@ if __name__ == "__main__":
 
     args = argument_parser()
 
-    bins_to_explore = [8]
+    bins_to_explore = [32]
 
     cmd_list = []
 
@@ -114,68 +116,88 @@ if __name__ == "__main__":
     datasets_names = [dataset_directory.split(os.path.sep)[-1] for dataset_directory in datasets_directories]
     datasets_names = sorted(datasets_names)
 
+    results_dict_list = []
+
     for dataset_name in datasets_names:
+        results_dict = {'dataset_name': dataset_name,
+                        'Base Train RMSE': None, 'New Train RMSE': None,
+                        'Base Test RMSE': None, 'New Test RMSE': None}
 
         if args.preprocess == 'True':
             # Process the dataset
             for bins in bins_to_explore:
-                os.system("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\""
-                                .format(dataset_name, bins, args.output_classes, args.split_method, args.log_lvl))
+                cmd = "python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl=\"{}\""\
+                    .format(dataset_name, bins, args.output_classes, args.split_method, args.log_lvl)
+                print("Launching " + str(cmd))
+                os.system(cmd)
 
         # Extract the features
         for classifier in args.classifiers:
             if args.extract == 'True':
                 for bins in bins_to_explore:
-                    os.system("python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"
-                                    .format(dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl, args.n_jobs))
+                    cmd = "python feature_extraction.py --dataset_folder=\"../data/processed/{}/{}_bins_{}_{}/\" --classifier=\"{}\" --log_lvl=\"{}\" --n_jobs={}"\
+                        .format(dataset_name, bins, args.split_method, args.output_classes, classifier, args.log_lvl, args.n_jobs)
+                    print("Launching " + str(cmd))
+                    os.system(cmd)
 
         print("RESULTS FOR NORMAL EXTENDED ", dataset_name)
         # Generate the predictions
         for classifier in args.classifiers:
             for regressor in args.regressors:
                 for bins in bins_to_explore:
-                    os.system("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""
-                              " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "
-                              "--log_lvl=\"{}\" --grid_search {} --n_jobs={}"
+                    cmd = "python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""\
+                          " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "\
+                          "--log_lvl=\"{}\" --grid_search {} --n_jobs={}"\
                               .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor,
                                       args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
-                                      'info', args.grid_search, args.n_jobs))
+                                      'warning', args.grid_search, args.n_jobs)
+                    print("Launching " + str(cmd))
+                    start_time = time.time()
+                    os.system(cmd)
+                    print("Elapsed time : {0:.2f}".format(time.time() - start_time))
 
         # Compute the metrics
         for classifier in args.classifiers:
             for regressor in args.regressors:
                 for bins in bins_to_explore:
-                    os.system("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}/{}/\" --log_lvl=\"{}\""
-                              .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor + '_regressor', 'info'))
+                    cmd = "python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}/{}/\" --log_lvl=\"{}\""\
+                        .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor + '_regressor', 'info')
+                    print("Launching " + str(cmd))
+                    os.system(cmd)
+
+        metrics_dataframe = pd.read_csv(os.path.join('..', 'data', 'metrics', dataset_name, str(bins_to_explore[0]) + '_bins' + '_' + args.split_method + '_' + args.output_classes, str(args.classifiers[0]) + '_classifier', str(args.regressors[0]) + '_regressor', 'metrics_extracted_features.csv'))
+        results_dict['Base Train RMSE'] = '{0:.4f}'.format(np.mean(metrics_dataframe['train_root_mean_squared_error']))
+        results_dict['Base Test RMSE'] = '{0:.4f}'.format(np.mean(metrics_dataframe['test_root_mean_squared_error']))
 
         print("RESULTS FOR FIXED EXTENDED ", dataset_name)
         # Generate the predictions
         for classifier in args.classifiers:
             for regressor in args.regressors:
                 for bins in bins_to_explore:
-                    os.system("python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""
-                              " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "
-                              "--log_lvl=\"{}\" --grid_search {} --n_jobs={} --REMOVE_DUPLICATES True"
-                              .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor,
-                                      args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
-                                      'info', args.grid_search, args.n_jobs))
+                    cmd = "python generate_predictions.py --dataset_folder=\"../data/extracted_features/{}/{}_bins_{}_{}/{}/\""\
+                          " --regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\" --learning_rate=\"{}\" "\
+                          "--log_lvl=\"{}\" --grid_search {} --n_jobs={} --REMOVE_DUPLICATES True"\
+                        .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor,
+                                args.n_estimators, args.max_depth, args.max_features, args.learning_rate,
+                                'warning', args.grid_search, args.n_jobs)
+                    print("Launching " + str(cmd))
+                    start_time = time.time()
+                    os.system(cmd)
+                    print("Elapsed time : {0:.2f}".format(time.time() - start_time))
 
         # Compute the metrics
         for classifier in args.classifiers:
             for regressor in args.regressors:
                 for bins in bins_to_explore:
-                    os.system("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}/{}/\" --log_lvl=\"{}\""
-                              .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor + '_regressor', 'info'))
+                    cmd = "python compute_metrics.py --predictions_folder=\"../data/predictions/{}/{}_bins_{}_{}/{}/{}/\" --log_lvl=\"{}\""\
+                        .format(dataset_name, bins, args.split_method, args.output_classes, classifier + '_classifier', regressor + '_regressor', 'info')
+                    print("Launching " + str(cmd))
+                    os.system(cmd)
 
-        print("BASELINE FOR ", dataset_name)
-        # Compute the baseline
-        for regressor in args.regressors:
-            os.system("python generate_predictions.py --dataset_folder=\"../data/processed/{}/2_bins_{}_{}/\" "
-                            "--regressor=\"{}\" --n_estimators=\"{}\" --max_depth=\"{}\" --max_features=\"{}\""
-                            "--learning_rate=\"{}\" --log_lvl=\"{}\" --grid_search {} --n_jobs={}"
-                            .format(dataset_name, args.split_method, args.output_classes, regressor,
-                                    args.n_estimators, args.max_depth, args.max_features,
-                                    args.learning_rate, 'info', args.grid_search, args.n_jobs))
-            os.system("python compute_metrics.py --predictions_folder=\"../data/predictions/{}/2_bins_{}_{}/Standard/{}\" --log_lvl=\"{}\""
-                      .format(dataset_name, args.split_method, args.output_classes, regressor + '_regressor', args.log_lvl))
+        metrics_dataframe = pd.read_csv(os.path.join('..', 'data', 'metrics', dataset_name, str(bins_to_explore[0]) + '_bins' + '_' + args.split_method + '_' + args.output_classes, str(args.classifiers[0]) + '_classifier', str(args.regressors[0]) + '_regressor', 'metrics_extracted_features.csv'))
+        results_dict['New Train RMSE'] = '{0:.4f}'.format(np.mean(metrics_dataframe['train_root_mean_squared_error']))
+        results_dict['New Test RMSE'] = '{0:.4f}'.format(np.mean(metrics_dataframe['test_root_mean_squared_error']))
 
+        results_dict_list.append(results_dict)
+
+        pd.DataFrame(results_dict_list).to_csv(path_or_buf=os.path.join('..', 'TMP_DIFF_DICT' + str(args.regressors[0]) + '.csv'), index=False)

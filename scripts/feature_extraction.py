@@ -17,6 +17,7 @@ import gc
 import os
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src.models.BasicSklearnClassifier import BasicSklearnClassifier
 from src.utils.DataProcessingUtils import detect_class_columns
 from src.models.LogisticRegressionC import LogisticRegressionC
 from src.utils.logging_util import generate_output_path
@@ -48,7 +49,7 @@ def argument_parser():
     parser.add_argument('--classifier',
                         type=str,
                         help='The classifier model to use',
-                        choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops", "DecisionTree"],
+                        # choices=["RandomForest", "LogisticRegression", "XGBoost", "GaussianNB", "Khiops", "DecisionTree"],
                         required=True)
 
     parser.add_argument('--n_jobs',
@@ -86,7 +87,8 @@ def create_new_classifier_model(classifier_name, n_jobs):
     elif classifier_name == 'DecisionTree':
         return DecisionTreeC()
     else:
-        raise ValueError('Unknown parameter for classifier.')
+        return BasicSklearnClassifier(classifier_name)
+        # raise ValueError('Unknown parameter for classifier.')
 
 
 if __name__ == "__main__":
@@ -103,7 +105,7 @@ if __name__ == "__main__":
         output_path = generate_output_path(dataset_folder, ['processed'], 'extracted_features')
 
         # Add the classifier name to the path so we can distinguish different feature extractions
-        output_path = os.path.join(output_path, args.classifier + '_classifier')
+        output_path = os.path.join(output_path, args.classifier.split('.')[-1] + '_classifier')
 
         logging.info('Generated output path : ' + output_path)
 
