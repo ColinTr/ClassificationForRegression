@@ -79,7 +79,7 @@ def argument_parser():
 
     parser.add_argument('--extract',
                         type=str,
-                        help='Do the feature_extraction step or not',
+                        help='Run the feature_extraction step or not',
                         choices=["True", "False"],
                         default='True')
 

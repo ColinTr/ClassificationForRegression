@@ -109,8 +109,7 @@ def argument_parser():
     parser.add_argument('--extracted_only',
                         type=str,
                         choices=['True', 'False'],
-                        help='Use only the extracted features to train the '
-                             'regressor',
+                        help='Use only the extracted features to train the regressor',
                         default='False')
 
     parser.add_argument('--log_lvl',

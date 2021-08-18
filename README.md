@@ -122,10 +122,10 @@ Here are the scripts and the details about every usable parameter :
 
     The mandatory parameters are :
     * dataset_folder : The folder where the k-fold datasets are stored
+    * classifier : The classifier model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops) **Any classifier of sklearn with model.predict_proba() are also supported.** In that case, use full module name (ex : sklearn.naive_bayes.GaussianNB)
 
     The optional parameters are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
-    * classifier : The classifier model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
     * class_cols : The indexes of the classes columns
     * n_jobs : The number of cores to use
     * log_lvl : Change the log display level (Choices : debug, info, warning)
@@ -140,6 +140,8 @@ Here are the scripts and the details about every usable parameter :
 
     The options are :
     * grid_search : Automatically optimize the hyperparameters for the given dataset using a grid search (Choices : True, False)
+    * tuning_size : The percentage of the training set to reserve for hyper-parameters tuning in the grid search. Only relevant if --grid_search is set to True
+    * extracted_only : Use only the extracted features to train the regressor
     * use_hyperparam_file : Use the hyperparameters in the hyperparameters.json file that is in the same folder of the dataset (Choices : True, False)
     * output_path : The folder where the results will be saved (will be generated if not defined)
     * n_estimators : The number of trees in the forest of RandomForest or the number of gradient boosted trees for XGBoost
@@ -161,15 +163,17 @@ Here are the scripts and the details about every usable parameter :
     * log_lvl : Change the log display level (Choices : debug, info, warning)
    
 
-5) **visualisation.py :**
+5) **visualisation.py and visualisation_fused.py:**
    > python visualisation.py [parent_folder] [options]
+   
+    The fused version plot the train and test curves on the same figure, while the non-fused creates two separate graphs.
 
     The mandatory parameters are :
     * parent_folder : The folder where the results of the script *generate_predictions.py* are stored
 
     The options are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
-    * show_variance : Whether the variance should be shown on the graph or not (Choices : true, false)
+    * show_variance : Whether the variance should be shown on the graph or not (Choices : True, False)
     * metric : The metric to display (Choices : r_squared, adjusted_r_squared, MSE, RMSE, MAE)
     * log_lvl : Change the log display level (Choices : debug, info, warning)
    
@@ -179,10 +183,15 @@ Here are the scripts and the details about every usable parameter :
 
     The mandatory parameters are :
     * dataset_name : The dataset to use
-    * classifiers : The classifiers to compare (choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops)
+    * classifiers : The classifiers to compare (choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops) **Any classifier of sklearn with model.predict_proba() are also supported.** In that case, use full module name (ex : sklearn.naive_bayes.GaussianNB)
     * regressors : The regression models to use (Choices : RandomForest, LinearRegression, XGBoost, GaussianNB, Khiops)
 
     The options are :
+    * extract : Run the feature_extraction step or not (Choices : True, False)
+    * grid_search : Automatically optimize the hyperparameters for the given dataset using a grid search (Choices : True, False)
+    * baseline : Compute the baseline or not (Choices : True, False)
+    * extracted_only : Use only the extracted features to train the regressor (Choices : True, False)
+    * n_jobs : The number of cores to use
     * output_classes : The method of class generation (Choices : below_threshold, inside_bin)
     * split_method : The splitting method to use (Choices : equal_width, equal_freq, kmeans)
     * n_estimators : The number of trees in the forest of RandomForest or the number of gradient boosted trees for XGBoost
