@@ -122,8 +122,7 @@ Here are the scripts and the details about every usable parameter :
 
     The mandatory parameters are :
     * dataset_folder : The folder where the k-fold datasets are stored
-    * classifier : The classifier model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops) **Any classifier of sklearn with model.predict_proba() are also supported.** In that case, use full module name (ex : sklearn.naive_bayes.GaussianNB). The full list for the version 0.0 of sklearn of supported classifiers seems to be : [AdaBoostClassifier BaggingClassifier BernoulliNB CalibratedCla
-ssifierCV DecisionTree ExtraTreeClassifier ExtraTreesClassifier GaussianNB GradientBoostingClassifier Khiops KNeighborsClassifier LabelPropagation LinearDiscriminantAnalysis LogisticRegression RadiusNeighborsClassifier RandomForest XGBoost]
+    * classifier : The classifier model to use (Choices : RandomForest, LogisticRegression, XGBoost, GaussianNB, Khiops) **Any classifier of sklearn with model.predict_proba() are also supported.** In that case, use full module name (ex : sklearn.naive_bayes.GaussianNB). The full list for the version 0.0 of sklearn of supported classifiers seems to be : [AdaBoostClassifier BaggingClassifier BernoulliNB CalibratedClassifierCV DecisionTree ExtraTreeClassifier ExtraTreesClassifier GaussianNB GradientBoostingClassifier Khiops KNeighborsClassifier LabelPropagation LinearDiscriminantAnalysis LogisticRegression RadiusNeighborsClassifier RandomForest XGBoost]
 
     The optional parameters are :
     * output_path : The folder where the results will be saved (will be generated if not defined)
