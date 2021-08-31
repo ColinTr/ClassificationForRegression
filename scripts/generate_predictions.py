@@ -23,6 +23,7 @@ from src.utils.logging_util import generate_output_path
 from src.utils.logging_util import setup_logging_level
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
+from src.models.CDFRegressor import CDFRegressor
 from sklearn.tree import DecisionTreeRegressor
 from os.path import isfile, join
 from xgboost import XGBRegressor
@@ -56,7 +57,7 @@ def argument_parser():
     parser.add_argument('--regressor',
                         type=str,
                         help='The regression model to use',
-                        choices=["RandomForest", "LinearRegression", "XGBoost", "Khiops", "DecisionTree"],
+                        choices=["RandomForest", "LinearRegression", "XGBoost", "Khiops", "DecisionTree", "CDFRegressorWeightedMean", "CDFRegressorLargestDiff"],
                         required=True)
 
     parser.add_argument('--n_estimators',
@@ -486,6 +487,27 @@ if __name__ == "__main__":
 
             Y_train_pred = model.predict(X_train)
             Y_test_pred = model.predict(X_test)
+
+        elif args.regressor == 'CDFRegressorWeightedMean' or args.regressor == 'CDFRegressorLargestDiff':
+            # The first step is to find the values of the thresholds
+            # They must be located in : ../data/processed/_dataset_name_/thresholds/...
+
+            tmp_list = [e.replace('extracted_features', 'processed') for e in dataset_folder.replace('/', os.path.sep).split(os.path.sep)]
+            tmp_list = [e for e in tmp_list if 'classifier' not in e.split('_')]
+            thresholds_values_dataframe = pd.read_csv(os.path.join(*tmp_list, 'thresholds', 'fold_' + str(fold_num) + '.csv'))
+
+            thresholds_values_list = list(thresholds_values_dataframe['values'])
+
+            model = CDFRegressor()
+
+            model.fit(thresholds_real_values=thresholds_values_list)
+
+            if args.regressor == 'CDFRegressorWeightedMean':
+                Y_train_pred = model.predict(X_train)
+                Y_test_pred = model.predict(X_test)
+            if args.regressor == 'CDFRegressorLargestDiff':
+                Y_train_pred = model.predict_largest_diff(X_train)
+                Y_test_pred = model.predict_largest_diff(X_test)
 
         else:
             raise ValueError('Unknown parameter for regressor')

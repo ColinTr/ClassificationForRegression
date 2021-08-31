@@ -99,6 +99,12 @@ def argument_parser():
                         choices=["debug", "info", "warning"],
                         help='Change the log display level')
 
+    parser.add_argument('--save_thresholds',
+                        type=str,
+                        choices=['True', 'False'],
+                        help='Export the values of the thresholds in a file or not',
+                        default='False')
+
     return parser.parse_args()
 
 
@@ -211,6 +217,12 @@ if __name__ == "__main__":
         # Thresholds definition
         thresholds_list = thresholds_generator.generate_steps(Y_train, n_bins)
         logging.debug("Thresholds :" + str(thresholds_list))
+
+        if args.save_thresholds == 'True':
+            if not os.path.exists(os.path.join(output_path, 'thresholds')):
+                os.makedirs(os.path.join(output_path, 'thresholds'))
+            tmp_path = os.path.join(output_path, 'thresholds', 'fold_' + str(k_fold_index) + '.csv')
+            pd.DataFrame({'values': thresholds_list}).to_csv(path_or_buf=tmp_path, index=False)
 
         # Discretization
         class_generator.fit(thresholds_list)

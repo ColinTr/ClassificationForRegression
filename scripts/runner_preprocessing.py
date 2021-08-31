@@ -20,7 +20,12 @@ def argument_parser():
 
     parser.add_argument('--n_bins',
                         type=int,
+                        nargs='+',
                         help='The number of bins',
+                        required=True)
+
+    parser.add_argument('--dataset_name',
+                        type=str,
                         required=True)
 
     return parser.parse_args()
@@ -36,13 +41,9 @@ if __name__ == "__main__":
     output_classes = 'below_threshold'
     n_jobs = 16
 
-    datasets_directories = [f.path for f in os.scandir(os.path.join('..', 'data', 'cleaned')) if f.is_dir()]
-    datasets_names = [dataset_directory.split(os.path.sep)[-1] for dataset_directory in datasets_directories]
-    datasets_names = sorted(datasets_names)
-
     cmd_list = []
-    for dataset_name in datasets_names:
-        cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl warning".format(dataset_name, args.n_bins, output_classes, split_method))
+    for bins in args.n_bins:
+        cmd_list.append("python data_processing.py --dataset_path=\"../data/cleaned/{}/data.csv\" --n_bins=\"{}\" --output_classes=\"{}\" --split_method=\"{}\" --log_lvl info".format(args.dataset_name, bins, output_classes, split_method))
 
     for c in cmd_list:
         print("\nLaunching : " + str(c))
