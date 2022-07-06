@@ -3,7 +3,7 @@ tqdm==4.60.0
 pandas==1.2.4
 matplotlib==3.4.1
 virtualenv==20.4.5
-notebook==6.4.10
+notebook==6.4.12
 ipython==7.23.0
 jupyter==1.0.0
 jupyter-client==6.1.12
