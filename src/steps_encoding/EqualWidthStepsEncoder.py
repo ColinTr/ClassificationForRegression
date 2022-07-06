@@ -29,7 +29,7 @@ class EqualWidthStepsEncoder(StepsEncoder.StepsEncoder):
         Y_min = np.min(Y)
         Y_max = np.max(Y)
 
-        step = Y_max - Y_min / n_bins
+        step = (Y_max - Y_min) / n_bins
 
         thresholds_list = [(Y_min + index * step) for index in range(1, n_bins)]
 
