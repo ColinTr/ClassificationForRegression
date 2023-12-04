@@ -1,5 +1,7 @@
 # Classification For Regression
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Directory Structure
     .
     ├── .gitignore
@@ -201,3 +203,23 @@ Here are the scripts and the details about every usable parameter :
     * learning_rate : Boosting learning rate of XGBoost
     * preprocess : Do the pre-processing step or not
     * log_lvl : Change the log display level (Choices : debug, info, warning)
+
+
+## Citation
+If you found this work useful, please use the following citation:
+```
+@article{tr2022construction,
+   title = {Construction de variables à l'aide de classifieurs comme aide à la régression : une évaluation empirique},
+   author = {Colin Troisemaine and Vincent Lemaire},
+   journal = {Revue des Nouvelles Technologies de l'Information},
+   volume = {Extraction et Gestion des Connaissances, RNTI-E-38},
+   year = {2022},
+   pages = {217--224}
+}
+```
+
+## License
+
+Copyright (c) 2021 Orange.
+
+This code is released under the MIT license. See the LICENSE file for more information.
