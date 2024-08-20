@@ -1,8 +1,18 @@
-# Classification For Regression
+<h1 align="center">
+  Classification For Regression
+</h1>
+  
+<p align="center">
+  Code used to generate the results of the EGC 2022 conference paper <a href="https://arxiv.org/abs/2112.03703">Construction de variables a l'aide de classifieurs comme aide a la regression</a>
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<div align="center">
+ 
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+</div>
 
-## Directory Structure
+
+## 📂 Directory Structure
     .
     ├── .gitignore
     ├── README.md                                   <- This file
@@ -52,7 +62,8 @@
             └── Metrics.py                          <- Methods to compute all the metrics needed
 
 
-## Install
+## 🐍 Setting up the Python environment
+
 This project was written using python 3.7.10, and the libraries described in requirements.txt.
 
 It is recommended to create a virtual environment with virtualenv to install the exact versions of the packages used in this project. You will first need to install *virtualenv* with pip :
@@ -70,7 +81,8 @@ You can now install the required libraries inside your virtual environment with 
 > pip install -r requirements.txt
 
 
-## Run
+## 💻 Scripts usage example
+
 Here is a list of examples of usages of the scripts :
 
 **Note :** The following examples are meant to be used from inside the 'scripts' directory.
@@ -95,8 +107,10 @@ For easier understanding of the flow of the dataset through the scripts, refer t
 <div style="text-align:center">
    <img src="./scripts_diagram.png" alt="scripts_diagram" width="100%"/>
 </div>
+
  
-## Usage
+## 📚 Scripts documentation
+
 Here are the scripts and the details about every usable parameter :
 
 1) **data_processing.py :**
@@ -205,7 +219,7 @@ Here are the scripts and the details about every usable parameter :
     * log_lvl : Change the log display level (Choices : debug, info, warning)
 
 
-## Citation
+## 📜 Citation
 If you found this work useful, please use the following citation:
 ```
 @article{tr2022construction,
@@ -218,7 +232,7 @@ If you found this work useful, please use the following citation:
 }
 ```
 
-## License
+## ⚖️ License
 
 Copyright (c) 2021 Orange.
 
